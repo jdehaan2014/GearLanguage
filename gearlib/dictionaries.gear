@@ -1,0 +1,57 @@
+extension Dictionary
+
+  val count := length(self)
+  val first := listFirst(self)
+  val last := listLast(self)
+
+  func toString() => self
+
+  func add(.key, .value) => listAdd(self, key, value)
+  func insert(at index, .key, .value) => listInsert(self, index, key, value)
+  func delete(.key) => listDelete(self, key)
+  func contains(.key) => listContains(self, key)
+  func index(of key) => listIndexOf(self, key)
+  func retrieve(.key) => listRetrieve(self, key)
+  val keys := listKeys(self)
+  val values := listValues(self)
+end
+
+
+class DictionaryIterator
+  //let list := Null
+  let keys := Null
+  let values := Null
+  var index := 0
+
+  init(list)
+    //self.list := list
+    self.keys := list.keys
+    self.values := list.values
+  end
+
+  func makeItem(key, value)
+    class Item
+      let key := Null
+      let value := Null
+      init(key, value)
+        self.key := key
+        self.value := value
+      end
+    end
+    return Item(key, value)
+  end
+
+  val hasNext := self.index <  length(self.keys)
+
+  val next
+    let nextItem := self.makeItem(
+      self.keys[self.index], self.values[self.index])
+    self.index +=1
+    return nextItem
+  end
+end
+
+extension Dictionary
+  val iterator := DictionaryIterator(self)
+end
+

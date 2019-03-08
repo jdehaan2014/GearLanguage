@@ -1,0 +1,86 @@
+// unit arrays.gear contains standard array functionality
+
+extension Array
+  val count := length(self)
+  val first := listFirst(self)
+  val last := listLast(self)
+  func add(.value) => listAdd(self, value)
+  func insert(at index, .value) => listInsert(self, index, value)
+  func delete(.value) => listDelete(self, value)
+  func contains(.value) => listContains(self, value)
+  func index(of value) => listIndexOf(self, value)
+  func retrieve(.index) => listRetrieve(self, index)
+end
+
+class ArrayIterator
+  let list := Null
+  var index := 0
+
+  init(list)
+    self.list := list
+  end
+
+  val hasNext := self.index < length(self.list)
+
+  val next
+    var nextItem := self.list[self.index]
+    self.index +=1
+    return nextItem
+  end
+end
+
+extension Array
+  val iterator := ArrayIterator(self)
+end
+
+
+extension Array
+
+  func reduce(initialValue, nextValue)
+    var result := initialValue
+
+    for var i := 0 where i < length(self), i+=1 do
+      result := nextValue(result, self[i])
+    end
+    return result
+  end
+
+  func filter(includeElement)
+    var result := []
+    for var i := 0 where i < length(self), i+=1 do
+      if includeElement(self[i]) then
+        listAdd(result, self[i])
+      end
+    end
+    return result
+  end
+
+  func map(transform)
+    var result := []
+    for var i := 0 where i < length(self), i+=1 do
+      listAdd(result, transform(self[i]))
+     end
+    return result
+  end
+
+  func flatMap(transform)
+    return self.map(transform).reduce([],(x,y)=>x><y)
+  end
+
+  func forEach(function)
+    for var i:=0 where i<length(self), i+=1 do
+      function(self[i])
+    end
+  end
+
+end
+
+extension Array
+  func fill(.value)
+    for var i:= 0 where i<length(self), i+=1 do
+      self[i] := value
+    end
+    return self
+  end
+end
+

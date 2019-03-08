@@ -1,0 +1,84 @@
+// Range type and iterator
+
+class RangeIterator
+  var index := 0
+  var range := Null
+  var stepBy := 1
+
+  init(range)
+    self.range := range
+    self.index := range.from
+    self.stepBy := range.stepBy
+  end
+
+  val hasNext := self.index <= self.range.to
+
+  val next
+    var result := self.index
+    self.index += self.stepBy
+    return result
+  end
+end
+
+class Range
+  var from := Null
+  var to := Null
+  var stepBy := 1
+
+  init(from, to)
+    self.from := from
+    self.to := to
+  end
+
+  val iterator := RangeIterator(self)
+end
+
+extension Range
+  func toArray()
+    var result := []
+    for each item in self do
+      listAdd(result, item)
+    end
+    return result
+  end
+
+  func reduce(initialValue, nextValue)
+    var result := initialValue
+    for each item in self do
+      result := nextValue(result, item)
+    end
+    return result
+  end
+
+  func filter(includeElement)
+    var result := []
+    for each item in self where includeElement(item) do
+      listAdd(result, item)
+    end
+    return result
+  end
+
+  func map(transform)
+    var result := []
+    for each item in self do
+      listAdd(result, transform(item))
+    end
+    return result
+  end
+
+  func forEach(function)
+    for each item in self do
+      function(item)
+    end
+  end
+end
+
+
+extension Range
+  func step(.by)
+    self.stepBy := by
+    return self
+  end
+end
+
+
