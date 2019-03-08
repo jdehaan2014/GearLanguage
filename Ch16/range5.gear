@@ -1,0 +1,16 @@
+
+use system
+
+var range := (1..20).step(by:2)
+
+print(range.iterator.stepBy)
+
+
+for each r in range do
+  print(r)
+end
+
+for each i in (0..20).step(by:2) do
+  print(i)
+end
+

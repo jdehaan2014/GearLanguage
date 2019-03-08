@@ -1,0 +1,16 @@
+use system
+let interestingNumbers := [
+    'Prime': [2, 3, 5, 7, 11, 13],
+    'Fibonacci': [1, 1, 2, 3, 5, 8],
+    'Square': [1, 4, 9, 16, 25]
+]
+var largest := 0
+for each type in interestingNumbers do
+  for each number in type.value do
+    if number > largest then
+      largest := number
+    end
+  end
+end
+print(largest)
+// Prints "25"

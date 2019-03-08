@@ -1,0 +1,11 @@
+// anonymous function
+
+func calc(x, y, function)
+  return function(x,y)
+end
+
+var sum := calc(20, 22, (a,b) => a+b)
+var product := calc(2, 21, (a,b) => a*b)
+
+print('Sum is: \(sum) and product is: \(product).')
+

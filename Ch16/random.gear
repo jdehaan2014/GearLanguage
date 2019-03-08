@@ -1,0 +1,23 @@
+var number := randomLimit(100) + 1
+
+while True do
+  print('Guess a number: ', terminator: '')
+
+  ensure var guess := toNum(readln()) where guess <> Null else
+    print('That`s not a number!')
+    continue
+  end
+
+  if guess < number then
+    print('Too low.')
+  else
+    if guess = number then
+      print('You win!')
+      break
+    else
+      print('Too high.')
+    end
+  end
+
+end
+

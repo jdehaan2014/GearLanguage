@@ -1,0 +1,4 @@
+let userName := '12345678?'
+let chars := Array(userName)
+print(chars)
+

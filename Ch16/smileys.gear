@@ -1,0 +1,9 @@
+use system
+let smileys := ['😄', '😘', '😛', '🤨', '😏']
+
+for each smiley in smileys do
+  print('Smiley \(smiley) has ascii code \(ord(smiley)).')
+end
+
+
+

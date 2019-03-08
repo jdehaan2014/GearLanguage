@@ -1,0 +1,13 @@
+// test strings
+
+let y := 3
+var s := 'Hello it''s my turn now.\n\tHere!'
+
+var s2 := ''
+s2 := 'that''s me!'
+print('\(y)')
+print(s)
+print(s2)
+
+print('It''s me')
+

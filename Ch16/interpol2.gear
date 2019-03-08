@@ -1,0 +1,17 @@
+let apples := 4
+let bananas := 5
+print('I have \(apples) apples and \(bananas) bananas, so \(apples+bananas) pieces of fruit.')
+
+let truth := True
+print('Is the truth \(truth | False)?')
+
+print('Hello ' + 'world' + "!)
+
+let c := '🤪'
+print('That''s a nice smiley: \(c)')
+print('Number (' + 42 + ')')
+
+func add(a,b) => a+b
+print('I have \(add(apples,bananas)) pieces of fruit.')
+
+

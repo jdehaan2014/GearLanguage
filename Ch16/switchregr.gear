@@ -1,0 +1,12 @@
+let char := 'r'
+switch char
+  case 'a', 'e', 'i', 'o', 'u':
+    print('\(char) is a vowel with ascii value \(ord(char)).')
+  case 'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm',
+     'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z':
+    print('\(char) is a consonant with ascii value \(ord(char)).')
+  else
+    print('\(char) is not a vowel nor a consonant. Ascii value: \(ord(char)).')
+end
+// r is a consonant with ascii value 114.
+

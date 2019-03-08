@@ -1,0 +1,14 @@
+// array of char
+
+use system
+
+let a := 'Hello world, my answer is 42'
+let chars := Array(a)
+
+print(chars)
+
+
+for each char in Array('Hello world, my answer is 42') do
+  print(char)
+end
+

@@ -1,0 +1,31 @@
+// switch with is
+
+class Root
+  var name := 'Root'
+end
+
+class First (Root)
+end
+
+class Second (Root)
+end
+
+class Third (Second)
+end
+class Fourth
+end
+
+var sec := Second()
+
+print('Start: ', sec.name)
+
+switch sec
+  case is Root: print('Root')
+  case is First: print('First')
+  case is Second: print('Second')
+  case is Third: print('Third')
+  else
+    print('None of the above')
+end
+
+

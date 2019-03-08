@@ -1,0 +1,13 @@
+// interpolated strings
+
+let x := 5
+let y := 7
+
+var s := 'I''ve got \(x+y) things to do.'
+
+print(s)
+
+print('The number is \(6*7)!. And \(x*y) as well.')
+
+print('this is a backslash \. + a line ending\n\t duh')
+

@@ -1,0 +1,7 @@
+class Test
+  var a := 0
+  init(a)
+    self.a := a
+  end
+end
+

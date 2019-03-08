@@ -1,0 +1,31 @@
+class Root
+  var name := 'Root'
+end
+
+class First (Root)
+end
+
+class Second (Root)
+end
+
+class Third (Second)
+end
+class Fourth
+end
+
+var sec := Second()
+
+print('Start: ', sec.name)
+
+if sec is Root then
+  print('Root')
+elseif sec is First then
+  print('First')
+elseif sec is Second then
+  print('Second')
+elseif sec is Third then
+  print('Third')
+else
+  print('None of the above')
+end
+

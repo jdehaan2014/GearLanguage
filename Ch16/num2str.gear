@@ -1,0 +1,21 @@
+// test string to number and number to string
+
+var a := '3.1415'
+print(toNum(a))
+
+var b := 3.1415
+print(toStr(b))
+
+print(toNum(a) = b)
+
+print('a' = 'a')
+print(a = toStr(b))
+
+print(toStr(False))
+print(toStr(pi()))
+print(toStr(b=pi()))
+print(toStr(111))
+print(toStr("a))
+
+print(toNum(True))
+

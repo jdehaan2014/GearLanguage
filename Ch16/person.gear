@@ -1,0 +1,16 @@
+class Person
+  var name := ''
+  var address := ''
+  var age := 0
+  var income := 0
+  var cars := []
+
+  init(.name, .address, .age, .income, .cars)
+    self.name := name
+    self.address := address
+    self.age := age
+    self.income := income
+    self.cars := cars
+  end
+end
+

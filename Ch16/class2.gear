@@ -1,0 +1,18 @@
+// inheritance
+
+class Parent
+  func method()
+    print('Parent Method')
+  end
+end
+
+class Child(Parent)
+  func method()
+    inherited method()
+    print('Child Method')
+  end
+end
+
+var child := Child()
+child.method()
+

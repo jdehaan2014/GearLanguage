@@ -1,0 +1,28 @@
+func Fibonacci(n)
+  if n = 0 then
+    return 0
+  elseif n = 1 then
+    return 1
+  else
+    return Fibonacci(n-1) + Fibonacci(n-2)
+  end
+end
+
+let m := milliseconds()
+
+print(Fibonacci(30))
+
+print(milliseconds() - m)
+
+
+func Fib(n) =>
+  match n
+    if 0,1 then n
+    else Fib(n-1) + Fib(n-2)
+
+let o := milliseconds()
+
+print(Fib(30))
+
+print(milliseconds() - o)
+

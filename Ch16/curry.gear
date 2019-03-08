@@ -1,0 +1,16 @@
+// currying
+
+var square := x => x^2
+print(square(16))
+
+var helloWorld := func()
+  print('Hello world!')
+end
+
+helloWorld()  // Hello World!
+
+var z := (x=>2^x)(9)  // parentheses are required here!
+print(z)  // 512
+
+print((x=>2^x)(9))
+

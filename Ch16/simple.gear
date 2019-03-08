@@ -1,0 +1,37 @@
+var someCharacter := 'u'
+
+print(someCharacter, match someCharacter
+  if 'a', 'e', 'i', 'o', 'u' then ' is a vowel'
+  if 'b', 'c', 'd', 'f', 'g', 'h', 'j',
+     'k', 'l', 'm', 'n', 'p', 'q', 'r',
+     's', 't', 'v', 'w', 'x', 'y', 'z' then ' is a consonant'
+  else ' is not a vowel nor a consonant') // Prints "u is a vowel"
+
+use system
+var groceries := ['Potatoes', 'Cucumber', 'Tomatoes', 'Olive-oil', 'Peanuts']
+print(groceries[3])
+groceries[1] := 'Salad'
+
+print(groceries.first)
+print(groceries.last)
+
+groceries ><= ['French fries']
+groceries.add(value: 'Mushrooms')
+print(groceries)
+
+var a := []
+a.add(value: 1)
+print(a)
+
+//var emptyDict := Dictionary()
+var emptyDict := [:]
+emptyDict.add(key: 1, value: 'One')
+print(emptyDict)
+
+
+var smileys := ['smile': '😀', 'saint': '😇']
+smileys.add(key: 'lol', value: '🤣')
+smileys.add(key: 'cool', value: '😎')
+smileys.add(key: 'cry', value: '😭')
+print(smileys)
+

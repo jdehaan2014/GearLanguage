@@ -1,0 +1,16 @@
+//nested
+
+func greet(name)
+
+  var result := name
+  func makeGreeting()
+    result := 'Hello ' + name
+  end
+
+  makeGreeting()
+
+  return result
+end
+
+print(greet('Emanuelle'))
+

@@ -1,0 +1,20 @@
+func integral(f, from a, to b, steps n)
+  var sum := 0
+  let dt := (b-a)/n
+  for var i := 0 where i<n, i+=1 do
+    sum += f(a + (i + 0.5) * dt)
+  end
+  return sum*dt
+end
+
+// Calculate the integral over function f(x) = x^2 - 2x + 4 in 10000 steps
+print(integral(x=>x^2-2*x+4, from: 0, to: 1, steps: 10000))
+
+// Calculate the integral over function f(x) = x^3 in 10000 steps
+print(integral(x=>x^3, from: 0, to: 1, steps: 10000))
+
+// Calculate the integral over function 3) f(x) = x^2 + 4*x - 21 in 10000 steps
+print(integral(x=>x^2 + 4*x - 21, from: 0, to: 1, steps: 10000))
+
+print(pi())
+

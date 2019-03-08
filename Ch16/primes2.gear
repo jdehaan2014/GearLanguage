@@ -1,0 +1,38 @@
+
+use system
+
+
+/*func isPrime(number)
+  let sqrtNum := sqrt(number)
+  for var i:=3 where i<= sqrtNum, i+=2 do
+    if number % i = 0 then
+      return False
+    end
+  end
+  return True
+end
+*/
+//var primes := (3..<10000).step(by:2).filter(n=>isPrime(n))
+
+
+let m := milliseconds()
+
+//var primes := (3..<1000).step(by:2).filter(n=>isPrime(n))
+
+var primes := (3..<1000).step(by:2).filter(func(number)
+  let sqrtNum := sqrt(number)
+  for var i:=3 where i<= sqrtNum, i+=2 do
+    if number % i = 0 then
+      return False
+    end
+  end
+  return True
+end)
+
+
+let ms := milliseconds() - m
+
+print(primes)
+
+print('In \(ms) ms.')
+

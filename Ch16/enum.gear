@@ -1,0 +1,41 @@
+/*enum Color
+  (None
+   case Primary: Red, Yellow, Blue
+   case Secondary: Orange, Green, Brown)
+end
+
+func randomColor() =>
+  match randomLimit(7)+1
+    if 1 then Color.Red
+    if 2 then Color.Yellow
+    if 3 then Color.Blue
+    if 4 then Color.Orange
+    if 5 then Color.Green
+    if 6 then Color.Brown
+    else Color.None
+
+var myColor := randomColor()
+
+if myColor in Color.Primary then
+  print(myColor, ' is a primary color.')
+elseif myColor in Color.Secondary then
+  print(myColor, ' is a secondary color.')
+else
+  print(myColor)
+end
+*/
+
+use system
+
+enum Color
+  (None
+   case Primary: Red, Yellow, Blue
+   case Secondary: Orange, Green, Brown)
+end
+
+for each color in Color.Elements where color in Color.Primary do
+  print(color)
+end
+
+print(Color.Elements)
+

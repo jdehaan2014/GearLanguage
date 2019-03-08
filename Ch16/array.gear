@@ -1,0 +1,22 @@
+use system
+
+var numbers := [1,2,3,4,5,6,7,8,9,10]
+
+numbers.forEach(
+  func(x)
+    let squared := x^2
+    print('Number \(x) squared is: \(squared).')
+  end)
+
+let squaredNumbers := numbers.map(x=>x^2)
+print(squaredNumbers)
+
+let evenNumbers := numbers.filter(x=>x%2=0)
+print(evenNumbers)
+
+let sum := numbers.reduce(0, (x,y)=>x+y)
+print(sum)
+
+let factorial := numbers.reduce(1, (x,y)=>x*y)
+print(factorial)
+

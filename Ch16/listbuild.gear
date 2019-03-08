@@ -1,0 +1,12 @@
+// list builder
+use system
+
+//var result := Range(1,100).filter(x=>x^2>3).map(x=>2*x)
+var result := (1..100).filter(x=>x^2>3).map(x=>2*x)
+print(result)
+
+// as opposed to
+
+var other := {2*x for x in 1..100 where x^2>3}
+print(other)
+

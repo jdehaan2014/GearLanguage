@@ -1,0 +1,87 @@
+// traits
+
+use system
+
+trait ValidatesUsername
+
+  func validUNChars()
+    var result := []
+    for each ascii in Range(48, 57) do
+      result.add(value: chr(ascii))
+    end
+    for each ascii in Range(65, 90) do
+      result.add(value: chr(ascii))
+    end
+    for each ascii in Range(97, 122) do
+      result.add(value: chr(ascii))
+    end
+    return result
+  end
+
+  func isUsernameValid(username)
+    let chars := Array(username)
+    for each char in chars do
+      ensure self.validUNChars().contains(value: char) else
+        return False
+      end
+    end
+    return if chars.count < 8 then False else True
+  end
+
+end
+
+trait ValidatesPassword
+
+  func validPWChars()
+    var result := []
+    for each char in Range(34, 125) do
+      result.add(value: chr(char))
+    end
+    return result
+  end
+
+  func isPasswordValid(password)
+    let chars := Array(password)
+    for each char in chars do
+      ensure self.validPWChars().contains(value: char) else
+        return False
+      end
+    end
+    return if chars.count < 8 then False else True
+  end
+
+end
+
+class Login: ValidatesUsername, ValidatesPassword
+  var userName := ''
+  var passWord := ''
+
+  init(userName, passWord)
+    self.userName := userName
+    self.passWord := passWord
+  end
+
+  func loginEntered()
+    ensure self.isUsernameValid(self.userName) else
+      print('Wrong user name')
+      return False
+    end
+    ensure self.isPasswordValid(self.passWord) else
+      print('Wrong password')
+      return False
+    end
+    return True
+  end
+
+end
+
+print('user name: ', terminator: '')
+let userName := readln()
+print('password : ', terminator: '')
+let passWord := readln()
+
+var login := Login(userName, passWord)
+
+print(if login.loginEntered() then 'Login correct' else 'Login incorrect')
+
+

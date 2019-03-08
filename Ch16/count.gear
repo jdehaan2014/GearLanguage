@@ -1,0 +1,7 @@
+
+let m := milliseconds()
+for var i:=0 where i<10000000, i+=1 do
+end
+
+print(milliseconds()-m)
+

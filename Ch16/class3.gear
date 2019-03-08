@@ -1,0 +1,28 @@
+// iniherited init
+
+class Circle
+  var radius := 1
+  val area := pi() * self.radius^2
+  init(.radius)
+    self.radius := radius
+  end
+end
+
+class Cylinder (Circle)
+  var height := 0
+  val volume := self.area * self.height
+  init(.radius, .height)
+    inherited(radius: radius)
+    self.height := height
+  end
+end
+
+var circle := Circle(radius: 1)
+var cylinder := Cylinder(radius: 2, height: 10)
+
+print(circle.radius)     // prints 1
+print(circle.area)       // prints 3.14159265358979
+print(cylinder.radius)   // prints 2
+print(cylinder.area)     // prints 12.5663706143592
+print(cylinder.volume)   // prints 125.663706143592
+

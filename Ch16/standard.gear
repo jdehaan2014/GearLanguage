@@ -1,0 +1,7 @@
+print(trunc(3.14))
+print(date())
+print(time())
+print(now())
+print(today())
+
+print(4 | 2) // 100 or 010 = 110

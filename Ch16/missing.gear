@@ -1,0 +1,32 @@
+// missing number in array
+
+use system
+
+func missing(numbers)
+  let count := numbers.count
+  var sum := 0
+  for each i in 0..<count do
+    sum += numbers[i]
+  end
+  return count*(count+1)/2 - sum
+end
+
+func missing2(numbers)
+  var count := numbers.count
+  var i := 0
+  while i < count do
+    var m := (i+count)/2
+    if numbers[m] > m then
+      count := m
+    else
+      i := m+1
+    end
+  end
+  return count
+end
+
+let a := [0,1,2,4,5,6]
+
+print(missing(a))
+print(missing2(a))
+

@@ -1,0 +1,21 @@
+//[n in [2..N] | forall m in {2..n - 1} | n mod m > 0]
+
+use system
+
+
+let m := milliseconds()
+
+let primes :=
+  {n for n in (3..<1000).step(by:2) where
+    {m for m in (1..sqrt(n)).step(by:2) where n%m=0}.count=1}
+
+
+//let primes := (3..<1000).step(by:2)
+ //             .filter(n=>{m for m in (1..sqrt(n)).step(by:2) where n%m=0}.count=1)
+
+print(milliseconds()-m, ' ms')
+
+print(primes)
+
+
+

@@ -1,0 +1,64 @@
+// speed test list building
+
+      //list ><= [transform(item)]
+      //list.add(value: transform(item))
+      //listAdd(list, transform(item))
+
+use system
+
+//let m := milliseconds()
+
+/*
+var c := []
+for each i in 0..<10000 do  // 276 ms (2660ms for 100000)
+  listAdd(c, i)
+end
+*/
+//print(milliseconds()-m)
+
+/*
+var d := []
+for var i := 0 where i<10000, i+=1 do  // 76 ms (775ms for 100000)
+  listAdd(d, i)
+end
+*/
+/*
+var b := []
+for each i in 0..<10000 do  // 352 ms (3394ms for 100000)
+  b.add(value: i)
+end
+*/
+/*
+var a := []
+for each i in 0..<10000 do  // 2444 ms
+  a ><= [i]
+end
+*/
+
+let m := milliseconds()
+
+var c := []
+for each i in 0..<1000 where i%2=0 do  // 276 ms (2660ms for 100000)
+  c.add(value: i^2)
+end
+
+print(milliseconds()-m)
+
+
+let n := milliseconds()
+
+//var list := { n^2 for n in 0..<10000 }  // 314ms (3140ms for 100000)
+
+var list := {n^2 for n in 0..<1000 where n%2=0 }
+
+print(milliseconds()-n)
+
+print('====================')
+print(c)
+print('====================')
+print(list)
+
+// conclusion listAdd function is quickest
+// and normal for loop is almost 4 times quicker than for each
+
+

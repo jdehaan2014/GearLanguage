@@ -1,0 +1,24 @@
+//create hash
+
+let k_hash := 613
+let N_hash := 1008 //size of hash table (1009 = prime number)
+
+func makeHash(string)
+  var h := 0
+  for var i := 0 where i < length(string), i+=1 do
+    h := k_hash * h + ord(string[i])
+  end
+  return h % N_hash     //least significant 30 bits
+  //return ((h << 2) >> 2) % N_hash     //least significant 30 bits
+end
+
+var s := 'Hello'
+var h := makeHash(s)
+print(h)
+
+print(makeHash('Jeroen'))
+print(makeHash('Warja'))
+print(makeHash('Anastasia'))
+print(makeHash('Oma Tonny'))
+print(makeHash('Buurman Arthur'))
+

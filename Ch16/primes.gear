@@ -1,0 +1,38 @@
+
+use system
+//[n in [2..N] | forall m in {2..n - 1} | n mod m > 0]
+
+//var primes := N => (2..N).forEach(n=>(2..<n).filter(n%m>0))
+
+
+
+func isPrime(num)
+  if num < 2 then
+    return False
+  end
+
+  for var i := 2 where i < num, i+=1 do
+    if num%i=0 then
+      return False
+    end
+  end
+  return True
+end
+
+var primes := (2..100).filter(n=>isPrime(n))
+print(primes)
+
+
+/*
+var primes := (3..100).forEach(
+
+var primes := []
+for var n:=3 where n<=100, n+=2 do
+  if primes.forEach(prime=>n%prime>0) then
+    primes.add(value: n)
+  end
+end
+
+print(primes)
+*/
+

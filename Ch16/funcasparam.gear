@@ -1,0 +1,14 @@
+// func as parameter
+
+func add2Numbers(a,b) => a+b
+func mul2Numbers(a,b) => a*b
+
+func calc(x, y, function)
+  return function(x,y)
+end
+
+var sum := calc(20, 22, add2Numbers)
+var product := calc(2, 21, mul2Numbers)
+
+print('Sum is: \(sum) and product is: \(product).')
+

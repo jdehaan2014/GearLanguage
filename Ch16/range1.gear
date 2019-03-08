@@ -1,0 +1,7 @@
+
+use system
+
+var result := (1..15).filter(x=>x^2>3).map(x=>2*x)
+
+print(result)
+

@@ -1,0 +1,8 @@
+// ranges
+
+use system
+
+for each ascii in Range(ord('a'), ord('z')) do
+  print(chr(ascii), terminator: '|')
+end
+

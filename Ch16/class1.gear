@@ -1,0 +1,35 @@
+// harry and sally
+
+class Date
+  var day := 1
+  var month := 'January'
+  var year := 1980
+  init(.day, .month, .year)
+    self.day := day
+    self.month := month
+    self.year := year
+  end
+  func toString()
+    return 'Date: \(self.day)-\(self.month)-\(self.year)'
+  end
+end
+
+class Person
+  var name := 'Person'
+  var birthDate := Date()
+  init(name, .birthDate)
+    self.name := name
+    self.birthDate := birthDate
+  end
+  func toString()
+    return self.name + ': ' + self.birthDate.toString()
+  end
+end
+
+var Harry := Person('Harry', birthDate: Date(day: 23, month: 'February', year: 1987))
+var Sally := Person('Sally', birthDate: Date(day: 18, month: 'July', year: 1992))
+
+print(Harry.toString())
+print(Sally.toString())
+print(Person().toString())
+

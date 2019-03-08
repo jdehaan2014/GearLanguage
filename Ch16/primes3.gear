@@ -1,0 +1,40 @@
+
+use system
+
+func sieveOfErasthones(n)
+
+  func filterMultiples(list, k)
+    return list.filter(x=>(x <= k) | ((x > k) & ((x % k) <> 0)))
+  end
+
+
+  var listOfNum := (2..n).toArray()
+  var i := 2
+
+  while (i*i < n) & (i < n) do
+    listOfNum := filterMultiples(listOfNum, i)
+    i+=1
+  end
+
+  return listOfNum
+
+end
+
+
+func sieve(n)
+  var result := (2..n).
+
+end
+
+let m := milliseconds()
+
+var s := sieveOfErasthones(10000)
+
+
+let ms := milliseconds() - m
+
+//print(s)
+print('In \(ms) ms.')
+
+//print(sieveOfErasthones(100))
+

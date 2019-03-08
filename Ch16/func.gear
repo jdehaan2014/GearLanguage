@@ -1,0 +1,6 @@
+func hello(.person, .day)
+  print('Hello \(person), it''s \(day) today.')
+end
+
+hello(person: 'Jerry', day: today())
+

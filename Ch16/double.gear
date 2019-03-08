@@ -1,0 +1,15 @@
+// test double precision
+print(9999999999999999=
+      10000000000000000)
+let x := 0.1 + 0.2
+let y := 0.3
+print(x = y)
+
+var a := 'a'
+var b := 2
+var c := a + b
+print(c)
+var d := True | False
+print(d)
+print([] + [])
+

@@ -1,0 +1,27 @@
+use system
+
+func calculate(.scores)
+  class Statistics
+    var min := 0
+    var max := 0
+    var sum := 0
+  end
+  var statistics := Statistics()
+
+  for each score in scores do
+    if score > statistics.max then
+      statistics.max := score
+    elseif score < statistics.max then
+      statistics.min := score
+    end
+    statistics.sum += score
+  end
+
+  return statistics
+end
+
+let statistics := calculate(scores: [6, 7, 8, 9, 5, 4, 10, 3])
+print(statistics.min)
+print(statistics.max)
+print(statistics.sum)
+

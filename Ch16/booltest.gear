@@ -1,0 +1,18 @@
+
+print( 1 | 3 ) // 01 or 11 = 11
+print( 1 & 3 ) // 01 and 11 = 01
+print( 1 ~ 3 ) // 01 xor 11 = 10
+print( !3 ) // not 11 = -100
+print( !4 ) // not 100 = -0101
+print( !-4 ) // not -100 = 011
+print( !-5 ) // not -101 = 100
+
+print( !7 ) // not 111 = -1000
+
+print((7>6) | False)
+
+//True /\ False
+//True \/ False
+
+print(!True)
+

@@ -1,0 +1,24 @@
+use person
+use arrays
+
+var people := [
+  Person(name: 'Jerry', address: 'Milano, Italy', age: 39, income: 73000,
+    cars: ['Opel Astra', 'Citroen C1']),
+  Person(name: 'Cathy', address: 'Berlin, Germany', age: 34, income: 75000,
+    cars: ['Audi A3']),
+  Person(name: 'Bill', address: 'Brussels, Belgium', age: 48, income: 89000,
+    cars: ['Volco XC60', 'Mercedes B', 'Smart 4x4']),
+  Person(name: 'Francois', address: 'Lille, France', age: 56, income: 112000,
+    cars: ['Volco XC90', 'Jaguar X-type']),
+  Person(name: 'Joshua', address: 'Madrid, Spain', age: 43, income: 42000,
+    cars: [])
+  ]
+
+let names := people.map(person=>person.name)
+let totalIncome := people.map(person=>person.income).reduce(0, (x,y)=>x+y)
+let allCars := people.flatMap(person=>person.cars)
+
+print(names)
+print(totalIncome)
+print(allCars)
+

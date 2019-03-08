@@ -1,0 +1,32 @@
+use system
+
+func calculate(.scores)
+  var min := 0
+  var max := 0
+  var sum := 0
+
+  for each score in scores do
+    if score > max then
+      max := score
+    elseif score < max then
+      min := score
+    end
+    sum += score
+  end
+
+  func closure(type) =>
+    match type
+      if 'min' then min
+      if 'max' then max
+      else sum
+
+  return closure
+end
+
+var stats := calculate(scores: [6, 7, 8, 9, 5, 4])
+
+print(stats('min'))
+print(stats('max'))
+print(stats('sum'))
+
+

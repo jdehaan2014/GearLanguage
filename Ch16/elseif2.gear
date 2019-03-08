@@ -1,0 +1,15 @@
+let number := 100
+var guess := 1000
+
+if guess < number then
+  print('Too low.')
+elseif guess = number then
+  print('You win!')
+elseif (guess > number) & (guess <= 1000) then
+  print('Too high.')
+elseif (guess > 1000) & (guess < 10000) then
+  print('Way too high.')
+else
+  print('Out of reach')
+end
+

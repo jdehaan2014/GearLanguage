@@ -1,0 +1,15 @@
+// new range type
+
+use system
+
+let list := [0,1,2,3,4,5,6,7,8,9]
+
+for each i in Range(0,list.count-1) do
+  print(i)
+end
+
+
+for each i in 0..<list.count do
+  print(i)
+end
+

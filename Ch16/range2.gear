@@ -1,0 +1,23 @@
+use system
+
+var a := 1..10
+print(a)
+
+for each i in a do
+  print(i)
+end
+
+a.forEach(func(n) print(n) end)
+let y := (10..15).forEach(func(n) print(n) end)
+print(a.filter(x=>x%2=0))
+print(a.map(x=>x^2))
+print(a.reduce(0, (x,y)=>x+y))
+
+print((1..100).filter(x=>x%2=0))
+
+var listOfEvens := (1..100).filter(x=>x%2=0)
+
+var factorial := n => (1..n).reduce(1, (x,y)=>x*y)
+print(factorial(10))
+
+
