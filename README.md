@@ -4,7 +4,7 @@ See the PDF included for more information about the Gear language. It also inclu
 Gear is a multi-paradigm language: procedural, functional and object-oriented. It is dynamic without type annotation, but still strongly typed. Variables cannot change type!
 Currently, it is only an interpreter, but there are plans to create a compiler as well.
 
-The examples and executable from chapter 16 can be found in Ch16 folder. The executable is build on MacOs Mojave.
+The examples and executable from chapter 16 can be found in Ch16 folder. The executable is built on MacOs Mojave.
 To execute a file with name 'filename.gear':
 > gear -x -f filename.gear
 
@@ -12,3 +12,5 @@ To print the AST:
 > gear -a -f filename.gear
 
 It is important to copy the /gearlib folder, as it contains part of the RTL. Include 'use system' in your code to fully use the RTL.
+
+To create executables for Windows or Linux, compile the project with Lazarus/Free Pascal (v 3.04), in the respective OS.
