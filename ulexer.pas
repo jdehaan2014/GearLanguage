@@ -344,6 +344,8 @@ end;
 
 // multi line comment starts with '/*' and ends with '*/'
 procedure TLexer.MultiLineComment;
+var
+  Token: TToken;
 begin
   Repeat
     Repeat
@@ -351,7 +353,12 @@ begin
     Until (FLook = '*') or (FLook = FileEnding);
     FLook := getChar;
   Until (FLook = '/') or (FLook = FileEnding);
-  FLook := getChar;
+  if FLook = FileEnding then begin
+    Token := TToken.Create(ttNone, '', Null, FLine, FCol, FReader.FileIndex);
+    Error(Token, 'Lexer error: Comment exceeds file.');
+  end
+  else
+    FLook := getChar;
 end;
 
 procedure TLexer.SingleLineComment;
