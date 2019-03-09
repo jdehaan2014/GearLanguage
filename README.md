@@ -1,7 +1,7 @@
 # GearLanguage
-A programming language interpreter written in Free Pascal
+A programming language interpreter written in Free Pascal.
 See the PDF included for more information about the Gear language. It also includes 16 chapters that explain exactly (including code) how the language evolved. In the appendix a description of the language is available.
-Gear is a multi-paradigm language: procedural, functional and object-oriented. It is dynamic without type annotation, but still strongly typed. Variables cannot change type!
+Gear is a multi-paradigm language: procedural, object-oriented and functional with closures and anonymous functions. It is dynamic without type annotation, but still strongly typed. Variables cannot change type! 
 Currently, it is only an interpreter, but there are plans to create a compiler as well.
 
 The examples and executable from chapter 16 can be found in Ch16 folder. The executable is built on MacOs Mojave.
