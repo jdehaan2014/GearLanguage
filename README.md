@@ -6,10 +6,10 @@ Currently, it is only an interpreter, but there are plans to create a compiler a
 
 The examples from chapter 16 of the book can be found in the Ch16 folder. The executable is built on MacOs Mojave and is named gear.
 To execute a file with name 'helloworld.gear':
-> gear -x -f helloworld.gear
+> gear -x -f helloWorld.gear
 
 To print the AST:
-> gear -a -f helloworld.gear
+> gear -a -f helloWorld.gear
 
 It is important to copy the /gearlib folder, as it contains part of the RTL. Include 'use system' in your code to fully use the RTL.
 
