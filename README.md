@@ -5,7 +5,7 @@ Gear is a multi-paradigm language: procedural, object-oriented and functional wi
 Currently, it is only an interpreter, but there are plans to create a compiler as well.
 
 The examples from chapter 16 of the book can be found in the Ch16 folder. The executable is built on MacOs Mojave and is named gear.
-To execute a file with name 'helloworld.gear':
+To execute a file with name 'helloWorld.gear':
 > gear -x -f helloWorld.gear
 
 To print the AST:
