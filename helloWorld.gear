@@ -1,0 +1,22 @@
+
+print('Hello world!')
+
+// or
+
+var helloWorld := func() print('Hello world!') end
+helloWorld()
+
+// or
+
+func helloworld()
+  print('Hello world!')
+end
+
+helloworld()
+
+func greetings(to name)
+  print('Hello \(name)!')
+end
+
+greetings(to: 'world')
+
