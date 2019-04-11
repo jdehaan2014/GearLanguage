@@ -594,7 +594,10 @@ begin
     IArrayInstance(Variable).Put(Index, Value, IndexedExpr.Index.Token);
   end
   else if VarSupports(Variable, IDictInstance) then begin
-    OldValue := IDictInstance(Variable).get(Index, IndexedExpr.Index.Token);
+    if IDictInstance(Variable).Contains(Index) then
+      OldValue := IDictInstance(Variable).get(Index, IndexedExpr.Index.Token)
+    else
+      OldValue := Null;
     Value := getAssignValue(OldValue, NewValue, IndexedExpr.Variable.Token, Op);
     IDictInstance(Variable).Put(Index, Value, IndexedExpr.Index.Token);
   end
