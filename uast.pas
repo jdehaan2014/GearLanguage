@@ -203,6 +203,15 @@ type
       destructor Destroy; override;
   end;
 
+  TTupleExpr = class(TFactorExpr)
+    private
+      FExprList: TExprList;
+    public
+      property ExprList: TExprList read FExprList;
+      constructor Create(AExprList: TExprList; AToken: TToken);
+      destructor Destroy; override;
+  end;
+
   TStmt = class(TNode)
     // Base class for statements
   end;
@@ -392,8 +401,8 @@ type
   // Base class for declarations
   TDecl = class(TNode)
     private
-       type TDeclKind = (dkArray, dkClass, dkDict, dkEnum, dkExtension,
-         dkFunc, dkTrait, dkVal, dkVar);
+       type TDeclKind = (dkNone, dkArray, dkClass, dkDict, dkEnum, dkExtension,
+         dkFunc, dkTrait, dkVal, dkVar, dkTuple);
     private
        FKind: TDeclKind;
        FIdent: TIdent;
@@ -415,6 +424,18 @@ type
         AMutable: Boolean=True);
       destructor Destroy; override;
   end;
+
+  TDeclList = specialize TArrayObj<TDecl>;
+
+  TVarDecls = class(TDecl)
+    private
+      FList: TDeclList;
+    public
+      property List: TDeclList read FList;
+      constructor Create(AList: TDeclList; AToken: TToken);
+      destructor Destroy; override;
+  end;
+
 
   TFuncDecl = class(TDecl)
     private
@@ -453,8 +474,6 @@ type
       property FuncDecl: TFuncDecl read FFuncDecl;
       constructor Create(AIdent: TIdent; AFuncDecl: TFuncDecl; AToken: TToken);
   end;
-
-  TDeclList = specialize TArrayObj<TDecl>;
 
   TClassDecl = class(TDecl)
     private
@@ -818,6 +837,21 @@ begin
   inherited Destroy;
 end;
 
+{ TTupleExpr }
+
+constructor TTupleExpr.Create(AExprList: TExprList; AToken: TToken);
+begin
+  inherited Create(AToken);
+  FExprList := AExprList;
+end;
+
+destructor TTupleExpr.Destroy;
+begin
+  if Assigned(FExprList) then FExprList.Free;
+  inherited Destroy;
+end;
+
+
 { TPrintStmt }
 
 constructor TPrintStmt.Create
@@ -903,6 +937,7 @@ begin
   if Assigned(FExpr) then FExpr.Free;
   inherited Destroy;
 end;
+
 
 { TIfStmt }
 
@@ -1087,6 +1122,20 @@ end;
 destructor TVarDecl.Destroy;
 begin
   if Assigned(FExpr) then FExpr.Free;
+  inherited Destroy;
+end;
+
+{ TVarDecls }
+
+constructor TVarDecls.Create(AList: TDeclList; AToken: TToken);
+begin
+  inherited Create(Nil, dkNone, AToken);
+  FList := AList;
+end;
+
+destructor TVarDecls.Destroy;
+begin
+  if Assigned(FList) then FList.Free;
   inherited Destroy;
 end;
 
@@ -1342,6 +1391,7 @@ begin
   if Assigned(FNodes) then FNodes.Free;
   inherited Destroy;
 end;
+
 
 end.
 

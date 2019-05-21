@@ -200,12 +200,20 @@ end;
 function TArrayInstance.toString: string;
 var
   i: Integer;
+
+  function getStr(Value: Variant): String;
+  begin
+    Result := Value.toString;
+    if VarType(Value) = varString then
+      Result := QuotedStr(Result);
+  end;
+
 begin
   Result := '[';
   if FElements.Count > 0 then begin
     for i := 0 to FElements.Count-2 do
-      Result += FElements[i].toString + ', ';
-    Result += FElements[FElements.Count-1].toString;
+      Result += getStr(FElements[i]) + ', ';
+    Result += getStr(FElements[FElements.Count-1]);
   end;
   Result += ']';
 end;

@@ -33,11 +33,11 @@ type
       const Increase = 2;
       var
         Indent: string;
-        Tree: TProduct;
+        Tree: TNode;
       procedure IncIndent;
       procedure DecIndent;
     public
-      constructor Create(ATree: TProduct);
+      constructor Create(ATree: TNode);
       procedure Print;
     published
       procedure VisitNode(Node: TNode);
@@ -58,6 +58,7 @@ type
       procedure VisitIndexedExpr(IndexedExpr: TIndexedExpr);
       procedure VisitDictDeclExpr(DictDeclExpr: TDictDeclExpr);
       procedure VisitInterpolatedExpr(InterpolatedExpr: TInterpolatedExpr);
+      procedure VisitTupleExpr(TupleExpr: TTupleExpr);
       //statements
       procedure VisitPrintStmt(PrintStmt: TPrintStmt);
       procedure VisitAssignStmt(AssignStmt: TAssignStmt);
@@ -75,6 +76,7 @@ type
       procedure VisitUseStmt(UseStmt: TUseStmt);
       //declarations
       procedure VisitVarDecl(VarDecl: TVarDecl);
+      procedure VisitVarDecls(VarDecls: TVarDecls);
       procedure VisitFuncDecl(FuncDecl: TFuncDecl);
       procedure VisitValDecl(ValDecl: TValDecl);
       procedure VisitClassDecl(ClassDecl: TClassDecl);
@@ -100,7 +102,7 @@ begin
   Indent := StringOfChar(' ', Length(Indent) - Increase);
 end;
 
-constructor TPrinter.Create(ATree: TProduct);
+constructor TPrinter.Create(ATree: TNode);
 begin
   Indent := '  ';
   Tree := ATree;
@@ -276,6 +278,17 @@ begin
   IncIndent;
   VisitNode(InterpolatedExpr);
   for Expr in InterpolatedExpr.ExprList do
+    Visit(Expr);
+  DecIndent;
+end;
+
+procedure TPrinter.VisitTupleExpr(TupleExpr: TTupleExpr);
+var
+  Expr: TExpr;
+begin
+  IncIndent;
+  VisitNode(TupleExpr);
+  for Expr in TupleExpr.ExprList do
     Visit(Expr);
   DecIndent;
 end;
@@ -457,6 +470,14 @@ begin
   Visit(VarDecl.Ident);
   Visit(VarDecl.Expr);
   DecIndent;
+end;
+
+procedure TPrinter.VisitVarDecls(VarDecls: TVarDecls);
+var
+  Decl: TDecl;
+begin
+  for Decl in VarDecls.List do
+    Visit(Decl);
 end;
 
 procedure TPrinter.VisitFuncDecl(FuncDecl: TFuncDecl);

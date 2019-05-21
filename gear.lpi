@@ -92,7 +92,7 @@
         <Mode0 Name="default"/>
       </Modes>
     </RunParams>
-    <Units Count="28">
+    <Units Count="30">
       <Unit0>
         <Filename Value="gear.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -218,6 +218,16 @@
         <Filename Value="uEnum.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit27>
+      <Unit28>
+        <Filename Value="utupleintf.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uTupleIntf"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="utuple.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uTuple"/>
+      </Unit29>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -244,6 +254,14 @@
       </Debugging>
       <LinkSmart Value="True"/>
     </Linking>
+    <Other>
+      <Verbosity>
+        <ShowNotes Value="False"/>
+      </Verbosity>
+      <CompilerMessages>
+        <IgnoredMessages idx3124="True"/>
+      </CompilerMessages>
+    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">

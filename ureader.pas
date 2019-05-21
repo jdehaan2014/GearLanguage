@@ -27,6 +27,7 @@ uses
 
 const
   //on Unix '^D' on windows ^Z (#26)
+  //FileEnding = ^D;
   {$IFDEF UNIX}
     FileEnding = ^D;
   {$ENDIF}

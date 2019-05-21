@@ -79,6 +79,7 @@ type
       procedure VisitIndexedExpr(IndexedExpr: TIndexedExpr);
       procedure VisitDictDeclExpr(DictDeclExpr: TDictDeclExpr);
       procedure VisitInterpolatedExpr(InterpolatedExpr: TInterpolatedExpr);
+      procedure VisitTupleExpr(TupleExpr: TTupleExpr);
       // Stmt
       procedure VisitPrintStmt(PrintStmt: TPrintStmt);
       procedure VisitAssignStmt(AssignStmt: TAssignStmt);
@@ -96,6 +97,7 @@ type
       procedure VisitUseStmt(UseStmt: TUseStmt);
       // Decl
       procedure VisitVarDecl(VarDecl: TVarDecl);
+      procedure VisitVarDecls(VarDecls: TVarDecls);
       procedure VisitFuncDecl(FuncDecl: TFuncDecl);
       procedure VisitValDecl(ValDecl: TValDecl);
       procedure VisitClassDecl(ClassDecl: TClassDecl);
@@ -280,6 +282,14 @@ begin
     Visit(Expr);
 end;
 
+procedure TResolver.VisitTupleExpr(TupleExpr: TTupleExpr);
+var
+  Expr: TExpr;
+begin
+  for Expr in TupleExpr.ExprList do
+    Visit(Expr);
+end;
+
 procedure TResolver.VisitPrintStmt(PrintStmt: TPrintStmt);
 var
   Expr: TExpr;
@@ -421,6 +431,14 @@ begin
     Symbol := Retrieve(VarDecl.Ident);
     Symbol.isNull := True;
   end;
+end;
+
+procedure TResolver.VisitVarDecls(VarDecls: TVarDecls);
+var
+  Decl: TDecl;
+begin
+  for Decl in VarDecls.List do
+    Visit(Decl);
 end;
 
 procedure TResolver.VisitFuncDecl(FuncDecl: TFuncDecl);

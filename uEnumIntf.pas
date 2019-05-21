@@ -22,7 +22,7 @@ unit uEnumIntf;
 interface
 
 uses
-  Classes, SysUtils, uAST, Variants, uMembers, uCollections, uToken, uArrayIntf;
+  Classes, SysUtils, uAST, Variants, uMembers, uToken, uArrayIntf;
 
 type
 

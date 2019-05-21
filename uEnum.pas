@@ -65,7 +65,7 @@ type
   end;
 
 implementation
-uses uFunc, uVariantSupport, uLanguage, uArray;
+uses uFunc, uLanguage, uArray;
 
 { TEnumClass }
 

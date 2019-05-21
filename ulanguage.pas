@@ -93,6 +93,7 @@ begin
       WriteLn(Errors.toString)
     else
       Interpreter.Execute(Tree);
+
   finally
     if Assigned(Tree) then Tree.Free;
     Resolver.Free;

@@ -56,6 +56,7 @@ type
       function VisitDictDeclExpr(DictDeclExpr: TDictDeclExpr): Variant;
       function VisitIndexedExpr(IndexedExpr: TIndexedExpr): Variant;
       function VisitInterpolatedExpr(InterpolatedExpr: TInterpolatedExpr): Variant;
+      function VisitTupleExpr(TupleExpr: TTupleExpr): Variant;
       //statements
       procedure VisitPrintStmt(PrintStmt: TPrintStmt);
       procedure VisitAssignStmt(AssignStmt: TAssignStmt);
@@ -73,6 +74,7 @@ type
       procedure VisitUseStmt(UseStmt: TUseStmt);
       //declarations
       procedure VisitVarDecl(VarDecl: TVarDecl);
+      procedure VisitVarDecls(VarDecls: TVarDecls);
       procedure VisitFuncDecl(FuncDecl: TFuncDecl);
       procedure VisitValDecl(ValDecl: TValDecl);
       function getMembers(DeclList: TDeclList): TMembers;
@@ -97,7 +99,7 @@ type
 
 implementation
 uses uCallable, uFunc, uStandard, uClassIntf, uClass, uArrayIntf, uArray,
-  uDictIntf, uDict, uEnumIntf, uEnum, uMath, uVariantSupport;
+  uDictIntf, uDict, uEnumIntf, uEnum, uMath, uVariantSupport, uTupleIntf, uTuple;
 
 const
   ErrDuplicateID = '%s cannot be defined. Identifier "%s" is already declared.';
@@ -349,19 +351,21 @@ end;
 function TInterpreter.VisitGetExpr(GetExpr: TGetExpr): Variant;
 var
   Instance: Variant;
+  Ident: TIdent = Nil;
 begin
   Instance := Visit(GetExpr.Instance);
+  Ident := GetExpr.Ident;
   if VarSupportsIntf(Instance,
        [IGearInstance, IArrayInstance, IDictInstance, IEnumInstance]) then
   begin
     if VarSupports(Instance, IGearInstance) then
-      Result := IGearInstance(Instance).GetMember(GetExpr.Ident)
+      Result := IGearInstance(Instance).GetMember(Ident)
     else if VarSupports(Instance, IArrayInstance) then
-      Result := IArrayInstance(Instance).GetMember(GetExpr.Ident)
+      Result := IArrayInstance(Instance).GetMember(Ident)
     else if VarSupports(Instance, IDictInstance) then
-      Result := IDictInstance(Instance).GetMember(GetExpr.Ident)
+      Result := IDictInstance(Instance).GetMember(Ident)
     else if VarSupports(Instance, IEnumInstance) then
-      Result := IEnumInstance(Instance).GetMember(GetExpr.Ident);
+      Result := IEnumInstance(Instance).GetMember(Ident);
 
     if VarSupports(Result, IValuable) then
       Result := ICallable((IValuable(Result) as TVal)
@@ -369,13 +373,13 @@ begin
                           .Call(GetExpr.Token, Self, TArgList.Create());
   end
   else if VarSupports(Instance, IEnumable) then begin
-    if IEnumable(Instance).isCase(GetExpr.Ident.Text) then
-      Result := GetExpr.Ident.Text
-    else if GetExpr.Ident.Text = 'Elements' then
+    if IEnumable(Instance).isCase(Ident.Text) then
+      Result := Ident.Text
+    else if Ident.Text = 'Elements' then
       Result := IEnumable(Instance).ElementList
     else
       Result := IEnumInstance(TEnumInstance.Create(
-        IEnumable(Instance) as TEnumClass, GetExpr.Ident));
+        IEnumable(Instance) as TEnumClass, Ident));
   end
   else
     Raise ERuntimeError.Create(GetExpr.Ident.Token, ErrExpectedInstance);
@@ -447,6 +451,8 @@ begin
   end
   else if VarSupports(Instance, IDictInstance) then
     Result := IDictInstance(Instance).get(Index, IndexedExpr.Index.Token)
+  else if VarSupports(Instance, ITuple) then
+    Result := ITuple(Instance).get(Index, IndexedExpr.Index.Token)
   else if VarIsStr(Instance) then begin
     CheckNumericIndex(Index, IndexedExpr.Index.Token);
     Result := String(Instance)[Index+1];  // strings start at index 1
@@ -463,6 +469,20 @@ begin
   Result := '';
   for Expr in InterpolatedExpr.ExprList do
     Result := TMath._Add(Result, Visit(Expr), Expr.Token);
+end;
+
+function TInterpreter.VisitTupleExpr(TupleExpr: TTupleExpr): Variant;
+var
+  Expr: TExpr;
+  Tuple: ITuple;
+  Elements: TTupleElements;
+begin
+  Tuple := ITuple(TTuple.Create);
+
+  for Expr in TupleExpr.ExprList do
+    Tuple.Elements.Add(Visit(Expr));
+
+  Result := Tuple;
 end;
 
 procedure TInterpreter.VisitPrintStmt(PrintStmt: TPrintStmt);
@@ -600,6 +620,12 @@ begin
       OldValue := Null;
     Value := getAssignValue(OldValue, NewValue, IndexedExpr.Variable.Token, Op);
     IDictInstance(Variable).Put(Index, Value, IndexedExpr.Index.Token);
+  end
+  else if VarSupports(Variable, ITuple) then begin
+    CheckNumericIndex(Index, IndexedExpr.Index.Token);
+    OldValue := ITuple(Variable).get(Index, IndexedExpr.Index.Token);
+    Value := getAssignValue(OldValue, NewValue, IndexedExpr.Variable.Token, Op);
+    ITuple(Variable).Put(Index, Value, IndexedExpr.Index.Token);
   end
   else if VarIsStr(Variable) then begin
     CheckNumericIndex(Index, IndexedExpr.Index.Token);
@@ -801,6 +827,14 @@ procedure TInterpreter.VisitVarDecl(VarDecl: TVarDecl);
 begin
   CheckDuplicate(VarDecl.Ident, 'Variable');
   CurrentSpace.Store(VarDecl.Ident, Visit(VarDecl.Expr));
+end;
+
+procedure TInterpreter.VisitVarDecls(VarDecls: TVarDecls);
+var
+  Decl: TDecl;
+begin
+  for Decl in VarDecls.List do
+    Visit(Decl);
 end;
 
 procedure TInterpreter.VisitFuncDecl(FuncDecl: TFuncDecl);

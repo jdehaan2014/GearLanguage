@@ -361,6 +361,7 @@ begin
     FLook := getChar;
 end;
 
+
 procedure TLexer.SingleLineComment;
 begin
   Repeat

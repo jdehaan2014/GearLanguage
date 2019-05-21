@@ -37,7 +37,7 @@ type
 
     //Keywords declarations
     ttArray, ttClass, ttDictionary, ttEach, ttEnum, ttExtension, ttFunc,
-    ttInit, ttLet, ttVal, ttVar, ttTrait, ttStatic,
+    ttInit, ttLet, ttVar, ttVal, ttTrait,
     //Keywords statements and expressions
     ttIf, ttThen, ttElse, ttElseif, ttWhile, ttDo, ttRepeat, ttUntil,
     ttFor, ttIn, ttIs, ttReturn, ttEnd, ttMatch, ttWhere, ttSwitch, ttCase,
@@ -229,7 +229,6 @@ initialization
   Keywords['repeat'] := ttRepeat;
   Keywords['return'] := ttReturn;
   Keywords['self'] := ttSelf;
-  Keywords['static'] := ttStatic;
   Keywords['switch'] := ttSwitch;
   Keywords['then'] := ttThen;
   Keywords['trait'] := ttTrait;
