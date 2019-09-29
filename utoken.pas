@@ -23,7 +23,7 @@ unit uToken;
 interface
 
 uses
-  Classes, SysUtils, uCollections, Variants;
+  Classes, SysUtils, Generics.Collections, Variants;
 
 type
 
@@ -37,7 +37,7 @@ type
 
     //Keywords declarations
     ttArray, ttClass, ttDictionary, ttEach, ttEnum, ttExtension, ttFunc,
-    ttInit, ttLet, ttVar, ttVal, ttTrait,
+    ttInit, ttLet, ttVal, ttVar, ttTrait, ttStatic,
     //Keywords statements and expressions
     ttIf, ttThen, ttElse, ttElseif, ttWhile, ttDo, ttRepeat, ttUntil,
     ttFor, ttIn, ttIs, ttReturn, ttEnd, ttMatch, ttWhere, ttSwitch, ttCase,
@@ -82,7 +82,7 @@ type
       function Copy: TToken;
   end;
 
-  TTokens = specialize TArrayObj<TToken>;
+  TTokens = specialize TObjectList<TToken>;
   TTokensHelper = class helper for TTokens
     function toText: String;
   end;
@@ -94,9 +94,8 @@ var
 
 implementation
 
-constructor TToken.Create
-  (ATyp: TTokenTyp; ALexeme: String; AValue: Variant; ALine, ACol: LongInt; AFileIndex: Integer
-  );
+constructor TToken.Create(ATyp: TTokenTyp; ALexeme: String; AValue: Variant;
+  ALine, ACol: LongInt; AFileIndex: Integer);
 begin
   FTyp := ATyp;
   FLexeme := ALexeme;
@@ -167,9 +166,14 @@ begin
     ttEOF: Result := 'End of file';
     else begin
       WriteStr(Result, Self);
-      Result := Result.Substring(2).ToLower;
+      Result := Result.Substring(2);
     end;
   end;
+end;
+
+function TTokenTypSetHelper.Contains(TokenTyp: TTokenTyp): Boolean;
+begin
+  Result := TokenTyp in Self;
 end;
 
 { TTokensHelper }
@@ -183,61 +187,54 @@ begin
     Result += Token.toString + LineEnding;
 end;
 
-{ TTokenTypSetHelper }
-
-function TTokenTypSetHelper.Contains(TokenTyp: TTokenTyp): Boolean;
-begin
-  Result := TokenTyp in Self;
-end;
-
 initialization
 
-  Keywords := TKeywords.Create;
-  Keywords.Sorted := True;
+  Keywords := TKeywords.Create();
 
   // the constant values
-  Keywords['False'] := ttFalse;
-  Keywords['Null'] := ttNull;
-  Keywords['True'] := ttTrue;
+  Keywords.Add('False', ttFalse);
+  Keywords.Add('Null', ttNull);
+  Keywords.Add('True', ttTrue);
 
   // the keywords
-  Keywords['array'] := ttArray;
-  Keywords['break'] := ttBreak;
-  Keywords['case'] := ttCase;
-  Keywords['class'] := ttClass;
-  Keywords['continue'] := ttContinue;
-  Keywords['dictionary'] := ttDictionary;
-  Keywords['do'] := ttDo;
-  Keywords['each'] := ttEach;
-  Keywords['else'] := ttElse;
-  Keywords['elseif'] := ttElseif;
-  Keywords['end'] := ttEnd;
-  Keywords['ensure'] := ttEnsure;
-  Keywords['enum'] := ttEnum;
-  Keywords['extension'] := ttExtension;
-  Keywords['for'] := ttFor;
-  Keywords['func'] := ttFunc;
-  Keywords['if'] := ttIf;
-  Keywords['in'] := ttIn;
-  Keywords['is'] := ttIs;
-  Keywords['inherited'] := ttInherited;
-  Keywords['init'] := ttInit;
-  Keywords['let'] := ttLet;
-  Keywords['match'] := ttMatch;
-  Keywords['on'] := ttOn;
-  Keywords['print'] := ttPrint;
-  Keywords['repeat'] := ttRepeat;
-  Keywords['return'] := ttReturn;
-  Keywords['self'] := ttSelf;
-  Keywords['switch'] := ttSwitch;
-  Keywords['then'] := ttThen;
-  Keywords['trait'] := ttTrait;
-  Keywords['until'] := ttUntil;
-  Keywords['use'] := ttUse;
-  Keywords['val'] := ttVal;
-  Keywords['var'] := ttVar;
-  Keywords['where'] := ttWhere;
-  Keywords['while'] := ttWhile;
+  Keywords.Add('array', ttArray);
+  Keywords.Add('break', ttBreak);
+  Keywords.Add('case', ttCase);
+  Keywords.Add('class', ttClass);
+  Keywords.Add('continue', ttContinue);
+  Keywords.Add('dictionary', ttDictionary);
+  Keywords.Add('do', ttDo);
+  Keywords.Add('each', ttEach);
+  Keywords.Add('else', ttElse);
+  Keywords.Add('elseif', ttElseif);
+  Keywords.Add('end', ttEnd);
+  Keywords.Add('ensure', ttEnsure);
+  Keywords.Add('enum', ttEnum);
+  Keywords.Add('extension', ttExtension);
+  Keywords.Add('for', ttFor);
+  Keywords.Add('func', ttFunc);
+  Keywords.Add('if', ttIf);
+  Keywords.Add('in', ttIn);
+  Keywords.Add('is', ttIs);
+  Keywords.Add('inherited', ttInherited);
+  Keywords.Add('init', ttInit);
+  Keywords.Add('let', ttLet);
+  Keywords.Add('match', ttMatch);
+  Keywords.Add('on', ttOn);
+  Keywords.Add('print', ttPrint);
+  Keywords.Add('repeat', ttRepeat);
+  Keywords.Add('return', ttReturn);
+  Keywords.Add('self', ttSelf);
+  Keywords.Add('static', ttStatic);
+  Keywords.Add('switch', ttSwitch);
+  Keywords.Add('then', ttThen);
+  Keywords.Add('trait', ttTrait);
+  Keywords.Add('until', ttUntil);
+  Keywords.Add('use', ttUse);
+  Keywords.Add('val', ttVal);
+  Keywords.Add('var', ttVar);
+  Keywords.Add('where', ttWhere);
+  Keywords.Add('while', ttWhile);
 
 finalization
   Keywords.Free;

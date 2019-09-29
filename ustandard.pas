@@ -27,7 +27,7 @@ interface
 
 uses
   Classes, SysUtils, uInterpreter, uCallable, uToken, uFunc, Variants,
-  uError, math;
+  uError, math, uMemory;
 
 type
 
@@ -115,47 +115,11 @@ type
     function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
   end;
 
+  TRandomize = class(TInterfacedObject, ICallable)
+    function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
+  end;
+
   TLength = class(TInterfacedObject, ICallable)
-    function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-  end;
-
-  TListAdd = class(TInterfacedObject, ICallable)
-    function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-  end;
-
-  TListInsert = class(TInterfacedObject, ICallable)
-    function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-  end;
-
-  TListDelete = class(TInterfacedObject, ICallable)
-    function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-  end;
-
-  TListContains = class(TInterfacedObject, ICallable)
-    function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-  end;
-
-  TListIndexOf = class(TInterfacedObject, ICallable)
-    function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-  end;
-
-  TListRetrieve = class(TInterfacedObject, ICallable)
-    function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-  end;
-
-  TListFirst = class(TInterfacedObject, ICallable)
-    function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-  end;
-
-  TListLast = class(TInterfacedObject, ICallable)
-    function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-  end;
-
-  TListKeys = class(TInterfacedObject, ICallable)
-    function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-  end;
-
-  TListValues = class(TInterfacedObject, ICallable)
     function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
   end;
 
@@ -175,13 +139,23 @@ type
     function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
   end;
 
-  TToNum =class(TInterfacedObject, ICallable)
+  TToNum = class(TInterfacedObject, ICallable)
     function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
   end;
 
-  TToStr =class(TInterfacedObject, ICallable)
+  TToStr = class(TInterfacedObject, ICallable)
     function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
   end;
+
+  TPred = class(TInterfacedObject, ICallable)
+    function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
+  end;
+
+  TSucc = class(TInterfacedObject, ICallable)
+    function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
+  end;
+
+procedure StoreStandardFunctions(GlobalSpace: TMemorySpace);
 
 implementation
 uses uArrayIntf, uDictIntf;
@@ -385,236 +359,37 @@ begin
   Result := Int(Random(ArgList[0].Value));
 end;
 
+{ TRandomize }
+
+function TRandomize.Call(Token: TToken; Interpreter: TInterpreter;
+  ArgList: TArgList): Variant;
+begin
+  TFunc.CheckArity(Token, ArgList.Count, 0);
+  Result := Null;
+  Randomize;
+end;
+
+
 { TLength }
 
 function TLength.Call
   (Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
 var
-  Instance: Variant;
+  Value: Variant;
 begin
   TFunc.CheckArity(Token, ArgList.Count, 1);
-  Instance := ArgList[0].Value;
-  if VarSupports(Instance, IArrayInstance) then
-    Result := IArrayInstance(Instance).Count
-  else if VarSupports(Instance, IDictInstance) then
-    Result := IDictInstance(Instance).Count
-  else if VarIsStr(Instance) then
-    Result := Length(Instance)
+  Value := ArgList[0].Value;
+  if VarSupports(Value, IArrayInstance) then
+    Result := IArrayInstance(Value).Count
+  else if VarSupports(Value, IDictInstance) then
+    Result := IDictInstance(Value).Count
+  else if VarIsStr(Value) then
+    Result := Length(Value)
   else
     Raise ERuntimeError.Create(Token,
       'Length function not possible for this type.');
 end;
 
-{ TListAdd }
-
-
-function TListAdd.Call
-  (Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-var
-  Instance: Variant;
-begin
-  Instance := ArgList[0].Value;
-  if VarSupports(Instance, IArrayInstance) then begin
-    TFunc.CheckArity(Token, ArgList.Count, 2);
-    IArrayInstance(Instance).Add(ArgList[1].Value);
-    Result := IArrayInstance(Instance);
-  end
-  else if VarSupports(Instance, IDictInstance) then begin
-    TFunc.CheckArity(Token, ArgList.Count, 3);
-    IDictInstance(Instance).Add(ArgList[1].Value, ArgList[2].Value);
-    Result := IDictInstance(Instance);
-  end
-  else
-    Raise ERuntimeError.Create(Token,
-      'listAdd function not possible for this type.');
-end;
-
-{ TListInsert }
-
-function TListInsert.Call
-  (Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-var
-  Instance: Variant;
-begin
-  Instance := ArgList[0].Value;
-  if VarSupports(Instance, IArrayInstance) then begin
-    TFunc.CheckArity(Token, ArgList.Count, 3);
-    IArrayInstance(Instance).Insert(ArgList[1].Value, ArgList[2].Value, Token);
-    Result := IArrayInstance(Instance);
-  end
-  else if VarSupports(Instance, IDictInstance) then begin
-    TFunc.CheckArity(Token, ArgList.Count, 4);
-    IDictInstance(Instance).Insert(
-      ArgList[1].Value, ArgList[2].Value, ArgList[3].Value, Token);
-    Result := IDictInstance(Instance);
-  end
-  else
-    Raise ERuntimeError.Create(Token,
-      'listInsert function not possible for this type.');
-end;
-
-{ TListDelete }
-
-function TListDelete.Call
-  (Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-var
-  Instance: Variant;
-begin
-  Instance := ArgList[0].Value;
-  if VarSupports(Instance, IArrayInstance) then begin
-    TFunc.CheckArity(Token, ArgList.Count, 2);
-    IArrayInstance(Instance).Delete(ArgList[1].Value, Token);
-    Result := IArrayInstance(Instance);
-  end
-  else if VarSupports(Instance, IDictInstance) then begin
-    TFunc.CheckArity(Token, ArgList.Count, 2);
-    IDictInstance(Instance).Delete(ArgList[1].Value, Token);
-    Result := IDictInstance(Instance);
-  end
-  else
-    Raise ERuntimeError.Create(Token,
-      'listDelete function not possible for this type.');
-end;
-
-{ TListContains }
-
-function TListContains.Call
-  (Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-var
-  Instance: Variant;
-begin
-  TFunc.CheckArity(Token, ArgList.Count, 2);
-  Instance := ArgList[0].Value;
-  if VarSupports(Instance, IArrayInstance) then
-    Result := IArrayInstance(Instance).Contains(ArgList[1].Value)
-  else if VarSupports(Instance, IDictInstance) then
-    Result := IDictInstance(Instance).Contains(ArgList[1].Value)
-  else
-    Raise ERuntimeError.Create(Token,
-      'listContains function not possible for this type.');
-end;
-
-{ TListIndexOf }
-
-function TListIndexOf.Call
-  (Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-var
-  Instance: Variant;
-begin
-  TFunc.CheckArity(Token, ArgList.Count, 2);
-  Instance := ArgList[0].Value;
-  if VarSupports(Instance, IArrayInstance) then
-    Result := IArrayInstance(Instance).IndexOf(ArgList[1].Value)
-  else if VarSupports(Instance, IDictInstance) then
-    Result := IDictInstance(Instance).IndexOf(ArgList[1].Value)
-  else
-    Raise ERuntimeError.Create(Token,
-      'listIndexOf function not possible for this type.');
-end;
-
-{ TListRetrieve }
-
-function TListRetrieve.Call
-  (Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-var
-  Instance: Variant;
-begin
-  TFunc.CheckArity(Token, ArgList.Count, 2);
-  Instance := ArgList[0].Value;
-  if VarSupports(Instance, IArrayInstance) then
-    Result := IArrayInstance(Instance).Retrieve(ArgList[1].Value, Token)
-  else if VarSupports(Instance, IDictInstance) then
-    Result := IDictInstance(Instance).Retrieve(ArgList[1].Value, Token)
-  else
-    Raise ERuntimeError.Create(Token,
-      'listRetrieve function not possible for this type.');
-end;
-
-{ TListFirst }
-
-function TListFirst.Call
-  (Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-var
-  Instance: Variant;
-begin
-  TFunc.CheckArity(Token, ArgList.Count, 1);
-  Instance := ArgList[0].Value;
-  if VarSupports(Instance, IArrayInstance) then begin
-    if IArrayInstance(Instance).Count > 0 then
-      Result := IArrayInstance(Instance).Elements.First
-    else Result := Unassigned;
-  end
-  else if VarSupports(Instance, IDictInstance) then begin
-    if IDictInstance(Instance).Count > 0 then
-      Result := IDictInstance(Instance).Elements.Keys[0]
-    else Result := Unassigned;
-  end
-  else if VarIsStr(Instance) then
-    Result := String(Instance)[1]
-  else
-    Raise ERuntimeError.Create(Token,
-      'listFirst function not possible for this type.');
-end;
-
-{ TListLast }
-
-function TListLast.Call
-  (Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-var
-  Instance: Variant;
-begin
-  TFunc.CheckArity(Token, ArgList.Count, 1);
-  Instance := ArgList[0].Value;
-  if VarSupports(Instance, IArrayInstance) then begin
-    if IArrayInstance(Instance).Count > 0 then
-      Result := IArrayInstance(Instance).Elements.Last
-    else Result := Unassigned;
-  end
-  else if VarSupports(Instance, IDictInstance) then begin
-    if IDictInstance(Instance).Count > 0 then
-      Result := IDictInstance(Instance).Elements.Keys[IDictInstance(Instance).Count-1]
-    else Result := Unassigned;
-  end
-  else if VarIsStr(Instance) then
-    Result := String(Instance)[Length(Instance)]
-  else
-    Raise ERuntimeError.Create(Token,
-      'listLast function not possible for this type.');
-end;
-
-{ TListKeys }
-
-function TListKeys.Call
-  (Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-var
-  Instance: Variant;
-begin
-  TFunc.CheckArity(Token, ArgList.Count, 1);
-  Instance := ArgList[0].Value;
-  if VarSupports(Instance, IDictInstance) then begin
-    Result := IDictInstance(Instance).Keys;
-  end
-  else
-    Raise ERuntimeError.Create(Token,
-      'listKeys function not possible for this type.');
-end;
-
-{ TListValues }
-
-function TListValues.Call
-  (Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
-var
-  Instance: Variant;
-begin
-  TFunc.CheckArity(Token, ArgList.Count, 1);
-  Instance := ArgList[0].Value;
-  if VarSupports(Instance, IDictInstance) then begin
-    Result := IDictInstance(Instance).Values;
-  end
-  else
-    Raise ERuntimeError.Create(Token,
-      'listValues function not possible for this type.');
-end;
 
 { TAssigned }
 
@@ -674,7 +449,6 @@ begin
   end;
 end;
 
-
 { TToStr }
 
 function TToStr.Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList
@@ -687,7 +461,68 @@ begin
   end;
 end;
 
-initialization
-  Randomize;
+{ TPred }
+
+function TPred.Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList
+  ): Variant;
+var
+  x: Byte;
+begin
+  TFunc.CheckArity(Token, ArgList.Count, 1);
+  x := Byte(ArgList[0].Value);
+  Result := Pred(x);
+end;
+
+{ TSucc }
+
+function TSucc.Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList
+  ): Variant;
+var
+  x: Byte;
+begin
+  TFunc.CheckArity(Token, ArgList.Count, 1);
+  x := Byte(ArgList[0].Value);
+  Result := Succ(x);
+end;
+
+
+procedure StoreStandardFunctions(GlobalSpace: TMemorySpace);
+var
+  Token: TToken;
+begin
+  Token := TToken.Create(ttIdentifier, '', Null, 0, 0);
+  GlobalSpace.Store('abs', ICallable(TAbs.Create), Token);
+  GlobalSpace.Store('arctan', ICallable(TArctan.Create), Token);
+  GlobalSpace.Store('chr', ICallable(TChr.Create), Token);
+  GlobalSpace.Store('cos', ICallable(TCos.Create), Token);
+  GlobalSpace.Store('date', ICallable(TDate.Create), Token);
+  GlobalSpace.Store('exp', ICallable(TExp.Create), Token);
+  GlobalSpace.Store('frac', ICallable(TFrac.Create), Token);
+  GlobalSpace.Store('length', ICallable(TLength.Create), Token);
+  GlobalSpace.Store('ln', ICallable(TLn.Create), Token);
+  GlobalSpace.Store('milliseconds', ICallable(TMilliSeconds.Create), Token);
+  GlobalSpace.Store('now', ICallable(TNow.Create), Token);
+  GlobalSpace.Store('ord', ICallable(TOrd.Create), Token);
+  GlobalSpace.Store('pi', ICallable(TPi.Create), Token);
+  GlobalSpace.Store('random', ICallable(TRandom.Create), Token);
+  GlobalSpace.Store('randomLimit', ICallable(TRandomLimit.Create), Token);
+  GlobalSpace.Store('randomize', ICallable(TRandomize.Create), Token);
+  GlobalSpace.Store('round', ICallable(TRound.Create), Token);
+  GlobalSpace.Store('sin', ICallable(TSin.Create), Token);
+  GlobalSpace.Store('sqr', ICallable(TSqr.Create), Token);
+  GlobalSpace.Store('sqrt', ICallable(TSqrt.Create), Token);
+  GlobalSpace.Store('time', ICallable(TTime.Create), Token);
+  GlobalSpace.Store('today', ICallable(TToday.Create), Token);
+  GlobalSpace.Store('trunc', ICallable(TTrunc.Create), Token);
+  GlobalSpace.Store('assigned', ICallable(TAssigned.Create), Token);
+  GlobalSpace.Store('readln', ICallable(TReadLn.Create), Token);
+  GlobalSpace.Store('floor', ICallable(TFloor.Create), Token);
+  GlobalSpace.Store('ceil', ICallable(TCeil.Create), Token);
+  GlobalSpace.Store('toNum', ICallable(TToNum.Create), Token);
+  GlobalSpace.Store('toStr', ICallable(TToStr.Create), Token);
+  GlobalSpace.Store('pred', ICallable(TPred.Create), Token);
+  GlobalSpace.Store('succ', ICallable(TSucc.Create), Token);
+end;
+
 end.
 

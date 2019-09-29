@@ -24,12 +24,11 @@ unit uMath;
 interface
 
 uses
-  Classes, SysUtils, uToken, uError, math, Variants,
-  uClassIntf, uArrayIntf, uEnumIntf;
+  Classes, SysUtils, uToken, uError, math, Variants;
 
 type
   TMath = record
-    const
+    private const
       ErrIncompatibleOperands = 'Incompatible operand types for "%s" operation.';
       ErrMustBeBothNumber  = 'Both operands must be a number for "%s" operation.';
       ErrMustBeNumber = 'Operand must be a number for "%s" operation.';
@@ -39,7 +38,9 @@ type
       ErrConcatNotAllowed = 'Both types must be array for concat operation.';
       ErrArrayWrongTypes = 'Both variables must be array of same type.';
       ErrArrayMismatchElem = 'Mismatch in number of array elements in array operation.';
+      ErrIncompatibleTypes = 'Incompatible types in assignment: %s vs. %s.';
 
+   public
     class function _Add(const Left, Right: Variant; Op: TToken): Variant; static;
     class function _Sub(const Left, Right: Variant; Op: TToken): Variant; static;
     class function _Mul(const Left, Right: Variant; Op: TToken): Variant; static;
@@ -51,7 +52,6 @@ type
     class function _Shl(const Left, Right: Variant; Op: TToken): Variant; static;
     class function _Shr(const Left, Right: Variant; Op: TToken): Variant; static;
     class function _Pow(const Left, Right: Variant; Op: TToken): Variant; static;
-    class function _Concat(const Left, Right: Variant; Op: TToken): Variant; static;
     class function _Neg(const Value: Variant; Op: TToken): Variant; static;
     class function _Not(const Value: Variant; Op: TToken): Variant; static;
 
@@ -71,50 +71,48 @@ type
     class function oneOfBothBoolean(const Value1, Value2: Variant): Boolean; static;
     class function oneOfBothNull(const Value1, Value2: Variant): Boolean; static;
 
-    //arrays
+    // array math
     class function areBothArray(const Left, Right: Variant): Boolean; static;
-    class function sameArrayTypes(const Left, Right: IArrayInstance): Boolean; static;
-    class function addTwoArrays(
-      const Left, Right: IArrayInstance; Op: TToken):Variant; static;
-    class function addToArray(
-      const Left: IArrayInstance; Right: Variant; Op: TToken): Variant; static;
-    class function subNumberFromArray(
-      const Left: IArrayInstance; Right: Variant; Op: TToken): Variant; static;
-    class function subTwoArrays(const Left, Right: IArrayInstance; Op: TToken
+    class function _Concat(const Left, Right: Variant; Op: TToken): Variant; static;
+    class function sameArrayTypes(const Left, Right: Variant): Boolean; static;
+    class function addTwoArrays(const Left, Right: Variant; Op: TToken
       ): Variant; static;
-    class function mulNumberToArray(
-      const Left: IArrayInstance; Right: Variant; Op: TToken): Variant; static;
-    class function mulTwoArrays(const Left, Right: IArrayInstance; Op: TToken
-      ): Variant; static;
-    class function divArrayByNumber(
-      const Left: IArrayInstance; Right: Variant; Op: TToken): Variant; static;
-    class function divTwoArrays(const Left, Right: IArrayInstance; Op: TToken
-      ): Variant; static;
-    class function negArray(const Value: IArrayInstance; Op: TToken): Variant; static;
-    class function eqTwoArrays(const Left, Right: IArrayInstance; Op: TToken
-      ): Variant; static;
-    class function _Dot(const Left, Right: Variant; Op: TToken): Variant; static;
-
-    //enums
+    class function addToArray(const Left, Right: Variant; Op: TToken): Variant; static;
+    class function subTwoArrays(const Left, Right: Variant; Op: TToken
+      ): Variant;static;
+    class function subNumberFromArray(const Left, Right: Variant; Op: TToken
+      ): Variant;static;
+    class function mulTwoArrays(const Left, Right: Variant; Op: TToken
+      ): Variant;static;
+    class function mulNumberToArray(const Left, Right: Variant; Op: TToken
+      ): Variant;static;
+    class function divTwoArrays(const Left, Right: Variant; Op: TToken
+      ): Variant;static;
+    class function divArrayByNumber(const Left, Right: Variant; Op: TToken
+      ): Variant;static;
+    class function negArray(const Value: Variant; Op: TToken): Variant; static;
+    class function eqTwoArrays(const Left, Right: Variant; Op: TToken): Variant; static;
+    class function _Dot(const Left, Right: Variant; Op: TToken): Variant;static;
+    // enum
+    class procedure CheckSameEnumTypes(const Left, Right: Variant; Token: TToken
+      ); static;
     class function areBothEnum(const Left, Right: Variant): Boolean; static;
     class function sameEnumTypes(const Left, Right: Variant): Boolean; static;
   end;
 
 implementation
-uses uArray, uLanguage;
+uses uClassIntf, uArrayIntf, uArray, uVariantSupport, uEnumIntf;
 
 { TMath }
 
 class function TMath._Add(const Left, Right: Variant; Op: TToken): Variant;
 begin
   if VarIsStr(Left) then
-    Exit(Left + VarToStr(Right));
+    Exit(Left + Right.toString);
   if VarIsBool(Left) then
     Raise ERuntimeError.Create(Op, Format(ErrIncompatibleOperands, ['+']));
   if areBothNumber(Left, Right) then
     Exit(Left + Right);
-  //if areBothString(Left, Right) then
-    //Exit(Left + Right);
   if areBothArray(Left, Right) then
     Exit(addTwoArrays(Left, Right, Op));
   if VarSupports(Left, IArrayInstance) then
@@ -254,33 +252,6 @@ begin
   end;
 end;
 
-function makeArray(TypeName: string; Token: TToken): IArrayInstance;
-var
-  ArrayType: IArrayable;
-begin
-  ArrayType := IArrayable(
-    Language.Interpreter.Memory.Load(TypeName, Token));
-  Result := IArrayInstance(TArrayInstance.Create(ArrayType as TArrayClass));
-end;
-
-class function TMath._Concat(const Left, Right: Variant; Op: TToken): Variant;
-var
-  newArray, leftArray, rightArray: IArrayInstance;
-begin
-  if not areBothArray(Left, Right) then
-    Raise ERuntimeError.Create(Op, ErrConcatNotAllowed);
-
-  leftArray := IArrayInstance(Left);
-  rightArray := IArrayInstance(Right);
-  if not sameArrayTypes(leftArray, rightArray) then
-    Raise ERuntimeError.Create(Op, ErrArrayWrongTypes);
-
-  newArray := makeArray(leftArray.TypeName, Op);
-  newArray.Elements.Assign(leftArray.Elements);
-  newArray.Elements.Concat(rightArray.Elements);
-  Result := newArray;
-end;
-
 class function TMath._Neg(const Value: Variant; Op: TToken): Variant;
 begin
   if VarIsBool(Value) then
@@ -294,7 +265,7 @@ end;
 
 class function TMath._Not(const Value: Variant; Op: TToken): Variant;
 begin
-  if (VarType(Value) = varBoolean) or VarIsNumeric(Value) then
+  if VarType(Value) = varBoolean then
     Result := not Value
   else
     Raise ERuntimeError.Create(Op, Format(ErrMustBeBoolean, ['!']));
@@ -371,7 +342,7 @@ begin
   if oneOfBothNull(Left, Right) then
     Exit(False);
   if VarSupports(Right, IArrayInstance) then
-    Exit(IArrayInstance(Right).Elements.Contains(Left));
+    Exit(IArrayInstance(Right).Elements.Find(Left, Op) >= 0);
   if VarSupports(Left, IEnumInstance) then
     Exit(IEnumInstance(Left).ElemSetName = Right);
   Raise ERuntimeError.Create(Op, Format(ErrMustBeBoolean, ['in']));
@@ -385,6 +356,7 @@ begin
     Exit(IGearInstance(Left).ClassName = IClassable(Right).Name);
   Raise ERuntimeError.Create(Op, Format(ErrIncompatibleOperands, ['is']));
 end;
+
 
 class function TMath.areBothNumber(const Value1, Value2: Variant): Boolean;
 begin
@@ -411,180 +383,217 @@ begin
   Result := VarIsNull(Value1) or VarIsNull(Value2);
 end;
 
+
+// ARRAY MATH
+
 class function TMath.areBothArray(const Left, Right: Variant): Boolean;
 begin
   Result := VarSupports(Left, IArrayInstance) and
             VarSupports(Right, IArrayInstance);
 end;
 
-class function TMath.sameArrayTypes(const Left, Right: IArrayInstance): Boolean;
+class function TMath.sameArrayTypes(const Left, Right: Variant): Boolean;
 begin
-  Result := Left.TypeName = Right.TypeName;
+  Result := IArrayInstance(Left).getTypeName = IArrayInstance(Right).getTypeName;
 end;
 
-class function TMath.addTwoArrays(const Left, Right: IArrayInstance; Op: TToken):Variant;
+class function TMath._Concat(const Left, Right: Variant; Op: TToken): Variant;
+var
+  newArray: IArrayInstance;
+begin
+  if not areBothArray(Left, Right) then
+    Raise ERuntimeError.Create(Op, ErrConcatNotAllowed);
+
+  if not sameArrayTypes(Left, Right) then
+    Raise ERuntimeError.Create(Op, ErrArrayWrongTypes);
+
+  newArray := IArrayInstance(TArrayInstance.Create(
+                IArrayInstance(Left).getArrayClass as TArrayClass));
+  newArray.Elements.AddRange(IArrayInstance(Left).Elements);
+  newArray.Elements.AddRange(IArrayInstance(Right).Elements);
+  Result := newArray;
+end;
+
+class function TMath.addTwoArrays(const Left, Right: Variant; Op: TToken):Variant;
 var
   i: Integer;
   newArray: IArrayInstance;
 begin
   if not sameArrayTypes(Left, Right) then
     Raise ERuntimeError.Create(Op, ErrArrayWrongTypes);
-  if Left.Count <> Right.Count then
+  if IArrayInstance(Left).Count <> IArrayInstance(Right).Count then
     Raise ERuntimeError.Create(Op, ErrArrayMismatchElem);
 
-  newArray := makeArray(Left.TypeName, Op);
-  for i := 0 to Left.Count-1 do
-    newArray.Elements.Add(_Add(Left[i], Right[i], Op));
+  newArray := IArrayInstance(TArrayInstance.Create(
+                IArrayInstance(Left).getArrayClass as TArrayClass));
+  for i := 0 to IArrayInstance(Left).Count-1 do
+    newArray.Elements.Add(
+      _Add(IArrayInstance(Left)[i], IArrayInstance(Right)[i], Op));
 
   Result := newArray;
 end;
 
-class function TMath.addToArray(
-  const Left: IArrayInstance; Right: Variant; Op: TToken): Variant;
+class function TMath.addToArray(const Left, Right: Variant; Op: TToken): Variant;
 var
   i: Integer;
   newArray: IArrayInstance;
 begin
-  newArray := makeArray(Left.TypeName, Op);
-  for i := 0 to Left.Count-1 do
-    newArray.Elements.Add(_Add(Left[i], Right, Op));
-
-  Result := newArray;
-end;
-
-class function TMath.subNumberFromArray(
-  const Left: IArrayInstance; Right: Variant; Op: TToken): Variant;
-var
-  i: Integer;
-  newArray: IArrayInstance;
-begin
-  newArray := makeArray(Left.TypeName, Op);
-  for i := 0 to Left.Count-1 do
-    newArray.Elements.Add(_Sub(Left[i], Right, Op));
+  newArray := IArrayInstance(TArrayInstance.Create(
+                IArrayInstance(Left).getArrayClass as TArrayClass));
+  for i := 0 to IArrayInstance(Left).Count-1 do
+    newArray.Elements.Add(_Add(IArrayInstance(Left)[i], Right, Op));
 
   Result := newArray;
 end;
 
 class function TMath.subTwoArrays(
-  const Left, Right: IArrayInstance; Op: TToken): Variant;
+  const Left, Right: Variant; Op: TToken): Variant;
 var
   i: Integer;
   newArray: IArrayInstance;
 begin
   if not sameArrayTypes(Left, Right) then
     Raise ERuntimeError.Create(Op, ErrArrayWrongTypes);
-  if Left.Count <> Right.Count then
+  if IArrayInstance(Left).Count <> IArrayInstance(Right).Count then
     Raise ERuntimeError.Create(Op, ErrArrayMismatchElem);
 
-  newArray := makeArray(Left.TypeName, Op);
-  for i := 0 to Left.Count-1 do
-    newArray.Elements.Add(_Sub(Left[i], Right[i], Op));
+  newArray := IArrayInstance(TArrayInstance.Create(
+                IArrayInstance(Left).getArrayClass as TArrayClass));
+  for i := 0 to IArrayInstance(Left).Count-1 do
+    newArray.Elements.Add(
+      _Sub(IArrayInstance(Left)[i], IArrayInstance(Right)[i], Op));
 
   Result := newArray;
 end;
 
-class function TMath.mulNumberToArray(
-  const Left: IArrayInstance; Right: Variant; Op: TToken): Variant;
+class function TMath.subNumberFromArray(
+  const Left, Right: Variant; Op: TToken): Variant;
 var
   i: Integer;
   newArray: IArrayInstance;
 begin
-  newArray := makeArray(Left.TypeName, Op);
-  for i := 0 to Left.Count-1 do
-    newArray.Elements.Add(_Mul(Left[i], Right, Op));
+  newArray := IArrayInstance(TArrayInstance.Create(
+                IArrayInstance(Left).getArrayClass as TArrayClass));
+  for i := 0 to IArrayInstance(Left).Count-1 do
+    newArray.Elements.Add(_Sub(IArrayInstance(Left)[i], Right, Op));
+
+  Result := newArray;
+end;
+
+
+class function TMath.mulNumberToArray(
+  const Left, Right: Variant; Op: TToken): Variant;
+var
+  i: Integer;
+  newArray: IArrayInstance;
+begin
+  newArray := IArrayInstance(TArrayInstance.Create(
+                IArrayInstance(Left).getArrayClass as TArrayClass));
+  for i := 0 to IArrayInstance(Left).Count-1 do
+    newArray.Elements.Add(_Mul(IArrayInstance(Left)[i], Right, Op));
 
   Result := newArray;
 end;
 
 class function TMath.mulTwoArrays(
-  const Left, Right: IArrayInstance; Op: TToken): Variant;
+  const Left, Right: Variant; Op: TToken): Variant;
 var
   i: Integer;
   newArray: IArrayInstance;
 begin
   if not sameArrayTypes(Left, Right) then
     Raise ERuntimeError.Create(Op, ErrArrayWrongTypes);
-  if Left.Count <> Right.Count then
+  if IArrayInstance(Left).Count <> IArrayInstance(Right).Count then
     Raise ERuntimeError.Create(Op, ErrArrayMismatchElem);
 
-  newArray := makeArray(Left.TypeName, Op);
-  for i := 0 to Left.Count-1 do
-    newArray.Elements.Add(_Mul(Left[i], Right[i], Op));
+  newArray := IArrayInstance(TArrayInstance.Create(
+                IArrayInstance(Left).getArrayClass as TArrayClass));
+  for i := 0 to IArrayInstance(Left).Count-1 do
+    newArray.Elements.Add(
+      _Mul(IArrayInstance(Left)[i], IArrayInstance(Right)[i], Op));
 
   Result := newArray;
 end;
 
 class function TMath.divArrayByNumber(
-  const Left: IArrayInstance; Right: Variant; Op: TToken): Variant;
+  const Left, Right: Variant; Op: TToken): Variant;
 var
   i: Integer;
   newArray: IArrayInstance;
 begin
-  newArray := makeArray(Left.TypeName, Op);
-  for i := 0 to Left.Count-1 do
-    newArray.Elements.Add(_Div(Left[i], Right, Op));
+  newArray := IArrayInstance(TArrayInstance.Create(
+                IArrayInstance(Left).getArrayClass as TArrayClass));
+  for i := 0 to IArrayInstance(Left).Count-1 do
+    newArray.Elements.Add(_Div(IArrayInstance(Left)[i], Right, Op));
 
   Result := newArray;
 end;
 
 class function TMath.divTwoArrays(
-  const Left, Right: IArrayInstance; Op: TToken): Variant;
+  const Left, Right: Variant; Op: TToken): Variant;
 var
   i: Integer;
   newArray: IArrayInstance;
 begin
   if not sameArrayTypes(Left, Right) then
     Raise ERuntimeError.Create(Op, ErrArrayWrongTypes);
-  if Left.Count <> Right.Count then
+  if IArrayInstance(Left).Count <> IArrayInstance(Right).Count then
     Raise ERuntimeError.Create(Op, ErrArrayMismatchElem);
 
-  newArray := makeArray(Left.TypeName, Op);
-  for i := 0 to Left.Count-1 do
-    newArray.Elements.Add(_Div(Left[i], Right[i], Op));
+  newArray := IArrayInstance(TArrayInstance.Create(
+                IArrayInstance(Left).getArrayClass as TArrayClass));
+  for i := 0 to IArrayInstance(Left).Count-1 do
+    newArray.Elements.Add(
+      _Div(IArrayInstance(Left)[i], IArrayInstance(Right)[i], Op));
 
   Result := newArray;
 end;
 
-class function TMath.negArray(const Value: IArrayInstance; Op: TToken): Variant;
+class function TMath.negArray(const Value: Variant; Op: TToken): Variant;
 var
   i: Integer;
   newArray: IArrayInstance;
 begin
-  newArray := makeArray(Value.TypeName, Op);
-  for i := 0 to Value.Count-1 do
-    newArray.Elements.Add(_Neg(Value[i], Op));
+  newArray := IArrayInstance(TArrayInstance.Create(
+                IArrayInstance(Value).getArrayClass as TArrayClass));
+  for i := 0 to IArrayInstance(Value).Count-1 do
+    newArray.Elements.Add(_Neg(IArrayInstance(Value)[i], Op));
 
   Result := newArray;
 end;
 
-class function TMath.eqTwoArrays(const Left, Right: IArrayInstance; Op: TToken
+class function TMath.eqTwoArrays(const Left, Right: Variant; Op: TToken
   ): Variant;
 var
   i: Integer;
 begin
-  if not sameArrayTypes(Left, Right) then Exit(False);
-  if Left.Count <> Right.Count then Exit(False);
+  if not sameArrayTypes(Left, Right) then
+    Exit(False);
+  if IArrayInstance(Left).Count <> IArrayInstance(Right).Count then
+    Exit(False);
 
   Result := True;
-  for i := 0 to Left.Count-1 do
-    if _NEQ(Left[i], Right[i], Op) then
+  for i := 0 to IArrayInstance(Left).Count-1 do
+    if _NEQ(IArrayInstance(Left)[i], IArrayInstance(Right)[i], Op) then
       Exit(False);
 end;
 
 class function TMath._Dot(const Left, Right: Variant; Op: TToken): Variant;
 var
-  tempArray: IArrayInstance;
+  temp: IArrayInstance;
   i: Integer;
 begin
   if areBothArray(Left, Right) then begin
-    tempArray := _Mul(Left, Right, Op);
+    temp := _Mul(IArrayInstance(Left), IArrayInstance(Right), Op);
     Result := 0;
-    for i := 0 to tempArray.Count-1 do
-      Result += tempArray[i];
+    for i := 0 to temp.Count-1 do
+      Result += temp[i];
   end
   else
     Raise ERuntimeError.Create(Op, Format(ErrArrayWrongTypes, ['::']));
 end;
+
+{ ENUM }
 
 class function TMath.areBothEnum(const Left, Right: Variant): Boolean;
 begin
@@ -594,6 +603,17 @@ end;
 class function TMath.sameEnumTypes(const Left, Right: Variant): Boolean;
 begin
   Result := IEnumInstance(Left).EnumName = IEnumInstance(Right).EnumName;
+end;
+
+class procedure TMath.CheckSameEnumTypes(const Left, Right: Variant; Token: TToken);
+begin
+  if not VarSupports(Right, IEnumInstance) then
+    Raise ERuntimeError.Create(Token, Format(ErrIncompatibleTypes,
+          [IEnumInstance(Left).EnumName, VarTypeAsText(VarType(Right))]));
+
+  if not sameEnumTypes(Left, Right) then
+    Raise ERuntimeError.Create(Token, Format(ErrIncompatibleTypes,
+            [IEnumInstance(Left).EnumName, IEnumInstance(Right).EnumName]));
 end;
 
 end.

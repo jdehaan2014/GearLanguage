@@ -82,13 +82,14 @@ begin
       Terminate;
       Exit;
     end;
+
     if not (ExtractFileExt(InputFile) = '.gear') then begin
       ShowException(Exception.Create('File extension must be ".gear".'));
       Terminate;
       Exit;
     end;
+
     GearProdFolder := ExtractFilePath(ExcludeTrailingPathDelimiter(InputFile));
-    //writeln(GearProdFolder);
   end;
 
   { Execute a file }
@@ -134,9 +135,9 @@ begin
   //get the application directory from the executable
   AppFolder := ExtractFilePath(ExcludeTrailingPathDelimiter(ParamStr(0)));
   GearLibFolder := AppFolder + 'gearlib/';
-  //writeln(GearLibFolder);
+
   Application := TGearLang.Create(nil);
-  Application.Title := 'Gear Language';
+  Application.Title:='Gear Language';
   Application.Run;
   Application.Free;
 end.

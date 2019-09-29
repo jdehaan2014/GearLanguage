@@ -22,8 +22,8 @@ unit uInterpreter;
 interface
 
 uses
-  Classes, SysUtils, uVisitor, uAST, uToken, uError, Variants,
-  uMemory, uMembers;
+  Classes, SysUtils, uVisitor, uAST, uToken, uError, Variants, uMath, uMemory,
+  uMembers;
 
 type
 
@@ -31,24 +31,29 @@ type
     private
       CurrentSpace: TMemorySpace;
       FGlobals: TMemorySpace;
+      procedure CheckDuplicate(AIdent: TIdent; const TypeName: String);
+      function Lookup(Variable: TVariable): Variant;
+      procedure Assign(Variable: TVariable; Value: Variant);
+      function getMembers(DeclList: TDeclList): TMembers;
+      function ApplyTraits(Traits: TExprList): TMembers;
+      function CombineMembers(Traits: TMembers; DeclList: TDeclList): TMembers;
+      procedure CheckNumericIndex(Value: Variant; Token: TToken);
     public
       property Globals: TMemorySpace read FGlobals;
-      property Memory: TMemorySpace read CurrentSpace;
       constructor Create;
       destructor Destroy; override;
       procedure Execute(Tree: TProduct);
-      procedure Execute(Block: TBlock; MemorySpace: TMemorySpace);
-    published
-      //expressions
+      procedure Execute(Block: TBlock; MemorySpace: TMemorySpace);    published
+      procedure VisitIdent(Ident: TIdent);
+      // Expressions
       function VisitBinaryExpr(BinaryExpr: TBinaryExpr): Variant;
       function VisitConstExpr(ConstExpr: TConstExpr): Variant;
       function VisitUnaryExpr(UnaryExpr: TUnaryExpr): Variant;
-      procedure VisitIdent(Ident: TIdent);
-      function VisitVariable(Variable: TVariable): Variant;
       function VisitCallExpr(CallExpr: TCallExpr): Variant;
+      function VisitVariable(Variable: TVariable): Variant;
       function VisitIfExpr(IfExpr: TIfExpr): Variant;
       function VisitMatchExpr(MatchExpr: TMatchExpr): Variant;
-      function VisitFuncDeclExpr(FuncDeclExpr: TFuncDeclExpr): Variant;
+      function VisitTupleExpr(TupleExpr: TTupleExpr): Variant;
       function VisitGetExpr(GetExpr: TGetExpr): Variant;
       function VisitSelfExpr(SelfExpr: TSelfExpr): Variant;
       function VisitInheritedExpr(InheritedExpr: TInheritedExpr): Variant;
@@ -56,8 +61,7 @@ type
       function VisitDictDeclExpr(DictDeclExpr: TDictDeclExpr): Variant;
       function VisitIndexedExpr(IndexedExpr: TIndexedExpr): Variant;
       function VisitInterpolatedExpr(InterpolatedExpr: TInterpolatedExpr): Variant;
-      function VisitTupleExpr(TupleExpr: TTupleExpr): Variant;
-      //statements
+      // Statements
       procedure VisitPrintStmt(PrintStmt: TPrintStmt);
       procedure VisitAssignStmt(AssignStmt: TAssignStmt);
       procedure VisitCallExprStmt(CallExprStmt: TCallExprStmt);
@@ -72,117 +76,71 @@ type
       procedure VisitContinueStmt(ContinueStmt: TContinueStmt);
       procedure VisitReturnStmt(ReturnStmt: TReturnStmt);
       procedure VisitUseStmt(UseStmt: TUseStmt);
-      //declarations
+      // Declarations
       procedure VisitVarDecl(VarDecl: TVarDecl);
       procedure VisitVarDecls(VarDecls: TVarDecls);
       procedure VisitFuncDecl(FuncDecl: TFuncDecl);
-      procedure VisitValDecl(ValDecl: TValDecl);
-      function getMembers(DeclList: TDeclList): TMembers;
+      function VisitFuncDeclExpr(FuncDeclExpr: TFuncDeclExpr): Variant;
       procedure VisitClassDecl(ClassDecl: TClassDecl);
+      procedure VisitValDecl(ValDecl: TValDecl);
       procedure VisitExtensionDecl(ExtensionDecl: TExtensionDecl);
-      function ApplyTraits(Traits: TExprList): TMembers;
-      function CombineMembers(Traits: TMembers; DeclList: TDeclList): TMembers;
       procedure VisitTraitDecl(TraitDecl: TTraitDecl);
       procedure VisitArrayDecl(ArrayDecl: TArrayDecl);
       procedure VisitDictDecl(DictDecl: TDictDecl);
       procedure VisitEnumDecl(EnumDecl: TEnumDecl);
-      //block
+      // Blocks
       procedure VisitBlock(Block: TBlock);
       procedure VisitProduct(Product: TProduct);
-
-    private
-      procedure CheckDuplicate(AIdent: TIdent; const TypeName: String);
-      procedure Assign(Variable: TVariable; Value: Variant);
-      function Lookup(Variable: TVariable): Variant;
-      procedure CheckNumericIndex(Value: Variant; Token: TToken);
   end;
 
 implementation
-uses uCallable, uFunc, uStandard, uClassIntf, uClass, uArrayIntf, uArray,
-  uDictIntf, uDict, uEnumIntf, uEnum, uMath, uVariantSupport, uTupleIntf, uTuple;
+uses uCallable, uFunc, uStandard, uStandardList, uStandardCRT, uVariantSupport,
+  uTupleIntf, uTuple, uClassIntf, uClass, uArrayIntf, uArray, uDictIntf, uDict, uEnumIntf, uEnum;
 
 const
-  ErrDuplicateID = '%s cannot be defined. Identifier "%s" is already declared.';
+  ErrDuplicateID = 'Duplicate identifier: %s "%s" is already declared.';
   ErrIncompatibleTypes = 'Incompatible types in assignment: %s vs. %s.';
-  ErrConditionMustBeBool = 'Condition must return a Boolean value.';
+  ErrConditionNotBoolean = 'Condition is not Boolean.';
   ErrNotAFunction = '"%s" is not defined as function.';
   ErrExpectedInstance = 'Expected declared type instance.';
   ErrUndefVarOrSelfMissing = 'Variable is undefined or missing "self".';
   ErrClassMemberImmutable = 'Class member "%s" is immutable.';
   ErrUndefinedMethod = 'Undefined method "%s".';
-  ErrAssignToValue = 'Assignment to Value property not allowed.';
   ErrExtIdNoType = 'Extension identifier "%s" is not a type.';
   ErrNotDeclaredAsTrait = '"%s" is not declared as trait.';
   ErrTraitIsDeclared = 'Trait "%s" "%s" is already declared.';
   ErrTraitDeclared = 'Trait already declared for member "%s".';
-  ErrIndexMustBeNumeric = 'Index must be a numeric value.';
   ErrArrayTypeExpected = 'Array or string type expected.';
+  ErrIllegalAssignOp = 'Illegal assignment operator, ":=" expected.';
 
 constructor TInterpreter.Create;
 begin
   FGlobals := TMemorySpace.Create();
-  FGlobals.Sorted := True;
-  FGlobals.Store('assigned', ICallable(TAssigned.Create));
-  FGlobals.Store('abs', ICallable(TAbs.Create));
-  FGlobals.Store('arctan', ICallable(TArctan.Create));
-  FGlobals.Store('ceil', ICallable(TCeil.Create));
-  FGlobals.Store('chr', ICallable(TChr.Create));
-  FGlobals.Store('cos', ICallable(TCos.Create));
-  FGlobals.Store('date', ICallable(TDate.Create));
-  FGlobals.Store('exp', ICallable(TExp.Create));
-  FGlobals.Store('floor', ICallable(TFloor.Create));
-  FGlobals.Store('frac', ICallable(TFrac.Create));
-  FGlobals.Store('length', ICallable(TLength.Create));
-  FGlobals.Store('ln', ICallable(TLn.Create));
-  FGlobals.Store('milliseconds', ICallable(TMilliSeconds.Create));
-  FGlobals.Store('now', ICallable(TNow.Create));
-  FGlobals.Store('today', ICallable(TToday.Create));
-  FGlobals.Store('ord', ICallable(TOrd.Create));
-  FGlobals.Store('pi', ICallable(TPi.Create));
-  FGlobals.Store('random', ICallable(TRandom.Create));
-  FGlobals.Store('randomLimit', ICallable(TRandomLimit.Create));
-  FGlobals.Store('readln', ICallable(TReadLn.Create));
-  FGlobals.Store('round', ICallable(TRound.Create));
-  FGlobals.Store('sin', ICallable(TSin.Create));
-  FGlobals.Store('sqr', ICallable(TSqr.Create));
-  FGlobals.Store('sqrt', ICallable(TSqrt.Create));
-  FGlobals.Store('time', ICallable(TTime.Create));
-  FGlobals.Store('toNum', ICallable(TToNum.Create));
-  FGlobals.Store('toStr', ICallable(TToStr.Create));
-  FGlobals.Store('trunc', ICallable(TTrunc.Create));
-  // list functions
-  Globals.Store('listAdd', ICallable(TListAdd.Create));
-  Globals.Store('listContains', ICallable(TListContains.Create));
-  Globals.Store('listDelete', ICallable(TListDelete.Create));
-  Globals.Store('listIndexOf', ICallable(TListIndexOf.Create));
-  Globals.Store('listInsert', ICallable(TListInsert.Create));
-  Globals.Store('listRetrieve', ICallable(TListRetrieve.Create));
-  Globals.Store('listFirst', ICallable(TListFirst.Create));
-  Globals.Store('listLast', ICallable(TListLast.Create));
-  Globals.Store('listKeys', ICallable(TListKeys.Create));
-  Globals.Store('listValues', ICallable(TListValues.Create));
+  StoreStandardFunctions(FGlobals);
+  StoreStandardListFunctions(FGlobals);
+  StoreStandardCRTFunctions(FGlobals);
 
   // store base Array type
-  Globals.Store('Array', IArrayable(
-    TArrayClass.Create(
-      TIdent.Create(TToken.Create(ttIdentifier, 'Array', Null, 0, 0)),
-      TArrayElements.Create(),
-      TMembers.Create(TFieldTable.Create, TConstTable.Create,
-        TMethodTable.Create, TValueTable.Create
-      )
-    ))
-  );
+  FGlobals.Store(
+    'Array',
+    IArrayable(
+      TArrayClass.Create(
+        TIdent.Create(TToken.Create(ttIdentifier, 'Array', Null, 0, 0)),
+        TArrayElements.Create(),
+        TMembers.Create(TFieldTable.Create, TConstTable.Create,
+          TMethodTable.Create, TValueTable.Create))),
+    TToken.Create(ttNone, '', Null, 0, 0));
 
   // store base Dictionary type
-  Globals.Store('Dictionary', IDictionable(
-    TDictClass.Create(
-      TIdent.Create(TToken.Create(ttIdentifier, 'Dictionary', Null, 0, 0)),
-      TDictElements.Create(),
-      TMembers.Create(TFieldTable.Create, TConstTable.Create,
-        TMethodTable.Create, TValueTable.Create
-      )
-    ))
-  );
+  FGlobals.Store(
+    'Dictionary',
+    IDictionary(
+      TDictClass.Create(
+        TIdent.Create(TToken.Create(ttIdentifier, 'Dictionary', Null, 0, 0)),
+        TDictElements.Create(),
+        TMembers.Create(TFieldTable.Create, TConstTable.Create,
+          TMethodTable.Create, TValueTable.Create))),
+    TToken.Create(ttNone, '', Null, 0, 0));
 
   CurrentSpace:= FGlobals;
 end;
@@ -196,7 +154,7 @@ end;
 procedure TInterpreter.Execute(Tree: TProduct);
 begin
   try
-    Visit(Tree);
+    VisitProc(Tree);
   except
     on E: ERuntimeError do
       RuntimeError(E);
@@ -210,10 +168,15 @@ begin
   SavedSpace := CurrentSpace;
   try
     CurrentSpace := MemorySpace;
-    Visit(Block);
+    VisitProc(Block);
   finally
     CurrentSpace := SavedSpace;
   end;
+end;
+
+procedure TInterpreter.VisitIdent(Ident: TIdent);
+begin
+  // do nothing
 end;
 
 function TInterpreter.VisitBinaryExpr(BinaryExpr: TBinaryExpr): Variant;
@@ -221,8 +184,8 @@ var
   Left, Right: Variant;
   Op: TToken;
 begin
-  Left := Visit(BinaryExpr.Left);
-  Right := Visit(BinaryExpr.Right);
+  Left := VisitFunc(BinaryExpr.Left);
+  Right := VisitFunc(BinaryExpr.Right);
   Op := BinaryExpr.Op;
   case BinaryExpr.Op.Typ of
     ttPlus: Result := TMath._Add(Left, Right, Op);
@@ -258,27 +221,13 @@ function TInterpreter.VisitUnaryExpr(UnaryExpr: TUnaryExpr): Variant;
 var
   Expr: Variant;
 begin
-  Expr := Visit(UnaryExpr.Expr);
+  Expr := VisitFunc(UnaryExpr.Expr);
   case UnaryExpr.Op.Typ of
     ttNot: Result := TMath._Not(Expr, UnaryExpr.Op);
     ttMin: Result := TMath._Neg(Expr, UnaryExpr.Op);
     ttQuestion: Result := Expr <> Unassigned;
     else Result := Expr;
   end;
-end;
-
-procedure TInterpreter.VisitIdent(Ident: TIdent);
-begin
-  // do nothing
-end;
-
-function TInterpreter.VisitVariable(Variable: TVariable): Variant;
-begin
-  Result := Lookup(Variable);
-  if VarSupports(Result, IValuable) then
-    Result := IValuable(Result).Call(Variable.Token, Self, TArgList.Create());
-  if VarIsEmpty(Result) then
-    Raise ERuntimeError.Create(Variable.Token, ErrUndefVarOrSelfMissing);
 end;
 
 function TInterpreter.VisitCallExpr(CallExpr: TCallExpr): Variant;
@@ -291,9 +240,11 @@ var
   CallArg: TCallArg;
   Token: TToken;
 begin
-  Callee := Visit(CallExpr.Callee);
-  if VarSupportsIntf(Callee,
-       [ICallable, IClassable, IArrayable, IDictionable]) then
+  if CallExpr.FromClass then
+    Callee := VisitFunc(CallExpr.Callee)
+  else
+    Callee := VisitFunc(CallExpr.Signature);
+  if VarSupportsIntf(Callee, [ICallable, IClassable, IArrayable, IDictionary]) then
     Func := ICallable(Callee)
   else begin
     Msg := Format(ErrNotAFunction, [CallExpr.Callee.Token.Lexeme]);
@@ -305,59 +256,80 @@ begin
       Token := CallExpr.Args[i].Ident.Token
     else
       Token := CallExpr.Args[i].Expr.Token;
-    CallArg := TCallArg.Create(Visit(CallExpr.Args[i].Expr),
-      CallExpr.Args[i].Ident, Token);
+    CallArg := TCallArg.Create(VisitFunc(CallExpr.Args[i].Expr),
+               CallExpr.Args[i].Ident, Token);
     Args.Add(CallArg);
   end;
   Result := Func.Call(CallExpr.Token, Self, Args);
+end;
+
+function TInterpreter.VisitVariable(Variable: TVariable): Variant;
+begin
+  Result := Lookup(Variable);
+  if VarSupports(Result, IValuable) then
+    Result := IValuable(Result).Call(Variable.Token, Self, TArgList.Create());
+  if VarIsEmpty(Result) then
+    Raise ERuntimeError.Create(Variable.Token, ErrUndefVarOrSelfMissing);
 end;
 
 function TInterpreter.VisitIfExpr(IfExpr: TIfExpr): Variant;
 var
   Condition: Variant;
 begin
-  Condition := Visit(IfExpr.Condition);
+  Condition := VisitFunc(IfExpr.Condition);
   if VarIsBool(Condition) then begin
     if Condition then
-      Result := Visit(IfExpr.TrueExpr)
+      Result := VisitFunc(IfExpr.TrueExpr)
     else
-      Result := Visit(IfExpr.FalseExpr)
+      Result := VisitFunc(IfExpr.FalseExpr)
   end
   else
-    Raise ERuntimeError.Create(IfExpr.Token, ErrConditionMustBeBool);
+    Raise ERuntimeError.Create(IfExpr.Token, ErrConditionNotBoolean);
 end;
 
 function TInterpreter.VisitMatchExpr(MatchExpr: TMatchExpr): Variant;
 var
   MatchValue, IfValue: Variant;
-  i, j: integer;
+  Key: TExpr;
 begin
-  MatchValue := Visit(MatchExpr.Expr);
-  for i := 0 to MatchExpr.IfLimbs.Count-1 do begin
-    for j := 0 to MatchExpr.IfLimbs[i].Values.Count-1 do begin
-      IfValue := Visit(MatchExpr.IfLimbs[i].Values[j]);
-      if TMath._EQ(MatchValue, IfValue, MatchExpr.IfLimbs[i].Values[j].Token) then
-        Exit(Visit(MatchExpr.IfLimbs[i].Expr));
-    end;
+  MatchValue := VisitFunc(MatchExpr.Expr);
+  for Key in MatchExpr.IfLimbs.Keys do begin
+    IfValue := VisitFunc(Key);
+    if TMath._EQ(MatchValue, IfValue, Key.Token) then
+      Exit(VisitFunc(MatchExpr.IfLimbs[Key]));
   end;
-  Result := Visit(MatchExpr.ElseLimb);
+  Result := VisitFunc(MatchExpr.ElseLimb);
 end;
 
-function TInterpreter.VisitFuncDeclExpr(FuncDeclExpr: TFuncDeclExpr): Variant;
+function TInterpreter.VisitTupleExpr(TupleExpr: TTupleExpr): Variant;
+var
+  Expr: TExpr;
+  Tuple: ITuple;
 begin
-  Result := ICallable(TFunc.Create(FuncDeclExpr.FuncDecl, CurrentSpace));
+  Tuple := ITuple(TTuple.Create);
+
+  for Expr in TupleExpr.ExprList do
+    Tuple.Elements.Add(VisitFunc(Expr));
+
+  Result := Tuple;
 end;
 
 function TInterpreter.VisitGetExpr(GetExpr: TGetExpr): Variant;
 var
-  Instance: Variant;
-  Ident: TIdent = Nil;
+  Instance, Index: Variant;
+  Ident: TIdent;
 begin
-  Instance := Visit(GetExpr.Instance);
-  Ident := GetExpr.Ident;
-  if VarSupportsIntf(Instance,
-       [IGearInstance, IArrayInstance, IDictInstance, IEnumInstance]) then
+  Instance := VisitFunc(GetExpr.Instance);
+  if VarSupports(Instance, ITuple) then begin
+    Index := VisitFunc(GetExpr.Member);
+    if not VarIsNumeric(Index) then
+      Raise ERuntimeError.Create(GetExpr.Member.Token, 'Integer number expected.');
+    Result := ITuple(Instance).Get(Index, GetExpr.Member.Token);
+  end
+  else if VarSupportsIntf(Instance,
+    [IGearInstance, IArrayInstance, IDictInstance, IEnumInstance]) then
   begin
+    Ident := TVariable(GetExpr.Member).Ident;
     if VarSupports(Instance, IGearInstance) then
       Result := IGearInstance(Instance).GetMember(Ident)
     else if VarSupports(Instance, IArrayInstance) then
@@ -366,23 +338,27 @@ begin
       Result := IDictInstance(Instance).GetMember(Ident)
     else if VarSupports(Instance, IEnumInstance) then
       Result := IEnumInstance(Instance).GetMember(Ident);
-
     if VarSupports(Result, IValuable) then
       Result := ICallable((IValuable(Result) as TVal)
                           .Bind(Instance))
                           .Call(GetExpr.Token, Self, TArgList.Create());
   end
+  else if VarSupports(Instance, IClassable) then begin
+    Ident := TVariable(GetExpr.Member).Ident;
+    Result := IClassable(Instance).GetStaticMember(Ident);
+  end
   else if VarSupports(Instance, IEnumable) then begin
+    Ident := TVariable(GetExpr.Member).Ident;
     if IEnumable(Instance).isCase(Ident.Text) then
       Result := Ident.Text
     else if Ident.Text = 'Elements' then
       Result := IEnumable(Instance).ElementList
     else
       Result := IEnumInstance(TEnumInstance.Create(
-        IEnumable(Instance) as TEnumClass, Ident));
+                  IEnumable(Instance) as TEnumClass, Ident));
   end
   else
-    Raise ERuntimeError.Create(GetExpr.Ident.Token, ErrExpectedInstance);
+    Raise ERuntimeError.Create(GetExpr.Token, ErrExpectedInstance);
 end;
 
 function TInterpreter.VisitSelfExpr(SelfExpr: TSelfExpr): Variant;
@@ -395,45 +371,45 @@ var
   Distance: Integer;
   Parent, Method: ICallable;
   Instance: IGearInstance;
+  MethodID: TIdent;
 begin
   Distance := InheritedExpr.Variable.Distance;
   Parent := ICallable(CurrentSpace.LoadAt(Distance, 'inherited'));
   Instance := IGearInstance(CurrentSpace.LoadAt(Distance-1, 'self'));
-  Method := (Parent as TGearClass).FindMethod(Instance, InheritedExpr.Method.Text);
+  MethodID := InheritedExpr.Method.Ident;
+  if MethodID.Text.Contains('init') then MethodID.Text := 'init';
+  Method := (Parent as TGearClass).FindMethod(Instance, MethodID.Text);
   if Method = Nil then
-    Raise ERuntimeError.Create(InheritedExpr.Method.Token, Format(
-      ErrUndefinedMethod, [InheritedExpr.Method.Text]));
+    Raise ERuntimeError.Create(MethodID.Token, Format(
+      ErrUndefinedMethod, [MethodID.Text]));
   Result := Method;
 end;
 
 function TInterpreter.VisitArrayDeclExpr(ArrayDeclExpr: TArrayDeclExpr): Variant;
 var
-  ArrayType: IArrayable;
+  ArrayExpr: IArrayable;
   Instance: IArrayInstance;
-  i: Integer;
+  Expr: TExpr;
 begin
-  ArrayType := IArrayable(Globals['Array']);
-
-  Instance := IArrayInstance(TArrayInstance.Create(ArrayType as TArrayClass));
-  for i := 0 to ArrayDeclExpr.ArrayDecl.Elements.Count-1 do
-    Instance.Elements.Add(Visit(ArrayDeclExpr.ArrayDecl.Elements[i]));
-
+  ArrayExpr := IArrayable(FGlobals['Array']);
+  Instance := IArrayInstance(TArrayInstance.Create(ArrayExpr as TArrayClass));
+  for Expr in ArrayDeclExpr.ArrayDecl.Elements do
+    Instance.Elements.Add(VisitFunc(Expr));
   Result := Instance;
 end;
 
 function TInterpreter.VisitDictDeclExpr(DictDeclExpr: TDictDeclExpr): Variant;
 var
-  DictType: IDictionable;
+  DictExpr: IDictionary;
   Instance: IDictInstance;
-  i: Integer;
+  Key: TExpr;
 begin
-  DictType := IDictionable(Globals['Dictionary']);
+  DictExpr := IDictionary(FGlobals['Dictionary']);
 
-  Instance := IDictInstance(TDictInstance.Create(DictType as TDictClass));
-  for i := 0 to DictDeclExpr.DictDecl.Elements.Count-1 do
-    Instance.Elements.Add(
-      Visit(DictDeclExpr.DictDecl.Elements[i].Key),
-      Visit(DictDeclExpr.DictDecl.Elements[i].Value));
+  Instance := IDictInstance(TDictInstance.Create(DictExpr as TDictClass));
+  for Key in DictDeclExpr.DictDecl.KeyValueList.Keys do
+    Instance.Elements.Add(VisitFunc(Key),
+                          VisitFunc(DictDeclExpr.DictDecl.KeyValueList[Key]));
 
   Result := Instance;
 end;
@@ -443,16 +419,14 @@ var
   Instance: Variant;
   Index: Variant;
 begin
-  Instance := Visit(IndexedExpr.Variable);
-  Index := Visit(IndexedExpr.Index);
+  Instance := VisitFunc(IndexedExpr.Variable);
+  Index := VisitFunc(IndexedExpr.Index);
   if VarSupports(Instance, IArrayInstance) then begin
     CheckNumericIndex(Index, IndexedExpr.Index.Token);
     Result := IArrayInstance(Instance).get(Index, IndexedExpr.Index.Token);
   end
   else if VarSupports(Instance, IDictInstance) then
     Result := IDictInstance(Instance).get(Index, IndexedExpr.Index.Token)
-  else if VarSupports(Instance, ITuple) then
-    Result := ITuple(Instance).get(Index, IndexedExpr.Index.Token)
   else if VarIsStr(Instance) then begin
     CheckNumericIndex(Index, IndexedExpr.Index.Token);
     Result := String(Instance)[Index+1];  // strings start at index 1
@@ -468,31 +442,29 @@ var
 begin
   Result := '';
   for Expr in InterpolatedExpr.ExprList do
-    Result := TMath._Add(Result, Visit(Expr), Expr.Token);
+    Result := TMath._Add(Result, VisitFunc(Expr), Expr.Token);
 end;
 
-function TInterpreter.VisitTupleExpr(TupleExpr: TTupleExpr): Variant;
-var
-  Expr: TExpr;
-  Tuple: ITuple;
-  Elements: TTupleElements;
-begin
-  Tuple := ITuple(TTuple.Create);
 
-  for Expr in TupleExpr.ExprList do
-    Tuple.Elements.Add(Visit(Expr));
-
-  Result := Tuple;
-end;
+//
+// STATEMENTS
+//
 
 procedure TInterpreter.VisitPrintStmt(PrintStmt: TPrintStmt);
 var
-  i: Integer;
+  Value: String='';
+  Terminator: String='';
+  Expr: TExpr;
 begin
-  for i := 0 to PrintStmt.ExprList.Count-1 do
-    Write((Visit(PrintStmt.ExprList[i])).toString);
-  Write((Visit(PrintStmt.Terminator)).toString);
+  for Expr in PrintStmt.ExprList do begin
+    Value := VisitFunc(Expr).toString;
+    Write(Value);
+  end;
+  Terminator := VisitFunc(PrintStmt.Terminator).toString;
+  Write(Terminator);
 end;
+
+// Helper functions for assignment
 
 function TypeOf(Value: Variant): String;
 begin
@@ -504,13 +476,7 @@ begin
     varShortInt, varSmallInt, varInteger, varInt64,
     varByte, varWord, varLongWord, varQWord: Result := 'Number';
     else
-      begin
-          if VarSupports(Value, IArrayInstance) then Exit('Array');
-          if VarSupports(Value, IDictInstance) then Exit('Dictionary');
-          if VarSupports(Value, IEnumInstance) then Exit('Enum');
-          if VarSupports(Value, IGearInstance) then Exit('Class');
-          if VarSupports(Value, ICallable) then Exit('Func');
-      end;
+      Result := 'Unknown';
   end;
 end;
 
@@ -525,20 +491,16 @@ begin
   if VarIsNull(NewValue) and (Op.Typ = ttAssign) then
     Exit(Null);
 
+  if VarSupports(OldValue, IEnumInstance) then begin
+    TMath.CheckSameEnumTypes(OldValue, NewValue, ID);
+    if Op.Typ = ttAssign then
+      Exit(NewValue)
+    else Raise ERuntimeError.Create(Op, ErrIllegalAssignOp);
+  end;
+
   if OldType <> NewType then
     Raise ERuntimeError.Create(ID,
       Format(ErrIncompatibleTypes, [OldType, NewType]));
-
-  if VarSupports(OldValue, IEnumInstance) then begin
-    if not TMath.sameEnumTypes(OldValue, NewValue) then
-      Raise ERuntimeError.Create(ID,
-        Format('Incompatible enum types in assignment: %s vs. %s.',
-          [IEnumInstance(OldValue).EnumName, IEnumInstance(NewValue).EnumName]));
-     if Op.Typ = ttAssign then
-       Exit(NewValue)
-     else
-       Raise ERuntimeError.Create(Op, 'Illegal assignment operator, ":=" expected.');
-  end;
 
   if not VarIsNull(OldValue) then begin
     if Op.Typ <> ttAssign then
@@ -563,7 +525,7 @@ var
 begin
   with AssignStmt do begin
     OldValue := Lookup(Variable);
-    NewValue := Visit(Expr);
+    NewValue := VisitFunc(Expr);
     Value := getAssignValue(OldValue, NewValue, Variable.Token, Op);
     Assign(Variable, Value);
   end;
@@ -571,29 +533,41 @@ end;
 
 procedure TInterpreter.VisitCallExprStmt(CallExprStmt: TCallExprStmt);
 begin
-  Visit(CallExprStmt.CallExpr);
+  // Since a CallExpr returns a value we have to use VisitFunc here, but we
+  // may ignore the result.
+  VisitFunc(CallExprStmt.CallExpr);
 end;
 
 procedure TInterpreter.VisitSetStmt(SetStmt: TSetStmt);
 var
-  Instance, OldValue, NewValue, Value: Variant;
+  Instance, OldValue, NewValue, Value, Index: Variant;
+  Member: TExpr;
+  Ident: TIdent;
 begin
-  Instance := Visit(SetStmt.Instance);
-  if not VarSupports(Instance, IGearInstance) then
-    Raise ERuntimeError.Create(SetStmt.Token, ErrExpectedInstance);
-
-  OldValue := IGearInstance(Instance).GetMember(SetStmt.Ident);
-  if VarSupports(OldValue, IValuable) then
-    Raise ERuntimeError.Create(SetStmt.Token, ErrAssignToValue);
-
-  if IGearInstance(Instance).isConstant(SetStmt.Ident) and
-     (not VarIsNull(OldValue)) then
-    Raise ERuntimeError.Create(SetStmt.Ident.Token, Format(
-      ErrClassMemberImmutable, [SetStmt.Ident.Text]));
-
-  NewValue := Visit(SetStmt.Expr);
-  Value := getAssignValue(OldValue, NewValue, SetStmt.Ident.Token, SetStmt.Op);
-  IGearInstance(Instance).SetField(SetStmt.Ident, Value);
+  Instance := VisitFunc(SetStmt.GetExpr.Instance);
+  Member := SetStmt.GetExpr.Member;
+  if VarSupports(Instance, ITuple) then begin
+    Index := VisitFunc(Member);
+    if not VarIsNumeric(Index) then
+      Raise ERuntimeError.Create(Member.Token, 'Integer number expected.');
+    OldValue := ITuple(Instance).Get(Index, Member.Token);
+    NewValue := VisitFunc(SetStmt.Expr);
+    Value := getAssignValue(OldValue, NewValue, Member.Token, SetStmt.Op);
+    ITuple(Instance).Put(Index, Value, Member.Token);
+  end
+  else if VarSupports(Instance, IGearInstance) then begin
+    Ident := TVariable(Member).Ident;
+    OldValue := IGearInstance(Instance).GetMember(Ident);
+    if (IGearInstance(Instance).isConstant(Ident) and
+       (not VarIsNull(OldValue))) or (VarSupports(OldValue, IValuable)) then
+      Raise ERuntimeError.Create(Ident.Token, Format(
+        ErrClassMemberImmutable, [Ident.Text]));
+    NewValue := VisitFunc(SetStmt.Expr);
+    Value := getAssignValue(OldValue, NewValue, Member.Token, SetStmt.Op);
+    IGearInstance(Instance).SetField(Ident, Value);
+  end
+  else
+    Raise ERuntimeError.Create(SetStmt.GetExpr.Token, ErrExpectedInstance);
 end;
 
 procedure TInterpreter.VisitIndexedExprStmt(IndexedExprStmt: TIndexedExprStmt);
@@ -602,30 +576,21 @@ var
   Index: Variant;
   VarAsStr: String;
 begin
-  Variable := Visit(IndexedExprStmt.IndexedExpr.Variable);
-  Index := Visit(IndexedExprStmt.IndexedExpr.Index);
-  NewValue := Visit(IndexedExprStmt.Expr);
+  Variable := VisitFunc(IndexedExprStmt.IndexedExpr.Variable);
+  Index := VisitFunc(IndexedExprStmt.IndexedExpr.Index);
+  NewValue := VisitFunc(IndexedExprStmt.Expr);
 
   with IndexedExprStmt do
   if VarSupports(Variable, IArrayInstance) then begin
     CheckNumericIndex(Index, IndexedExpr.Index.Token);
-    OldValue := IArrayInstance(Variable).get(Index, IndexedExpr.Index.Token);
+    OldValue := IArrayInstance(Variable).Get(Index, IndexedExpr.Index.Token);
     Value := getAssignValue(OldValue, NewValue, IndexedExpr.Variable.Token, Op);
     IArrayInstance(Variable).Put(Index, Value, IndexedExpr.Index.Token);
   end
   else if VarSupports(Variable, IDictInstance) then begin
-    if IDictInstance(Variable).Contains(Index) then
-      OldValue := IDictInstance(Variable).get(Index, IndexedExpr.Index.Token)
-    else
-      OldValue := Null;
+    OldValue := IDictInstance(Variable).get(Index, IndexedExpr.Index.Token);
     Value := getAssignValue(OldValue, NewValue, IndexedExpr.Variable.Token, Op);
     IDictInstance(Variable).Put(Index, Value, IndexedExpr.Index.Token);
-  end
-  else if VarSupports(Variable, ITuple) then begin
-    CheckNumericIndex(Index, IndexedExpr.Index.Token);
-    OldValue := ITuple(Variable).get(Index, IndexedExpr.Index.Token);
-    Value := getAssignValue(OldValue, NewValue, IndexedExpr.Variable.Token, Op);
-    ITuple(Variable).Put(Index, Value, IndexedExpr.Index.Token);
   end
   else if VarIsStr(Variable) then begin
     CheckNumericIndex(Index, IndexedExpr.Index.Token);
@@ -639,6 +604,7 @@ begin
     Raise ERuntimeError.Create(IndexedExpr.Variable.Token, ErrArrayTypeExpected);
 end;
 
+
 procedure TInterpreter.VisitIfStmt(IfStmt: TIfStmt);
 var
   SavedSpace: TMemorySpace;
@@ -648,11 +614,11 @@ var
   function isBooleanAndTrue(Condition: TExpr): Boolean;
   var Value: Variant;
   begin
-    Value := Visit(Condition);
+    Value := VisitFunc(Condition);
     if VarIsBool(Value) then
       Result := Boolean(Value)
     else
-      Raise ERuntimeError.Create(IfStmt.Token, ErrConditionMustBeBool);
+      Raise ERuntimeError.Create(IfStmt.Token, ErrConditionNotBoolean);
   end;
 
 begin
@@ -660,25 +626,25 @@ begin
     if Assigned(IfStmt.VarDecl) then begin
       SavedSpace := CurrentSpace;
       CurrentSpace := TMemorySpace.Create(SavedSpace);
-      Visit(IfStmt.VarDecl);
+      VisitProc(IfStmt.VarDecl);
     end;
 
     if isBooleanAndTrue(IfStmt.Condition) then
-      Visit(IfStmt.ThenPart)
+      VisitProc(IfStmt.ThenPart)
     else if Assigned(IfStmt.ElseIfs) then begin
       for i := 0 to IfStmt.ElseIfs.Count-1 do begin
         if isBooleanAndTrue(IfStmt.ElseIfs[i]) then begin
-          Visit(IfStmt.ElseIfParts[i]);
+          VisitProc(IfStmt.ElseIfParts[i]);
           ElseIfExecuted := True;
           Break;
         end;
       end;
       if not ElseIfExecuted then
         if Assigned(IfStmt.ElsePart) then
-          Visit(IfStmt.ElsePart);
+          VisitProc(IfStmt.ElsePart);
     end
     else if Assigned(IfStmt.ElsePart) then
-      Visit(IfStmt.ElsePart);
+      VisitProc(IfStmt.ElsePart);
 
   finally
     if Assigned(IfStmt.VarDecl) then begin
@@ -687,6 +653,7 @@ begin
     end;
   end;
 end;
+
 
 procedure TInterpreter.VisitWhileStmt(WhileStmt: TWhileStmt);
 var
@@ -697,24 +664,24 @@ begin
     if Assigned(WhileStmt.VarDecl) then begin
       SavedSpace := CurrentSpace;
       CurrentSpace := TMemorySpace.Create(SavedSpace);
-      Visit(WhileStmt.VarDecl);
+      VisitProc(WhileStmt.VarDecl);
     end;
     try
-      Condition := Visit(WhileStmt.Condition);
+      Condition := VisitFunc(WhileStmt.Condition);
       if VarIsBool(Condition) then begin
         while Condition do begin
           try
-            Visit(WhileStmt.Block);
+            VisitProc(WhileStmt.Block);
           except
             on EContinueException do;
           end;
-          Condition := Visit(WhileStmt.Condition);
+          Condition := VisitFunc(WhileStmt.Condition);
         end;
       end
       else
-        Raise ERuntimeError.Create(WhileStmt.Token, ErrConditionMustBeBool);
+        Raise ERuntimeError.Create(WhileStmt.Token, ErrConditionNotBoolean);
     except
-      on EBreakException do;
+      on EBreakException do; // nothing
     end;
   finally
     if Assigned(WhileStmt.VarDecl) then begin
@@ -729,19 +696,19 @@ var
   Condition: Variant;
 begin
   try
-    Condition := Visit(RepeatStmt.Condition);
+    Condition := VisitFunc(RepeatStmt.Condition);
     if VarIsBool(Condition) then begin
       repeat
         try
-          Visit(RepeatStmt.Block);
+          VisitProc(RepeatStmt.Block);
         except
           on EContinueException do;
         end;
-        Condition := Visit(RepeatStmt.Condition);
+        Condition := VisitFunc(RepeatStmt.Condition);
       until Condition;
     end
     else
-      Raise ERuntimeError.Create(RepeatStmt.Token, ErrConditionMustBeBool);
+      Raise ERuntimeError.Create(RepeatStmt.Token, ErrConditionNotBoolean);
   except
     on EBreakException do;
   end;
@@ -752,45 +719,35 @@ var
   Condition: Variant;
 begin
   if Assigned(EnsureStmt.VarDecl) then
-    Visit(EnsureStmt.VarDecl);
-  Condition := Visit(EnsureStmt.Condition);
+    VisitProc(EnsureStmt.VarDecl);
+  Condition := VisitFunc(EnsureStmt.Condition);
   if VarIsBool(Condition) then begin
     if not Condition then
-      Visit(EnsureStmt.ElsePart)
+      VisitProc(EnsureStmt.ElsePart)
   end
   else
-    Raise ERuntimeError.Create(EnsureStmt.Token, ErrConditionMustBeBool);
+    Raise ERuntimeError.Create(EnsureStmt.Token, ErrConditionNotBoolean);
 end;
 
 procedure TInterpreter.VisitSwitchStmt(SwitchStmt: TSwitchStmt);
 var
   SwitchValue, CaseValue: Variant;
-  IsObjValue: Boolean;
-  i, j: integer;
+  Key: TCaseItem;
+  MatchCase: Boolean;
 begin
-  SwitchValue := Visit(SwitchStmt.Expr);
-  for i := 0 to SwitchStmt.CaseLimbs.Count-1 do begin
-    for j := 0 to SwitchStmt.CaseLimbs[i].Values.Count-1 do begin
-      CaseValue := Visit(SwitchStmt.CaseLimbs[i].Values[j]);
-      IsObjValue := SwitchStmt.CaseLimbs[i].IsObj;
-      if IsObjValue then begin
-        if TMath._Is(SwitchValue, CaseValue,
-          SwitchStmt.CaseLimbs[i].Values[j].Token) then
-        begin
-          Visit(SwitchStmt.CaseLimbs[i].Block);
-          Exit;
-        end;
-      end
-      else if TMath._EQ(SwitchValue, CaseValue,
-        SwitchStmt.CaseLimbs[i].Values[j].Token) then
-      begin
-        Visit(SwitchStmt.CaseLimbs[i].Block);
-        Exit;
-      end;
+  SwitchValue := VisitFunc(SwitchStmt.Expr);
+  for Key in SwitchStmt.CaseLimbs.Keys do begin
+    CaseValue := VisitFunc(Key.Expr);
+    if Key.isObj then
+      MatchCase := TMath._Is(SwitchValue, CaseValue, Key.Expr.Token)
+    else
+      MatchCase := TMath._EQ(SwitchValue, CaseValue, Key.Expr.Token);
+    if MatchCase then begin
+      VisitProc(SwitchStmt.CaseLimbs[Key]);
+      Exit;
     end;
   end;
-  // if no match found => execute Else block
-  Visit(SwitchStmt.ElseLimb);
+  VisitProc(SwitchStmt.ElseLimb);
 end;
 
 procedure TInterpreter.VisitBreakStmt(BreakStmt: TBreakStmt);
@@ -799,10 +756,10 @@ var
 begin
   Condition := True;
   if Assigned(BreakStmt.Condition) then
-    Condition := Visit(BreakStmt.Condition);
+    Condition := VisitFunc(BreakStmt.Condition);
 
   if not VarIsBool(Condition) then
-    Raise ERuntimeError.Create(BreakStmt.Token, ErrConditionMustBeBool);
+    Raise ERuntimeError.Create(BreakStmt.Token, ErrConditionNotBoolean);
 
   if Condition then
     raise EBreakException.Create('');
@@ -815,18 +772,19 @@ end;
 
 procedure TInterpreter.VisitReturnStmt(ReturnStmt: TReturnStmt);
 begin
-  raise EReturnFromFunc.Create(Visit(ReturnStmt.Expr));
+  raise EReturnFromFunc.Create(VisitFunc(ReturnStmt.Expr));
 end;
 
 procedure TInterpreter.VisitUseStmt(UseStmt: TUseStmt);
 begin
-  // do nothing
+  //do nothing
 end;
+
 
 procedure TInterpreter.VisitVarDecl(VarDecl: TVarDecl);
 begin
   CheckDuplicate(VarDecl.Ident, 'Variable');
-  CurrentSpace.Store(VarDecl.Ident, Visit(VarDecl.Expr));
+  CurrentSpace.Store(VarDecl.Ident, VisitFunc(VarDecl.Expr));
 end;
 
 procedure TInterpreter.VisitVarDecls(VarDecls: TVarDecls);
@@ -834,7 +792,7 @@ var
   Decl: TDecl;
 begin
   for Decl in VarDecls.List do
-    Visit(Decl);
+    VisitProc(Decl);
 end;
 
 procedure TInterpreter.VisitFuncDecl(FuncDecl: TFuncDecl);
@@ -846,6 +804,36 @@ begin
   CurrentSpace.Store(FuncDecl.Ident, ICallable(Func));
 end;
 
+function TInterpreter.VisitFuncDeclExpr(FuncDeclExpr: TFuncDeclExpr): Variant;
+begin
+  Result := ICallable(TFunc.Create(FuncDeclExpr.FuncDecl, CurrentSpace));
+end;
+
+procedure TInterpreter.VisitClassDecl(ClassDecl: TClassDecl);
+var
+  GearClass: TGearClass;
+  Members, StaticMembers, Traits: TMembers;
+  Decl: TDecl;
+  Func: TFunc;
+  Parent: Variant;
+begin
+  CheckDuplicate(ClassDecl.Ident, 'Class');
+  CurrentSpace.Store(ClassDecl.Ident, Nil);
+  if Assigned(ClassDecl.Parent) then begin
+    Parent := VisitFunc(ClassDecl.Parent);
+    CurrentSpace := TMemorySpace.Create(CurrentSpace);
+    CurrentSpace.Store('inherited', Parent, ClassDecl.Parent.Token);
+  end
+  else Parent := Null;
+  Traits := ApplyTraits(ClassDecl.Traits);
+  Members := CombineMembers(Traits, ClassDecl.DeclList);
+  StaticMembers := getMembers(ClassDecl.StaticList);
+  if Assigned(ClassDecl.Parent) then
+    CurrentSpace := CurrentSpace.EnclosingSpace;
+  GearClass := TGearClass.Create(ClassDecl.Ident, Parent, Members, StaticMembers);
+  CurrentSpace.Update(ClassDecl.Ident, IClassable(GearClass));
+end;
+
 procedure TInterpreter.VisitValDecl(ValDecl: TValDecl);
 var
   Value: TVal;
@@ -855,132 +843,24 @@ begin
   CurrentSpace.Store(ValDecl.Ident, IValuable(Value));
 end;
 
-function TInterpreter.getMembers(DeclList: TDeclList): TMembers;
-var
-  Decl: TDecl;
-  Func: TFunc;
-  Value: TVal;
-begin
-  Result.Init;
-  for Decl in DeclList do begin
-    case Decl.Kind of
-      dkFunc: begin
-        Func := TFunc.Create(Decl as TFuncDecl, CurrentSpace);
-        Result.Methods[Decl.Ident.Text] := ICallable(Func);
-      end;
-      dkVal: begin
-        Value := TVal.Create((Decl as TValDecl).FuncDecl, CurrentSpace);
-        Result.Values[Decl.Ident.Text] := IValuable(Value);
-      end;
-      dkVar:
-        if (Decl as TVarDecl).Mutable then
-          Result.Fields[Decl.Ident.Text] := Visit((Decl as TVarDecl).Expr)
-        else
-          Result.Constants[Decl.Ident.Text] := Visit((Decl as TVarDecl).Expr);
-    end;
-  end;
-end;
-
-procedure TInterpreter.VisitClassDecl(ClassDecl: TClassDecl);
-var
-  GearClass: TGearClass;
-  Members, Traits: TMembers;
-  Parent: Variant;
-begin
-  CheckDuplicate(ClassDecl.Ident, 'Class');
-  CurrentSpace.Store(ClassDecl.Ident, Nil);
-  if Assigned(ClassDecl.Parent) then begin
-    Parent := Visit(ClassDecl.Parent);
-    CurrentSpace := TMemorySpace.Create(CurrentSpace);
-    CurrentSpace.Store('inherited', Parent);
-  end
-  else Parent := Null;
-  Traits := ApplyTraits(ClassDecl.Traits);
-  Members := CombineMembers(Traits, ClassDecl.DeclList);
-  if Assigned(ClassDecl.Parent) then
-    CurrentSpace := CurrentSpace.EnclosingSpace;
-  GearClass := TGearClass.Create(ClassDecl.Ident, Parent, Members);
-  CurrentSpace.Update(ClassDecl.Ident, IClassable(GearClass));
-end;
-
 procedure TInterpreter.VisitExtensionDecl(ExtensionDecl: TExtensionDecl);
 var
   TypeDecl: Variant;
   Members: TMembers;
 begin
   TypeDecl := CurrentSpace.Load(ExtensionDecl.Ident);  // get actual type
-  if not VarSupportsIntf(TypeDecl, [IClassable, IArrayable, IDictionable]) then
+  if not VarSupportsIntf(TypeDecl, [IClassable, IArrayable, IDictionary]) then
     Raise ERuntimeError.Create(ExtensionDecl.Ident.Token,
       Format(ErrExtIdNoType, [ExtensionDecl.Ident.Text]));
   Members := getMembers(ExtensionDecl.DeclList);
   if VarSupports(TypeDecl, IClassable) then
     IClassable(TypeDecl).ExtendWith(Members)
   else if VarSupports(TypeDecl, IArrayable) then
-    IClassable(TypeDecl).ExtendWith(Members)
-  else if VarSupports(TypeDecl, IDictionable) then
-    IDictionable(TypeDecl).ExtendWith(Members);
-end;
-
-function TInterpreter.ApplyTraits(Traits: TExprList): TMembers;
-var
-  Trait: TExpr;
-  TraitValue: Variant;
-  GearTrait: ITraitable;
-  i: Integer;
-  Name: String;
-begin
-  Result.Init;
-  for Trait in Traits do begin
-    TraitValue := Visit(Trait);
-    if not VarSupports(TraitValue, ITraitable) then
-      Raise ERuntimeError.Create(Trait.Token,
-        Format(ErrNotDeclaredAsTrait, [Trait.Token.Lexeme]));
-    GearTrait := ITraitable(TraitValue);
-    for i := 0 to GearTrait.Methods.Count-1 do begin
-      Name := GearTrait.Methods.Keys[i];
-      if Result.Methods.Contains(Name) then
-        Raise ERuntimeError.Create(GearTrait.Ident.Token,
-          Format(ErrTraitIsDeclared, ['function', Name]));
-      Result.Methods[Name] := GearTrait.Methods[Name];
-    end;
-    for i := 0 to GearTrait.Values.Count-1 do begin
-      Name := GearTrait.Values.Keys[i];
-      if Result.Values.Contains(Name) then
-        Raise ERuntimeError.Create(GearTrait.Ident.Token,
-          Format(ErrTraitIsDeclared, ['value', Name]));
-      Result.Values[Name] := GearTrait.Values[Name];
-    end;
-  end;
-end;
-
-function TInterpreter.CombineMembers(Traits: TMembers; DeclList: TDeclList): TMembers;
-var
-  Decl: TDecl;
-  Func: TFunc;
-  Value: TVal;
-begin
-  Result := Traits;
-  for Decl in DeclList do begin
-    if Traits.Methods.Contains(Decl.Ident.Text) or
-       Traits.Values.Contains(Decl.Ident.Text) then
-      Raise ERuntimeError.Create(Decl.Ident.Token,
-        Format(ErrTraitDeclared, [Decl.Ident.Text]));
-    case Decl.Kind of
-      dkFunc: begin
-        Func := TFunc.Create(Decl as TFuncDecl, CurrentSpace);
-        Result.Methods[Decl.Ident.Text] := ICallable(Func);
-      end;
-      dkVal: begin
-        Value := TVal.Create((Decl as TValDecl).FuncDecl, CurrentSpace);
-        Result.Values[Decl.Ident.Text] := IValuable(Value);
-      end;
-      dkVar:
-        if (Decl as TVarDecl).Mutable then
-          Result.Fields[Decl.Ident.Text] := Visit((Decl as TVarDecl).Expr)
-        else
-          Result.Constants[Decl.Ident.Text] := Visit((Decl as TVarDecl).Expr);
-    end;
-  end;
+    IArrayable(TypeDecl).ExtendWith(Members)
+  else if VarSupports(TypeDecl, IDictionary) then
+    IDictionary(TypeDecl).ExtendWith(Members)
+  else if VarSupports(TypeDecl, IEnumable) then
+    IEnumable(TypeDecl).ExtendWith(Members);
 end;
 
 procedure TInterpreter.VisitTraitDecl(TraitDecl: TTraitDecl);
@@ -1006,7 +886,7 @@ begin
   CheckDuplicate(ArrayDecl.Ident, 'Array');
   Elements := TArrayElements.Create;
   for Expr in ArrayDecl.Elements do
-    Elements.Add(Visit(Expr));
+    Elements.Add(VisitFunc(Expr));
   Members := getMembers(ArrayDecl.DeclList);
   ArrayClass := TArrayClass.Create(ArrayDecl.Ident, Elements, Members);
   CurrentSpace.Store(ArrayDecl.Ident, IArrayable(ArrayClass));
@@ -1015,17 +895,17 @@ end;
 procedure TInterpreter.VisitDictDecl(DictDecl: TDictDecl);
 var
   DictClass: TDictClass;
-  Element: TKeyValuePair;
+  Key: TExpr;
   Elements: TDictElements;
   Members: TMembers;
 begin
   CheckDuplicate(DictDecl.Ident, 'Dictionary');
   Elements := TDictElements.Create;
-  for Element in DictDecl.Elements do
-    Elements[Visit(Element.Key)] := Visit(Element.Value);
+  for Key in DictDecl.KeyValueList.Keys do
+    Elements.Add(VisitFunc(Key), VisitFunc(DictDecl.KeyValueList[Key]));
   Members := getMembers(DictDecl.DeclList);
   DictClass := TDictClass.Create(DictDecl.Ident, Elements, Members);
-  CurrentSpace.Store(DictDecl.Ident, IDictionable(DictClass));
+  CurrentSpace.Store(DictDecl.Ident, IDictionary(DictClass));
 end;
 
 procedure TInterpreter.VisitEnumDecl(EnumDecl: TEnumDecl);
@@ -1035,10 +915,10 @@ var
 begin
   CheckDuplicate(EnumDecl.Ident, 'Enum');
   Members := getMembers(EnumDecl.DeclList);
-  Enum := TEnumClass.Create(EnumDecl.Ident, EnumDecl.Elements.Copy,
-    EnumDecl.CaseTable, Members);
+  Enum := TEnumClass.Create(EnumDecl.Ident, EnumDecl.Elements.Copy, EnumDecl.CaseTable, Members);
   CurrentSpace.Store(EnumDecl.Ident, IEnumable(Enum));
 end;
+
 
 procedure TInterpreter.VisitBlock(Block: TBlock);
 var
@@ -1049,7 +929,7 @@ begin
   try
     CurrentSpace := TMemorySpace.Create(EnclosingSpace);
     for Node in Block.Nodes do
-      Visit(Node);
+      VisitProc(Node);
   finally
     CurrentSpace := EnclosingSpace;
   end;
@@ -1060,22 +940,97 @@ var
   Node: TNode;
 begin
   for Node in Product.Nodes do
-    Visit(Node);
+    VisitProc(Node);
 end;
+
+//
+// Helper functions
+//
+
+function TInterpreter.getMembers(DeclList: TDeclList): TMembers;
+var
+  Decl: TDecl;
+  Func: TFunc;
+  Value: TVal;
+begin
+  Result.Init;
+  for Decl in DeclList do begin
+    case Decl.Kind of
+      dkFunc: begin
+        Func := TFunc.Create(Decl as TFuncDecl, CurrentSpace);
+        Result.Methods.Add(Decl.Ident.Text, ICallable(Func));
+      end;
+      dkVal: begin
+        Value := TVal.Create((Decl as TValDecl).FuncDecl, CurrentSpace);
+        Result.Values.Add(Decl.Ident.Text, IValuable(Value));
+      end;
+      dkVar:
+        if (Decl as TVarDecl).Mutable then
+          Result.Fields.Add(Decl.Ident.Text, VisitFunc((Decl as TVarDecl).Expr))
+        else
+          Result.Constants.Add(Decl.Ident.Text, VisitFunc((Decl as TVarDecl).Expr));
+    end;
+  end;
+end;
+
+function TInterpreter.ApplyTraits(Traits: TExprList): TMembers;
+var
+  Trait: TExpr;
+  TraitValue: Variant;
+  GearTrait: ITraitable;
+  Name: String;
+begin
+  Result.Init;
+  for Trait in Traits do begin
+    TraitValue := VisitFunc(Trait);
+    if not VarSupports(TraitValue, ITraitable) then
+      Raise ERuntimeError.Create(Trait.Token,
+        Format(ErrNotDeclaredAsTrait, [Trait.Token.Lexeme]));
+    GearTrait := ITraitable(TraitValue);
+    for Name in GearTrait.Methods.Keys do begin
+      if Result.Methods.ContainsKey(Name) then
+        Raise ERuntimeError.Create(GearTrait.Ident.Token,
+          Format(ErrTraitIsDeclared, ['function', Name]));
+      Result.Methods.Add(Name, GearTrait.Methods[Name]);
+    end;
+  end;
+end;
+
+function TInterpreter.CombineMembers(Traits: TMembers; DeclList: TDeclList): TMembers;
+var
+  Decl: TDecl;
+  Func: TFunc;
+  Value: TVal;
+begin
+  Result := Traits;
+  for Decl in DeclList do begin
+    if Traits.Methods.ContainsKey(Decl.Ident.Text) then
+      Raise ERuntimeError.Create(Decl.Ident.Token,
+        Format(ErrTraitDeclared, [Decl.Ident.Text]));
+    case Decl.Kind of
+      dkFunc: begin
+        Func := TFunc.Create(Decl as TFuncDecl, CurrentSpace);
+        Result.Methods.Add(Decl.Ident.Text, ICallable(Func));
+      end;
+      dkVal: begin
+        Value := TVal.Create((Decl as TValDecl).FuncDecl, CurrentSpace);
+        Result.Values.Add(Decl.Ident.Text, IValuable(Value));
+      end;
+      dkVar:
+        if (Decl as TVarDecl).Mutable then
+          Result.Fields.Add(Decl.Ident.Text, VisitFunc((Decl as TVarDecl).Expr))
+        else
+          Result.Constants.Add(Decl.Ident.Text, VisitFunc((Decl as TVarDecl).Expr));
+    end;
+  end;
+end;
+
 
 procedure TInterpreter.CheckDuplicate(AIdent: TIdent; const TypeName: String);
 begin
-  if CurrentSpace.Contains(AIdent.Text) then
+  if CurrentSpace.ContainsKey(AIdent.Text) then
     Raise ERuntimeError.Create(AIdent.Token,
       Format(ErrDuplicateID, [TypeName, AIdent.Text]));
-end;
-
-procedure TInterpreter.Assign(Variable: TVariable; Value: Variant);
-begin
-  if Variable.Distance >= 0 then
-    CurrentSpace.UpdateAt(Variable.Distance, Variable.Ident, Value)
-  else
-    Globals.Update(Variable.Ident, Value);
 end;
 
 function TInterpreter.Lookup(Variable: TVariable): Variant;
@@ -1086,10 +1041,18 @@ begin
     Result := Globals.Load(Variable.Ident);
 end;
 
+procedure TInterpreter.Assign(Variable: TVariable; Value: Variant);
+begin
+  if Variable.Distance >= 0 then
+    CurrentSpace.UpdateAt(Variable.Distance, Variable.Ident, Value)
+  else
+    Globals.Update(Variable.Ident, Value);
+end;
+
 procedure TInterpreter.CheckNumericIndex(Value: Variant; Token: TToken);
 begin
   if not VarIsNumeric(Value) then
-    Raise ERuntimeError.Create(Token, ErrIndexMustBeNumeric);
+    Raise ERuntimeError.Create(Token, 'Index must be a number.');
 end;
 
 end.

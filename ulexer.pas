@@ -26,7 +26,6 @@ uses
 
 const
   Space  = #32;
-  BackSpace = #8;
   Tab    = #9;
   Quote1 = #39; // '
   Quote2 = #34; // "
@@ -41,6 +40,7 @@ const
   SpecialChar  = '#';
   IdentChars   = NumberChars + AlphaChars;
 
+
 type
 
   TLexer = class
@@ -50,8 +50,7 @@ type
       FReader: TReader;          // contains the text to scan
       FTokens: TTokens;          // list of mined tokens
       EndOfFile: Boolean;
-      NumParens: Integer;
-      procedure Error(Token: TToken; const Msg: String);
+      OpenParens: Integer;       // track if inside an interpolated string
       function getChar: Char;
       procedure doKeywordOrIdentifier(const Line, Col: Integer);
       procedure doNumber(const Line, Col: Integer);
@@ -75,8 +74,8 @@ begin
   FTokens := TTokens.Create();
   FLine := 1;
   FCol := 0;
-  EndOfFile := false;
-  NumParens := 0;
+  EndOfFile := False;
+  OpenParens := 0;
   FLook := getChar;   // get first character
   ScanTokens;  // scan all tokens
 end;
@@ -85,11 +84,6 @@ destructor TLexer.Destroy;
 begin
   FTokens.Free;
   inherited Destroy;
-end;
-
-procedure TLexer.Error(Token: TToken; const Msg: String);
-begin
-  Errors.Append(Token, Msg);
 end;
 
 // reads the next character from the input stream
@@ -158,12 +152,12 @@ begin
     '!' : AddToken(ttNot, '!');
     '^' : AddToken(ttPow, '^');
     '(' : begin
-            if NumParens>0 then NumParens +=1;
+            if OpenParens>0 then OpenParens +=1;
             AddToken(ttOpenParen, '(');
           end;
-    ')' : if NumParens>0 then begin
-            NumParens -= 1;
-            if NumParens = 0 then doString(Line, Col)
+    ')' : if OpenParens>0 then begin
+            OpenParens -= 1;
+            if OpenParens = 0 then doString(Line, Col)
             else AddToken(ttCloseParen, ')');
           end
           else AddToken(ttCloseParen, ')');
@@ -202,7 +196,9 @@ begin
     '0'..'9': doNumber(Line, Col);
     '_', 'A'..'Z', 'a'..'z': doKeywordOrIdentifier(Line, Col);
     Quote1: doString(Line, Col);
-    Quote2: doChar(Line, Col);
+    Quote2: if FReader.PeekChar = Quote2 then
+              doString(Line, Col)
+            else doChar(Line, Col);
     FileEnding: EndOfFile := true;
     else
       EndOfFile := true;
@@ -212,9 +208,8 @@ end;
 // process an identifier
 procedure TLexer.doKeywordOrIdentifier(const Line, Col: Integer);
 var
-  Index: integer = -1;
-  Lexeme: String = '';
-  TokenTyp: TTokenTyp = ttIdentifier;
+  Lexeme: String;
+  TokenTyp: TTokenTyp;
   Token: TToken;
 begin
   Lexeme := FLook;
@@ -225,8 +220,8 @@ begin
   end;
 
   //Match the keyword and return its type, otherwise it's an identifier
-  if Keywords.Contains(Lexeme, Index) then
-    TokenTyp := Keywords.At(Index);
+  if not Keywords.TryGetValue(Lexeme, TokenTyp) then
+    TokenTyp := ttIdentifier;
 
   Token := TToken.Create(TokenTyp, Lexeme, Null, Line, Col, FReader.FileIndex);
   Tokens.Add(Token);
@@ -236,7 +231,7 @@ end;
 procedure TLexer.doNumber(const Line, Col: Integer);
 var
   Lexeme: String = '';
-  Value: Double;
+  Value: Extended;  // 1.9E-4932 .. 1.1E4932  10 byte floating point number
   Token: TToken;
   FoundDotDot: Boolean = False;
 begin
@@ -275,12 +270,13 @@ begin
     end;
   end;
 
-  Value := Lexeme.ToDouble;
+  Value := Lexeme.ToExtended;
   Token := TToken.Create(ttNumber, Lexeme, Value, Line, Col, FReader.FileIndex);
   Tokens.Add(Token);
 end;
 
 { Process a string 'string' literal }
+
 procedure TLexer.doString(const Line, Col: Integer);
 var
   Lexeme: string = '';
@@ -293,27 +289,29 @@ begin
   while True do begin
     FLook := getChar;
     case FLook of
+      FileEnding:
+        begin
+          Token := TToken.Create(ttNone, '', Null, Line, Col, FReader.FileIndex);
+          Errors.Append(Token, 'Lexer error: String exceeds file.');
+          Break;
+        end;
       Quote1:
         if FReader.PeekChar = Quote1 then
           FLook := getChar
         else begin
           FLook := getChar;   // consume quote '
+          if OpenParens > 0 then begin
+            Token := TToken.Create(ttNone, '', Null, Line, Col, FReader.FileIndex);
+            Errors.Append(Token, 'Lexer error: Expected closing paren ")" in expression.');
+            FLook := ')';
+          end;
           Break;
         end;
-      LineEnding:
-        begin
-          Token := TToken.Create(ttNone, '', Null, Line, Col, FReader.FileIndex);
-          if NumParens > 0 then
-            Error(Token, 'Lexer error: Expected closing paren ")" in expression.')
-          else
-            Error(Token, 'Lexer error: String exceeds line.');
-          Break;
-        end;
-      '\':
+     '\':
         if FReader.PeekChar = '(' then begin
           FLook := getChar;
           Typ := ttInterpolated;
-          NumParens := 1;
+          OpenParens := 1;
           FLook := getChar;
           Break;
         end;
@@ -330,6 +328,55 @@ begin
   Tokens.Add(Token);
 end;
 
+//procedure TLexer.doString(const Line, Col: Integer);
+//var
+//  Lexeme: string = '';
+//  Value: String;
+//  Token: TToken;
+//  Typ: TTokenTyp;
+//begin
+//  Typ := ttString;
+//
+//  while True do begin
+//    FLook := getChar;
+//    case FLook of
+//      Quote1:
+//        if FReader.PeekChar = Quote1 then
+//          FLook := getChar
+//        else begin
+//          FLook := getChar;   // consume quote '
+//          Break;
+//        end;
+//      LineEnding:
+//        begin
+//          Token := TToken.Create(ttNone, '', Null, Line, Col, FReader.FileIndex);
+//          if OpenParens > 0 then
+//            Errors.Append(Token, 'Lexer error: Expected closing paren ")" in expression.')
+//          else
+//            Errors.Append(Token, 'Lexer error: String exceeds line.');
+//          Break;
+//        end;
+//      '\':
+//        if FReader.PeekChar = '(' then begin
+//          FLook := getChar;
+//          Typ := ttInterpolated;
+//          OpenParens := 1;
+//          FLook := getChar;
+//          Break;
+//        end;
+//    end;
+//    Lexeme += FLook;
+//  end;
+//
+//  Lexeme := StringReplace(Lexeme, '\n', LineEnding, [rfReplaceAll]);
+//  Lexeme := StringReplace(Lexeme, '\t', Tab, [rfReplaceAll]);
+//
+//  Value := Lexeme;
+//  Lexeme := '''' + Lexeme + '''';   // including the quotes
+//  Token := TToken.Create(Typ, Lexeme, Value, Line, Col, FReader.FileIndex);
+//  Tokens.Add(Token);
+//end;
+
 procedure TLexer.doChar(const Line, Col: Integer);
 var
   Value: Char;
@@ -344,8 +391,6 @@ end;
 
 // multi line comment starts with '/*' and ends with '*/'
 procedure TLexer.MultiLineComment;
-var
-  Token: TToken;
 begin
   Repeat
     Repeat
@@ -353,14 +398,8 @@ begin
     Until (FLook = '*') or (FLook = FileEnding);
     FLook := getChar;
   Until (FLook = '/') or (FLook = FileEnding);
-  if FLook = FileEnding then begin
-    Token := TToken.Create(ttNone, '', Null, FLine, FCol, FReader.FileIndex);
-    Error(Token, 'Lexer error: Comment exceeds file.');
-  end
-  else
-    FLook := getChar;
+  FLook := getChar;
 end;
-
 
 procedure TLexer.SingleLineComment;
 begin

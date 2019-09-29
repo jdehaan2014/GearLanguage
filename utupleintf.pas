@@ -5,14 +5,14 @@ unit uTupleIntf;
 interface
 
 uses
-  Classes, SysUtils, uCollections, uToken;
+  Classes, SysUtils, Generics.Collections, uToken;
 
 type
 
-  TTupleElements = specialize TArray<Variant>;
+  TTupleElements = specialize TList<Variant>;
 
   ITuple = interface
-    ['{547A44F8-846C-09C1-958D-609414F777DC}']
+    ['{D30402C8-77E2-88D5-21A1-7CCB1CA12D9B}']
     function getElements: TTupleElements;
     property Elements: TTupleElements read getElements;
     function Get(i: Integer; Token: TToken): Variant;

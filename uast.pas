@@ -22,7 +22,7 @@ unit uAST;
 interface
 
 uses
-  Classes, SysUtils, uToken, uCollections;
+  Classes, SysUtils, uToken, Generics.Collections;
 
 type
 
@@ -38,7 +38,7 @@ type
     // Base node for expressions.
   end;
 
-  TExprList = specialize TArrayObj<TExpr>;
+  TExprList = specialize TObjectList<TExpr>;
 
   TBinaryExpr = class(TExpr)
     private
@@ -76,20 +76,11 @@ type
       constructor Create(Constant: Variant; AToken: TToken);
   end;
 
-  TInterpolatedExpr = class(TFactorExpr)
-    private
-      FExprList: TExprList;
-    public
-      property ExprList: TExprList read FExprList;
-      constructor Create(AExprList: TExprList; AToken: TToken);
-      destructor Destroy; override;
-  end;
-
   TIdent = class(TNode)
     private
       FText: String;
     public
-      property Text: String read FText;
+      property Text: String read FText write FText;
       constructor Create(AToken: TToken);
   end;
 
@@ -120,13 +111,7 @@ type
   TMatchExpr = class(TFactorExpr)
     private
       type
-        TIfLimb = class
-          Values: TExprList;
-          Expr: TExpr;
-          constructor Create(AValues: TExprList; AExpr: TExpr);
-          destructor Destroy; override;
-        end;
-        TIfLimbs = specialize TArrayObj<TIfLimb>;
+        TIfLimbs = specialize TObjectDictionary<TExpr, TExpr>;
     private
       FExpr: TExpr;
       FIfLimbs: TIfLimbs;
@@ -137,7 +122,7 @@ type
       property ElseLimb: TExpr read FElseLimb write FElseLimb;
       constructor Create(aExpr: TExpr; AToken: TToken);
       destructor Destroy; override;
-      procedure AddLimb(AValues: TExprList; AExpr: TExpr);
+      procedure AddLimb(AValue, AExpr: TExpr);
   end;
 
   TCallExpr = class(TExpr)
@@ -149,26 +134,38 @@ type
           constructor Create(AExpr: TExpr; AIdent: TIdent);
           destructor Destroy; override;
         end;
-        TArgList = specialize TArrayObj<TArg>;
+        TArgs = specialize TObjectList<TArg>;
     private
       FCallee: TExpr;
-      FArgs: TArgList;
+      FArgs: TArgs;
+      FSignature: TExpr;
     public
+      FromClass: Boolean;
       property Callee: TExpr read FCallee;
-      property Args: TArgList read FArgs;
+      property Args: TArgs read FArgs;
+      property Signature: TExpr read FSignature write FSignature;
       constructor Create(ACallee: TExpr; AToken: TToken);
       destructor Destroy; override;
       procedure AddArgument(Expr: TExpr; Ident: TIdent);
   end;
 
-  TGetExpr = class(TExpr)
+  TTupleExpr = class(TFactorExpr)
+    private
+      FExprList: TExprList;
+    public
+      property ExprList: TExprList read FExprList;
+      constructor Create(AExprList: TExprList; AToken: TToken);
+      destructor Destroy; override;
+  end;
+
+  TGetExpr = class(TFactorExpr)
     private
       FInstance: TExpr;
-      FIdent: TIdent;
+      FMember: TExpr;
     public
       property Instance: TExpr read FInstance;
-      property Ident: TIdent read FIdent;
-      constructor Create(AInstance: TExpr; AIdent: TIdent);
+      property Member: TExpr read FMember;
+      constructor Create(AInstance, AMember: TExpr; AToken: TToken);
       destructor Destroy; override;
   end;
 
@@ -183,12 +180,12 @@ type
 
   TInheritedExpr = class(TFactorExpr)
     private
-      FVariable: TVariable;
-      FMethod: TIdent;
+      FVariable,
+      FMethod: TVariable;
     public
       property Variable: TVariable read FVariable;
-      property Method: TIdent read FMethod;
-      constructor Create(AVariable: TVariable; AMethod: TIdent);
+      property Method: TVariable read FMethod;
+      constructor Create(AVariable, AMethod: TVariable);
       destructor Destroy; override;
   end;
 
@@ -203,7 +200,7 @@ type
       destructor Destroy; override;
   end;
 
-  TTupleExpr = class(TFactorExpr)
+  TInterpolatedExpr = class(TFactorExpr)
     private
       FExprList: TExprList;
     public
@@ -212,11 +209,14 @@ type
       destructor Destroy; override;
   end;
 
+
+  { STATEMENTS }
+
   TStmt = class(TNode)
     // Base class for statements
   end;
 
-  TBlock = class;
+  TBlock = class; // forward declarations
   TVarDecl = class;
 
   TPrintStmt = class(TStmt)
@@ -255,17 +255,14 @@ type
 
   TSetStmt = class(TStmt)
     private
-      FInstance: TExpr;
-      FIdent: TIdent;
-      FExpr: TExpr;
+      FGetExpr: TGetExpr;
       FOp: TToken;
+      FExpr: TExpr;
     public
-      property Instance: TExpr read FInstance;
-      property Ident: TIdent read FIdent;
-      property Expr: TExpr read FExpr;
+      property GetExpr: TGetExpr read FGetExpr;
       property Op: TToken read FOp;
-      constructor Create(AInstance: TExpr; AIdent: TIdent; AOp: TToken;
-        AExpr: TExpr);
+      property Expr: TExpr read FExpr;
+      constructor Create(AGetExpr: TGetExpr; AOp: TToken; AExpr: TExpr);
       destructor Destroy; override;
   end;
 
@@ -282,7 +279,16 @@ type
       destructor Destroy; override;
   end;
 
-  TBlockList = specialize TArrayObj<TBlock>;
+  TUseStmt = class(TStmt)
+    private
+      FFileName: String;
+    public
+      property FileName: String read FFileName;
+      constructor Create(AFileName: String; AToken: TToken);
+  end;
+
+
+  TBlocks = specialize TObjectList<TBlock>;
 
   TIfStmt = class(TStmt)
     private
@@ -291,17 +297,17 @@ type
       FThenPart: TBlock;
       FElsePart: TBlock;
       FElseIfs: TExprList;
-      FElseIfParts: TBlockList;
+      FElseIfParts: TBlocks;
     public
       property VarDecl: TVarDecl read FVarDecl;
       property Condition: TExpr read FCondition;
       property ThenPart: TBlock read FThenPart write FThenPart;
       property ElsePart: TBlock read FElsePart;
       property ElseIfs: TExprList read FElseIfs;
-      property ElseIfParts: TBlockList read FElseIfParts;
+      property ElseIfParts: TBlocks read FElseIfParts;
       constructor Create(AVarDecl: TVarDecl; ACondition: TExpr;
         AElseIfs: TExprList; AThenPart, AElsePart: TBlock;
-        AElseIfParts: TBlockList; AToken: TToken);
+        AElseIfParts: TBlocks; AToken: TToken);
       destructor Destroy; override;
   end;
 
@@ -342,67 +348,59 @@ type
        constructor Create(AVarDecl: TVarDecl; ACondition: TExpr;
          AElsePart: TBlock; AToken: TToken);
        destructor Destroy; override;
-   end;
+  end;
 
-   TSwitchStmt = class(TStmt)
-     private
-       type
-         TCaseLimb = class
-           Values: TExprList;
-           IsObj: Boolean;
-           Block: TBlock;
-           constructor Create(AValues: TExprList; AIsObj: Boolean; ABlock: TBlock);
-           destructor Destroy; override;
-         end;
-         TCaseLimbs = specialize TArrayObj<TCaseLimb>;
-     private
-       FExpr: TExpr;
-       FCaseLimbs: TCaseLimbs;
-       FElseLimb: TBlock;
-     public
-       property Expr: TExpr read FExpr;
-       property CaseLimbs: TCaseLimbs read FCaseLimbs write FCaseLimbs;
-       property ElseLimb: TBlock read FElseLimb write FElseLimb;
-       constructor Create(aExpr: TExpr; AToken: TToken);
-       destructor Destroy; override;
-       procedure AddLimb(AValues: TExprList; AIsObj: Boolean; ABlock: TBlock);
-   end;
+  TCaseItem = class
+    Expr: TExpr;
+    isObj: Boolean;
+    constructor Create(AExpr: TExpr; AIsObj: Boolean);
+  end;
 
-   TBreakStmt = class(TStmt)
-     private
-       FCondition: TExpr;
-     public
-       property Condition: TExpr read FCondition;
-       constructor Create(ACondition: TExpr; AToken: TToken);
-       destructor Destroy; override;
-   end;
+  TSwitchStmt = class(TStmt)
+    private
+      type
+        TCaseLimbs = specialize TObjectDictionary<TCaseItem, TBlock>;
+    private
+      FExpr: TExpr;
+      FCaseLimbs: TCaseLimbs;
+      FElseLimb: TBlock;
+    public
+      property Expr: TExpr read FExpr;
+      property CaseLimbs: TCaseLimbs read FCaseLimbs;
+      property ElseLimb: TBlock read FElseLimb write FElseLimb;
+      constructor Create(aExpr: TExpr; AToken: TToken);
+      destructor Destroy; override;
+      procedure AddLimb(AValue: TExpr; AIsObj: Boolean; ABlock: TBlock);
+  end;
 
-   TContinueStmt = class(TStmt)
-     //nothing in here
-   end;
+  TBreakStmt = class(TStmt)
+    private
+      FCondition: TExpr;
+    public
+      property Condition: TExpr read FCondition;
+      constructor Create(ACondition: TExpr; AToken: TToken);
+      destructor Destroy; override;
+  end;
 
-   TReturnStmt = class(TStmt)
-     private
-       FExpr: TExpr;
-     public
-       property Expr: TExpr read FExpr;
-       constructor Create(AExpr: TExpr; AToken: TToken);
-       destructor Destroy; override;
-   end;
+  TContinueStmt = class(TStmt)
+    //nothing in here
+  end;
 
-   TUseStmt = class(TStmt)
-     private
-       FFileName: String;
-     public
-       property FileName: String read FFileName;
-       constructor Create(AFileName: String; AToken: TToken);
-   end;
+  TReturnStmt = class(TStmt)
+    private
+      FExpr: TExpr;
+    public
+      property Expr: TExpr read FExpr;
+      constructor Create(AExpr: TExpr; AToken: TToken);
+      destructor Destroy; override;
+  end;
 
-  // Base class for declarations
+      { DECLARATIONS }
+
   TDecl = class(TNode)
     private
-       type TDeclKind = (dkNone, dkArray, dkClass, dkDict, dkEnum, dkExtension,
-         dkFunc, dkTrait, dkVal, dkVar, dkTuple);
+      type TDeclKind = (dkNone, dkArray, dkClass, dkDict, dkEnum, dkExtension, dkFunc,
+                        dkVal, dkVar, dkTrait);
     private
        FKind: TDeclKind;
        FIdent: TIdent;
@@ -410,6 +408,17 @@ type
       property Ident: TIdent read FIdent;
       property Kind: TDeclKind read FKind;
       constructor Create(AIdent: TIdent; AKind: TDeclKind; AToken: TToken);
+      destructor Destroy; override;
+  end;
+
+  TDeclList = specialize TObjectList<TDecl>;
+
+  TVarDecls = class(TDecl)
+    private
+      FList: TDeclList;
+    public
+      property List: TDeclList read FList;
+      constructor Create(AList: TDeclList; AToken: TToken);
       destructor Destroy; override;
   end;
 
@@ -425,33 +434,20 @@ type
       destructor Destroy; override;
   end;
 
-  TDeclList = specialize TArrayObj<TDecl>;
-
-  TVarDecls = class(TDecl)
-    private
-      FList: TDeclList;
-    public
-      property List: TDeclList read FList;
-      constructor Create(AList: TDeclList; AToken: TToken);
-      destructor Destroy; override;
-  end;
-
-
   TFuncDecl = class(TDecl)
     private
       type
         TParam = class
-          Ident: TIdent;
-          ExtIdent: TIdent;
+          Ident, ExtIdent: TIdent;
           constructor Create(AIdent, AExtIdent: TIdent);
           destructor Destroy; override;
         end;
-        TParamList = specialize TArrayObj<TParam>;
+        TParams = specialize TObjectList<TParam>;
       var
-        FParams: TParamList;
+        FParams: TParams;
         FBody: TBlock;
     public
-      property Params: TParamList read FParams;
+      property Params: TParams read FParams;
       property Body: TBlock read FBody write FBody;
       constructor Create(AIdent: TIdent; AToken: TToken);
       destructor Destroy; override;
@@ -467,26 +463,28 @@ type
       destructor Destroy; override;
   end;
 
+  TClassDecl = class(TDecl)
+    private
+      FDeclList: TDeclList;
+      FStaticList: TDeclList;
+      FParent: TVariable;
+      FTraits: TExprList;
+    public
+      property DeclList: TDeclList read FDeclList;
+      property StaticList: TDeclList read FStaticList;
+      property Parent: TVariable read FParent;
+      property Traits: TExprList read FTraits;
+      constructor Create(AIdent: TIdent; AParent: TVariable; ATraits: TExprList;
+        ADeclList, AStaticList: TDeclList; AToken: TToken);
+      destructor Destroy; override;
+  end;
+
   TValDecl = class(TDecl)
     private
       FFuncDecl: TFuncDecl;
     public
       property FuncDecl: TFuncDecl read FFuncDecl;
       constructor Create(AIdent: TIdent; AFuncDecl: TFuncDecl; AToken: TToken);
-  end;
-
-  TClassDecl = class(TDecl)
-    private
-      FDeclList: TDeclList;
-      FParent: TVariable;
-      FTraits: TExprList;
-    public
-      property DeclList: TDeclList read FDeclList;
-      property Parent: TVariable read FParent;
-      property Traits: TExprList read FTraits;
-      constructor Create(AIdent: TIdent; AParent: TVariable; ATraits: TExprList;
-        ADeclList: TDeclList; AToken: TToken);
-      destructor Destroy; override;
   end;
 
   TExtensionDecl = class(TDecl)
@@ -531,22 +529,17 @@ type
       destructor Destroy; override;
   end;
 
-  TKeyValuePair = class
-    Key, Value: TExpr;
-    constructor Create(AKey, AValue: TExpr);
-    destructor Destroy; override;
-  end;
-
-  TKeyValueList = specialize TArrayObj<TKeyValuePair>;
+  TKeyValueList =  specialize TObjectDictionary<TExpr, TExpr>;
 
   TDictDecl = class(TDecl)
     private
-      FElements: TKeyValueList;
+      FKeyValueList: TKeyValueList;
       FDeclList: TDeclList;
     public
-      property Elements: TKeyValueList read FElements write FElements;
+      property KeyValueList: TKeyValueList read FKeyValueList;
       property DeclList: TDeclList read FDeclList;
-      constructor Create(AIdent: TIdent; ADeclList: TDeclList; AToken: TToken);
+      constructor Create(AIdent: TIdent; AKeyValueList: TKeyValueList;
+        ADeclList: TDeclList; AToken: TToken);
       destructor Destroy; override;
       procedure AddElement(KeyExpr, ValueExpr: TExpr);
   end;
@@ -567,12 +560,12 @@ type
     function Copy: TEnumElement;
   end;
 
-  TEnumElements = specialize TDictionaryObj<String, TEnumElement>;
+  TEnumElements = specialize TDictionary<String, TEnumElement>;
   TEnumElementsHelper = class helper for TEnumElements
     function Copy: TEnumElements;
   end;
 
-  TCaseTable = specialize TArray<String>;
+  TCaseTable = specialize TList<String>;
 
   TEnumDecl = class(TDecl)
     private
@@ -585,10 +578,13 @@ type
       property CaseTable: TCaseTable read FCaseTable;
       constructor Create(AIdent: TIdent; ADeclList: TDeclList; AToken: TToken);
       destructor Destroy; override;
-      procedure AddElement(const SetName, Name: String; Value: Variant);
+      procedure AddElement(const SetName, Name: String; const Value: Variant);
   end;
 
-  TNodeList = specialize TArrayObj<TNode>;
+
+  TClassNameList = specialize TList<String>; // contains all defined classes
+
+  TNodeList = specialize TObjectList<TNode>;
 
   TBlock = class(TNode)
     private
@@ -601,6 +597,9 @@ type
 
   TProduct = class(TBlock)
   end;
+
+var
+  ClassNameList: TClassNameList;
 
 implementation
 
@@ -615,7 +614,7 @@ end;
 
 constructor TBinaryExpr.Create(ALeft: TExpr; AOp: TToken; ARight: TExpr);
 begin
-  Inherited Create(AOp);
+  inherited Create(AOp);
   FLeft :=  ALeft;
   FOp := AOp;
   FRight := ARight;
@@ -651,20 +650,6 @@ begin
   FValue := Constant;
 end;
 
-{ TInterpolatedExpr }
-
-constructor TInterpolatedExpr.Create(AExprList: TExprList; AToken: TToken);
-begin
-  inherited Create(AToken);
-  FExprList := AExprList;
-end;
-
-destructor TInterpolatedExpr.Destroy;
-begin
-  if Assigned(FExprList) then FExprList.Free;
-  inherited Destroy;
-end;
-
 { TIdent }
 
 constructor TIdent.Create(AToken: TToken);
@@ -672,6 +657,7 @@ begin
   inherited Create(AToken);
   FText := AToken.Lexeme;
 end;
+
 
 { TVariable }
 
@@ -709,19 +695,6 @@ end;
 
 { TMatchExpr }
 
-constructor TMatchExpr.TIfLimb.Create(AValues: TExprList; AExpr: TExpr);
-begin
-  Values := AValues;
-  Expr := AExpr;
-end;
-
-destructor TMatchExpr.TIfLimb.Destroy;
-begin
-  if Assigned(Values) then Values.Free;
-  if Assigned(Expr) then Expr.Free;
-  inherited Destroy;
-end;
-
 constructor TMatchExpr.Create(aExpr: TExpr; AToken: TToken);
 begin
   Inherited Create(AToken);
@@ -738,9 +711,9 @@ begin
   inherited Destroy;
 end;
 
-procedure TMatchExpr.AddLimb(AValues: TExprList; AExpr: TExpr);
+procedure TMatchExpr.AddLimb(AValue, AExpr: TExpr);
 begin
-  FIfLimbs.Add(TIfLimb.Create(AValues, AExpr));
+  FIfLimbs.Add(AValue, AExpr);
 end;
 
 { TCallExpr }
@@ -762,7 +735,9 @@ constructor TCallExpr.Create(ACallee: TExpr; AToken: TToken);
 begin
   inherited Create(AToken);
   FCallee := ACallee;
-  FArgs := TArgList.Create();
+  FSignature := FCallee;
+  FArgs := TArgs.Create();
+  FromClass := False;
 end;
 
 destructor TCallExpr.Destroy;
@@ -777,19 +752,33 @@ begin
   FArgs.Add(TArg.Create(Expr, Ident));
 end;
 
+{ TTupleExpr }
+
+constructor TTupleExpr.Create(AExprList: TExprList; AToken: TToken);
+begin
+  inherited Create(AToken);
+  FExprList := AExprList;
+end;
+
+destructor TTupleExpr.Destroy;
+begin
+  if Assigned(FExprList) then FExprList.Free;
+  inherited Destroy;
+end;
+
 { TGetExpr }
 
-constructor TGetExpr.Create(AInstance: TExpr; AIdent: TIdent);
+constructor TGetExpr.Create(AInstance, AMember: TExpr; AToken: TToken);
 begin
-  Inherited Create(AIdent.Token);
+  inherited Create(AToken);
   FInstance := AInstance;
-  FIdent := AIdent;
+  FMember := AMember;
 end;
 
 destructor TGetExpr.Destroy;
 begin
   if Assigned(FInstance) then FInstance.Free;
-  if Assigned(FIdent) then FIdent.Free;
+  if Assigned(FMember) then FMember.Free;
   inherited Destroy;
 end;
 
@@ -807,7 +796,9 @@ begin
   inherited Destroy;
 end;
 
-constructor TInheritedExpr.Create(AVariable: TVariable; AMethod: TIdent);
+{ TInheritedExpr }
+
+constructor TInheritedExpr.Create(AVariable, AMethod: TVariable);
 begin
   inherited Create(AVariable.Ident.Token);
   FVariable := AVariable;
@@ -837,27 +828,31 @@ begin
   inherited Destroy;
 end;
 
-{ TTupleExpr }
+{ TInterpolatedExpr }
 
-constructor TTupleExpr.Create(AExprList: TExprList; AToken: TToken);
+constructor TInterpolatedExpr.Create(AExprList: TExprList; AToken: TToken);
 begin
   inherited Create(AToken);
   FExprList := AExprList;
 end;
 
-destructor TTupleExpr.Destroy;
+destructor TInterpolatedExpr.Destroy;
 begin
   if Assigned(FExprList) then FExprList.Free;
   inherited Destroy;
 end;
 
 
+//
+// STATEMENTS
+//
+
 { TPrintStmt }
 
 constructor TPrintStmt.Create
   (AExprList: TExprList; ATerminator: TExpr; AToken: TToken);
 begin
-  Inherited Create(AToken);
+  inherited Create(AToken);
   FExprList := AExprList;
   FTerminator := ATerminator;
 end;
@@ -902,20 +897,17 @@ end;
 
 { TSetStmt }
 
-constructor TSetStmt.Create
-  (AInstance: TExpr; AIdent: TIdent; AOp: TToken; AExpr: TExpr);
+constructor TSetStmt.Create(AGetExpr: TGetExpr; AOp: TToken; AExpr: TExpr);
 begin
-  Inherited Create(AIdent.Token);
-  FInstance := AInstance;
-  FIdent := AIdent;
+  inherited Create(AOp);
+  FGetExpr := AGetExpr;
   FOp := AOp;
   FExpr := AExpr;
 end;
 
 destructor TSetStmt.Destroy;
 begin
-  if Assigned(FInstance) then FInstance.Free;
-  if Assigned(FIdent) then FIdent.Free;
+  if Assigned(FGetExpr) then FGetExpr.Free;
   if Assigned(FExpr) then FExpr.Free;
   inherited Destroy;
 end;
@@ -938,12 +930,20 @@ begin
   inherited Destroy;
 end;
 
+{ TUseStmt }
+
+constructor TUseStmt.Create(AFileName: String; AToken: TToken);
+begin
+  Inherited Create(AToken);
+  FFileName := AFileName;
+end;
+
 
 { TIfStmt }
 
 constructor TIfStmt.Create(AVarDecl: TVarDecl; ACondition: TExpr;
-  AElseIfs: TExprList; AThenPart, AElsePart: TBlock;
-  AElseIfParts: TBlockList; AToken: TToken);
+  AElseIfs: TExprList; AThenPart, AElsePart: TBlock; AElseIfParts: TBlocks;
+  AToken: TToken);
 begin
   inherited Create(AToken);
   FVarDecl := AVarDecl;
@@ -951,15 +951,15 @@ begin
   FThenPart := AThenPart;
   FElsePart := AElsePart;
   FElseIfs := AElseIfs;
-  FElseIfParts := AElseIfParts;
+  FElseIfParts:= AElseIfParts;
 end;
 
 destructor TIfStmt.Destroy;
 begin
-  if Assigned(FVarDecl) then FVarDecl.Free;
   if Assigned(FCondition) then FCondition.Free;
   if Assigned(FThenPart) then FThenPart.Free;
   if Assigned(FElsePart) then FElsePart.Free;
+  if Assigned(FVarDecl) then FVarDecl.Free;
   if Assigned(FElseIfs) then FElseIfs.Free;
   if Assigned(FElseIfParts) then FElseIfParts.Free;
   inherited Destroy;
@@ -1019,29 +1019,22 @@ begin
   inherited Destroy;
 end;
 
-{ TSwitchStmt }
+{ TCaseItem }
 
-constructor TSwitchStmt.TCaseLimb.Create
-  (AValues: TExprList; AIsObj: Boolean; ABlock: TBlock);
+constructor TCaseItem.Create(AExpr: TExpr; AIsObj: Boolean);
 begin
-  Values := AValues;
+  Expr := AExpr;
   IsObj := AIsObj;
-  Block := ABlock;
 end;
 
-destructor TSwitchStmt.TCaseLimb.Destroy;
-begin
-  if Assigned(Values) then Values.Free;
-  if Assigned(Block) then Block.Free;
-  inherited Destroy;
-end;
+{ TSwitchStmt }
 
 constructor TSwitchStmt.Create(aExpr: TExpr; AToken: TToken);
 begin
   Inherited Create(AToken);
   FExpr := AExpr;
   FElseLimb := Nil;
-  FCaseLimbs := TCaseLimbs.Create(True);
+  FCaseLimbs := TCaseLimbs.Create;
 end;
 
 destructor TSwitchStmt.Destroy;
@@ -1052,10 +1045,9 @@ begin
   inherited Destroy;
 end;
 
-procedure TSwitchStmt.AddLimb
-  (AValues: TExprList; AIsObj: Boolean; ABlock: TBlock);
+procedure TSwitchStmt.AddLimb(AValue: TExpr; AIsObj: Boolean; ABlock: TBlock);
 begin
-  FCaseLimbs.Add(TCaseLimb.Create(AValues, AIsObj, ABlock));
+  FCaseLimbs.Add(TCaseItem.Create(AValue, AIsObj), ABlock);
 end;
 
 { TBreakStmt }
@@ -1086,13 +1078,10 @@ begin
   inherited Destroy;
 end;
 
-{ TUseStmt }
 
-constructor TUseStmt.Create(AFileName: String; AToken: TToken);
-begin
-  Inherited Create(AToken);
-  FFileName := AFileName;
-end;
+//
+// DECLARATIONS
+//
 
 { TDecl }
 
@@ -1109,12 +1098,26 @@ begin
   inherited Destroy;
 end;
 
+{ TVarDecls }
+
+constructor TVarDecls.Create(AList: TDeclList; AToken: TToken);
+begin
+  Inherited Create(Nil, dkNone, AToken);
+  FList := AList;
+end;
+
+destructor TVarDecls.Destroy;
+begin
+  if Assigned(FList) then FList.Free;
+  inherited Destroy;
+end;
+
 { TVarDecl }
 
 constructor TVarDecl.Create
   (AIdent: TIdent; AExpr: TExpr; AToken: TToken; AMutable: Boolean);
 begin
-  inherited Create(AIdent, dkVar, AToken);
+  Inherited Create(AIdent, dkVar, AToken);
   FExpr := AExpr;
   FMutable := AMutable;
 end;
@@ -1122,20 +1125,6 @@ end;
 destructor TVarDecl.Destroy;
 begin
   if Assigned(FExpr) then FExpr.Free;
-  inherited Destroy;
-end;
-
-{ TVarDecls }
-
-constructor TVarDecls.Create(AList: TDeclList; AToken: TToken);
-begin
-  inherited Create(Nil, dkNone, AToken);
-  FList := AList;
-end;
-
-destructor TVarDecls.Destroy;
-begin
-  if Assigned(FList) then FList.Free;
   inherited Destroy;
 end;
 
@@ -1161,9 +1150,9 @@ end;
 
 constructor TFuncDecl.Create(AIdent: TIdent; AToken: TToken);
 begin
-  inherited Create(AIdent, dkFunc, AToken);
+  Inherited Create(AIdent, dkFunc, AToken);
   FBody := Nil;
-  FParams := TParamList.Create();
+  FParams := TParams.Create();
 end;
 
 destructor TFuncDecl.Destroy;
@@ -1192,6 +1181,28 @@ begin
   inherited Destroy;
 end;
 
+{ TClassDecl }
+
+constructor TClassDecl.Create(AIdent: TIdent; AParent: TVariable;
+  ATraits: TExprList; ADeclList, AStaticList: TDeclList; AToken: TToken);
+begin
+  Inherited Create(AIdent, dkClass, AToken);
+  FDeclList := ADeclList;
+  FStaticList := AStaticList;
+  FParent := AParent;
+  FTraits := ATraits;
+  ClassNameList.Add(AIdent.Text);
+end;
+
+destructor TClassDecl.Destroy;
+begin
+  if Assigned(FDeclList) then FDeclList.Free;
+  if Assigned(FStaticList) then FStaticList.Free;
+  if Assigned(FParent) then FParent.Free;
+  if Assigned(FTraits) then FTraits.Free;
+  inherited Destroy;
+end;
+
 { TValDecl }
 
 constructor TValDecl.Create(AIdent: TIdent; AFuncDecl: TFuncDecl;
@@ -1199,25 +1210,6 @@ constructor TValDecl.Create(AIdent: TIdent; AFuncDecl: TFuncDecl;
 begin
   Inherited Create(AIdent, dkVal, AToken);
   FFuncDecl := AFuncDecl;
-end;
-
-{ TClassDecl }
-
-constructor TClassDecl.Create(AIdent: TIdent; AParent: TVariable;
-  ATraits: TExprList; ADeclList: TDeclList; AToken: TToken);
-begin
-  Inherited Create(AIdent, dkClass, AToken);
-  FDeclList := ADeclList;
-  FParent := AParent;
-  FTraits := ATraits;
-end;
-
-destructor TClassDecl.Destroy;
-begin
-  if Assigned(FDeclList) then FDeclList.Free;
-  if Assigned(FParent) then FParent.Free;
-  if Assigned(FTraits) then FTraits.Free;
-  inherited Destroy;
 end;
 
 { TExtensionDecl }
@@ -1288,37 +1280,26 @@ begin
   inherited Destroy;
 end;
 
-constructor TKeyValuePair.Create(AKey, AValue: TExpr);
-begin
-  Key := AKey;
-  Value := AValue;
-end;
+{ TDictDecl }
 
-destructor TKeyValuePair.Destroy;
-begin
-  if Assigned(Key) then Key.Free;
-  if Assigned(Value) then Value.Free;
-  inherited Destroy;
-end;
-
-constructor TDictDecl.Create
-  (AIdent: TIdent; ADeclList: TDeclList; AToken: TToken);
+constructor TDictDecl.Create(AIdent: TIdent; AKeyValueList: TKeyValueList;
+  ADeclList: TDeclList; AToken: TToken);
 begin
   inherited Create(AIdent, dkDict, AToken);
-  FElements := TKeyValueList.Create;
+  FKeyValueList := AKeyValueList;
   FDeclList := ADeclList;
 end;
 
 destructor TDictDecl.Destroy;
 begin
+  if Assigned(FKeyValueList) then FKeyValueList.Free;
   if Assigned(FDeclList) then FDeclList.Free;
-  FElements.Free;
   inherited Destroy;
 end;
 
 procedure TDictDecl.AddElement(KeyExpr, ValueExpr: TExpr);
 begin
-  FElements.Add(TKeyValuePair.Create(KeyExpr, ValueExpr));
+  FKeyValueList.Add(KeyExpr, ValueExpr);
 end;
 
 { TDictDeclExpr }
@@ -1350,11 +1331,11 @@ end;
 
 function TEnumElementsHelper.Copy: TEnumElements;
 var
-  i: Integer;
+  Key: String;
 begin
   Result := TEnumElements.Create();
-  for i := 0 to self.Count-1 do
-    Result.Add(self.Keys[i], TEnumElement(self.Data[i]).Copy);
+  for Key in Self.Keys do
+    Result.Add(Key, TEnumElement(Self[Key]).Copy);
 end;
 
 constructor TEnumDecl.Create(AIdent: TIdent; ADeclList: TDeclList; AToken: TToken);
@@ -1368,12 +1349,12 @@ end;
 destructor TEnumDecl.Destroy;
 begin
   if Assigned(FDeclList) then FDeclList.Free;
-  FCaseTable.Free;
   FElements.Free;
+  FCaseTable.Free;
   inherited Destroy;
 end;
 
-procedure TEnumDecl.AddElement(const SetName, Name: String; Value: Variant);
+procedure TEnumDecl.AddElement(const SetName, Name: String; const Value: Variant);
 begin
   FElements.Add(Name, TEnumElement.Create(Value, SetName));
 end;
@@ -1393,5 +1374,10 @@ begin
 end;
 
 
+initialization
+  ClassNameList := TClassNameList.Create;
+
+finalization
+  ClassNameList.Free;
 end.
 

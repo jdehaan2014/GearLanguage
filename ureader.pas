@@ -23,33 +23,30 @@ unit uReader;
 interface
 
 uses
-  Classes, SysUtils, uCollections;
+  Classes, SysUtils, Generics.Collections;
 
 const
   //on Unix '^D' on windows ^Z (#26)
-  //FileEnding = ^D;
   {$IFDEF UNIX}
     FileEnding = ^D;
   {$ENDIF}
   {$IFDEF WINDOWS}
-    FileEnding = ^Z (#26)
+    FileEnding = ^Z //(#26)
   {$ENDIF}
 
 type
 
   TInputType = (itPrompt, itFile);
 
-  TReader = class
+  { TReader }
+
+  TReader = class(TStringList)
     private
       FFileName: TFileName;
       FFileIndex: Integer;
-      FSource: string;
-      FIndex: LongInt;
-      FCount: LongInt;
+      Index: LongInt;
       function getPeekChar: char;
     public
-      property Count: LongInt read FCount;
-      property Index: LongInt read FIndex;
       property FileName: TFileName read FFileName;
       property FileIndex: Integer read FFileIndex;
       property PeekChar: char read getPeekChar;
@@ -57,50 +54,46 @@ type
       function NextChar: char;
   end;
 
-  TFileNameArray = specialize TArray<TFileName>;
+  TFileNameArray = specialize TList<TFileName>;
 
 var
   FileNameArray: TFileNameArray;
 
 implementation
 
-constructor TReader.Create(Source: String; InputType: TInputType);
-var
-  SourceCode: TStringList = Nil;
-begin
-  FFileName := '';
-  FIndex := 1;
-  FFileIndex := -1;
-  case InputType of
-    itPrompt: FSource := Source;
-    itFile:
-      try
-        FFileName := Source;
-        FFileIndex := FileNameArray.Add(FFileName);
-        SourceCode := TStringList.Create;
-        SourceCode.LoadFromFile(FFileName);
-        FSource := SourceCode.Text;
-      finally
-        if Assigned(SourceCode) then SourceCode.Free;
-      end;
-  end;
-  FCount := FSource.Length;
-end;
+{ TReader }
 
-function TReader.NextChar: char;
+function TReader.getPeekChar: char; //peek at next character, but don't process it
 begin
   try
-    Result := FSource[FIndex];
-    Inc(FIndex);
+    Result := Text[Index];
   except
     Result := FileEnding;
   end;
 end;
 
-function TReader.getPeekChar: char;  //peek at next character, but don't process it
+constructor TReader.Create(Source: String; InputType: TInputType);
+begin
+  inherited Create;
+  FFileName := '';
+  FFileIndex := -1;
+  Index := 1;
+  case InputType of
+    itPrompt: add(Source);
+    itFile:
+      begin
+        FFileName := Source;
+        FFileIndex := FileNameArray.Add(FFileName);
+        LoadFromFile(FFileName);
+      end;
+  end;
+end;
+
+function TReader.NextChar: char;
 begin
   try
-    Result := FSource[FIndex];
+    Result := Text[Index];
+    Inc(Index);
   except
     Result := FileEnding;
   end;
@@ -110,7 +103,6 @@ initialization
   FileNameArray := TFileNameArray.Create;
 finalization
   FileNameArray.Free;
-end.
 
 end.
 

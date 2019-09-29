@@ -23,7 +23,7 @@ unit uError;
 interface
 
 uses
-  Classes, SysUtils, uToken, uCollections;
+  Classes, SysUtils, uToken, Generics.Collections;
 
 type
 
@@ -36,7 +36,7 @@ type
     function toString: String; override;
   end;
 
-  TErrors = class(specialize TArrayObj<TErrorItem>)
+  TErrors = class(specialize TObjectList<TErrorItem>)
     procedure Append(const ALine, ACol: Integer; const AMsg: String);
     procedure Append(AToken: TToken; const AMsg: String);
     function isEmpty: Boolean;
@@ -45,9 +45,6 @@ type
   end;
 
   EParseError = class(Exception);
-
-  EBreakException = class(Exception);
-  EContinueException = class(Exception);
 
   ERuntimeError = class(Exception)
     Token: TToken;
@@ -59,8 +56,11 @@ type
     constructor Create(AValue: Variant);
   end;
 
+  EBreakException = class(Exception);
+  EContinueException = class(Exception);
+
 procedure RuntimeError(E: ERuntimeError);
-//procedure RuntimeWarning(E: ERuntimeError);
+procedure RuntimeWarning(E: ERuntimeError);
 
 var
   Errors: TErrors;
@@ -75,7 +75,6 @@ begin
   Line := ALine;
   Col := ACol;
   Msg := AMsg;
-  FileIndex := 0;
 end;
 
 constructor TErrorItem.Create(AToken: TToken; const AMsg: String);
@@ -135,11 +134,14 @@ begin
   Exit;
 end;
 
-//procedure RuntimeWarning(E: ERuntimeError);
-//begin
-//  WriteLn('@[' + IntToStr(E.Token.Line) + ',' + IntToStr(E.Token.Col) + '] ' +
-//    'Runtime warning: ', E.Message);
-//end;
+procedure RuntimeWarning(E: ERuntimeError);
+const
+  ErrString = '@[%d,%d] in %s - Runtime warning: %s';
+begin
+  with E.Token do
+    Writeln(Format(ErrString,
+      [Line, Col, ExtractFileName(FileNameArray[FileIndex]), E.Message]));
+end;
 
 { ERuntimeError }
 

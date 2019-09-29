@@ -83,9 +83,13 @@ var
   Parser: TParser;
   Tree: TProduct = Nil;
   Resolver: TResolver;
+  Reader: TReader;
+  Lexer: TLexer;
 begin
   try
-    Parser := TParser.Create(TLexer.Create(TReader.Create(Source, InputType)));
+    Reader := TReader.Create(Source, InputType);
+    Lexer := TLexer.Create(Reader);
+    Parser := TParser.Create(Lexer);
     Tree := Parser.Parse;
     Resolver := TResolver.Create;
     Resolver.Resolve(Tree);
@@ -93,11 +97,12 @@ begin
       WriteLn(Errors.toString)
     else
       Interpreter.Execute(Tree);
-
   finally
     if Assigned(Tree) then Tree.Free;
-    Resolver.Free;
+    Reader.Free;
+    Lexer.Free;
     Parser.Free;
+    Resolver.Free;
   end;
 end;
 
@@ -124,7 +129,7 @@ end;
 class procedure Language.ExecutePrintAST(const Source: String);
 var
   Parser: TParser;
-  Tree: TProduct = Nil;
+  Tree: TProduct;
 begin
   WriteLn('Gear AST ', GearVersion, ' - (c) J. de Haan 2018', LineEnding);
   try
@@ -132,8 +137,7 @@ begin
     Tree := Parser.Parse;
     if not Errors.isEmpty then
       WriteLn(Errors.toString);
-    if Assigned(Tree) then
-      PrintAST(Tree);
+    PrintAST(Tree);
 
   finally
     Parser.Free;

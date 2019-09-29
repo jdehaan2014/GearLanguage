@@ -34,7 +34,7 @@ type
         TFuncForm = (ffFunction, ffAnonym, ffInit);
     private
       Tokens: TTokens;
-      Current: Integer;
+      Current: integer;
       LoopDepth: Integer;
       function CurrentToken: TToken;
       function Peek: TToken;
@@ -44,15 +44,12 @@ type
       procedure Synchronize(Types: TTokenTypSet);
       function isLastToken: Boolean;
       function MakeID(Name: String): TIdent;
+      function ParseExprList: TExprList;
     public
       constructor Create(Lexer: TLexer);
-      destructor Destroy; override;
       function Parse: TProduct;
     private
       function ParseIdent: TIdent;
-      function ParseExprList: TExprList;
-      function ParseKeyValuePair: TKeyValuePair;
-      function ParseKeyValueList: TKeyValueList;
       // Expressions
       function ParseExpr: TExpr;
       function isRelOp: Boolean;
@@ -62,8 +59,8 @@ type
       function isMulOp: Boolean;
       function ParseShiftExpr: TExpr;
       function isShiftOp: Boolean;
-      function ParseUnaryExpr: TExpr;
       function ParseRangeExpr: TExpr;
+      function ParseUnaryExpr: TExpr;
       function ParseCallExpr: TExpr;
       function ParseCallArgs(Callee: TExpr): TExpr;
       function ParseIfExpr: TExpr;
@@ -72,13 +69,13 @@ type
       function ParseParenExpr: TExpr;
       function ParseSelfExpr: TExpr;
       function ParseInheritedExpr: TExpr;
-      function ParseBracketExpr: TExpr;
       function ParseArrayDeclExpr(FirstExpr: TExpr): TExpr;
       function ParseDictDeclExpr(KeyExpr: TExpr): TExpr;
+      function ParseBracketExpr: TExpr;
       function ParseSetBuilderExpr: TExpr;
       function ParseInterpolatedExpr: TExpr;
       function ParseFactor: TExpr;
-      // Assignments
+      // Statements
       function ParseStmt: TStmt;
       function ParsePrintStmt: TStmt;
       function ParseAssignStmt: TStmt;
@@ -95,19 +92,19 @@ type
       function ParseUseStmt: TStmt;
       // Declarations
       function ParseDecl: TDecl;
-      function ParseDeclList(DeclSet: TTokenTypSet; const TypeName: String
-        ): TDeclList;
+      function ParseDeclList(DeclSet: TTokenTypSet; const TypeName: String): TDeclList;
       function ParseVarDecl(Mutable: Boolean): TDecl;
       function ParseVarDecls(Mutable: Boolean): TDecl;
       function ParseFuncDecl(FuncForm: TFuncForm): TDecl;
-      function ParseValDecl: TDecl;
       function ParseClassDecl: TDecl;
+      function ParseValDecl: TDecl;
       function ParseExtensionDecl: TDecl;
       function ParseTraitDecl: TDecl;
       function ParseArrayDecl: TDecl;
+      function ParseKeyValueList: TKeyValueList;
       function ParseDictDecl: TDecl;
       function ParseEnumDecl: TDecl;
-      // Block
+      // Blocks
       function ParseNode: TNode;
       function ParseBlock: TBlock;
       function ParseProduct: TProduct;
@@ -125,18 +122,17 @@ const
   ErrInvalidAssignTarget = 'Invalid assignment target.';
   ErrExpectedAssignOpFunc = 'Expected assignment operator, or function call.';
   ErrUnrecognizedDeclOrStmt = 'Unrecognized declaration or statement.';
-  ErrBreakOutsideLoop = 'Break can only be used from inside a loop.';
-  ErrInvalidParameter = 'Invalid parameter.';
+  ErrBreakInLoop = 'Break can only be used from inside a loop.';
   ErrExpectedArrow = 'Expected arrow "=>".';
   ErrIncorrectInherit = 'Incorrect inheritance expression.';
   ErrUnallowedDeclIn = 'Unallowed declaration in "%s".';
   ErrNotExistsUseFile = 'Used file "%s" does not exist.';
   ErrIncorrectUseFile = 'Used file "%s" is incorrect or corrupt.';
+  ErrNotAllowedInRange = 'Token "%s" not allowed in range expression.';
   ErrAtLeastOneEnum = 'At least one enum is required in declaration.';
   ErrDuplicateEnum = 'Duplicate enum name "%s".';
-  ErrDuplicateSetName = 'Duplicate enum set name "%s".';
   ErrNotAllowedInEnum = 'Constant value "%s" not allowed in enum declaration.';
-  ErrNotAllowedInRange = 'Token type "%s" not allowed in range expression.';
+  ErrDuplicateSetName = 'Duplicate enum set name "%s".';
 
 function TParser.CurrentToken: TToken;
 begin
@@ -179,24 +175,6 @@ begin
   Result := Current = Tokens.Count-1;
 end;
 
-constructor TParser.Create(Lexer: TLexer);
-//var
-//  Token: TToken;
-begin
-  Tokens := Lexer.Tokens;
-  Current := 0;
-  LoopDepth := 0;
-
-  //for Token in Tokens do
-  //  writeln(Token.toString);
-end;
-
-destructor TParser.Destroy;
-begin
-  if Assigned(Tokens) then Tokens.Free;
-  inherited Destroy;
-end;
-
 function TParser.MakeID(Name: String): TIdent;
 begin
   with CurrentToken do
@@ -204,18 +182,16 @@ begin
       ttIdentifier, Name, Null, Line, Col, FileIndex));
 end;
 
+constructor TParser.Create(Lexer: TLexer);
+begin
+  Tokens := Lexer.Tokens;
+  Current := 0;
+  LoopDepth := 0;
+end;
+
 function TParser.Parse: TProduct;
 begin
   Result := ParseProduct;
-end;
-
-function TParser.ParseIdent: TIdent;
-var
-  Token: TToken;
-begin
-  Token := CurrentToken;
-  Expect(ttIdentifier);
-  Result := TIdent.Create(Token);
 end;
 
 function TParser.ParseExprList: TExprList;
@@ -228,24 +204,13 @@ begin
   end;
 end;
 
-function TParser.ParseKeyValuePair: TKeyValuePair;
+function TParser.ParseIdent: TIdent;
 var
-  Key, Value: TExpr;
+  Token: TToken;
 begin
-  Key := ParseExpr;
-  Expect(ttColon);
-  Value := ParseExpr;
-  Result := TKeyValuePair.Create(Key, Value);
-end;
-
-function TParser.ParseKeyValueList: TKeyValueList;
-begin
-  Result := TKeyValueList.Create();
-  Result.Add(ParseKeyValuePair);
-  while CurrentToken.Typ = ttComma do begin
-    Next;  // skip ,
-    Result.Add(ParseKeyValuePair);
-  end;
+  Token := CurrentToken;
+  Expect(ttIdentifier);
+  Result := TIdent.Create(Token);
 end;
 
 function TParser.ParseExpr: TExpr;
@@ -262,9 +227,8 @@ end;
 
 function TParser.isRelOp: Boolean;
 begin
-  Result := CurrentToken.Typ in
-    [ttEQ, ttNEQ, ttGT, ttGE, ttLT, ttLE, ttIn, ttIs];
-  //  =     <>    >     >=     <    <=     in   is
+  Result := CurrentToken.Typ in [ttEQ, ttNEQ, ttGT, ttGE, ttLT, ttLE, ttIn, ttIs];
+  //                               =     <>    >     >=     <    <=    in    is
 end;
 
 function TParser.ParseAddExpr: TExpr;
@@ -300,7 +264,7 @@ end;
 function TParser.isMulOp: Boolean;
 begin
   Result := CurrentToken.Typ in [ttMul, ttDiv, ttRem, ttAnd, ttColons];
-  //                               *      /      %      &        ::
+  //                               *      /      %      &       ::
 end;
 
 function TParser.ParseShiftExpr: TExpr;
@@ -320,7 +284,6 @@ begin
   Result := CurrentToken.Typ in [ttShl, ttShr, ttPow];
   //                               <<     >>     ^
 end;
-
 
 function TParser.ParseRangeExpr: TExpr;
 var
@@ -375,17 +338,19 @@ begin
     Result := ParseCallExpr;
 end;
 
-
 function TParser.ParseCallExpr: TExpr;
+var
+  Token: TToken;
 begin
+  Token := CurrentToken;
   Result := ParseFactor;
   while CurrentToken.Typ in [ttDot, ttOpenParen, ttOpenBrack] do
     case CurrentToken.Typ of
-      ttOpenParen: Result := ParseCallArgs(Result);
       ttDot: begin
-        Next; // skip '.'
-        Result := TGetExpr.Create(Result, ParseIdent);
-      end;
+          Next; // skip .
+          Result := TGetExpr.Create(Result, ParseFactor, Token);
+        end;
+      ttOpenParen: Result := ParseCallArgs(Result);
       ttOpenBrack: begin
         Next; // skip [
         Result := TIndexedExpr.Create(Result, ParseExpr);
@@ -398,15 +363,19 @@ function TParser.ParseCallArgs(Callee: TExpr): TExpr;
 var
   CallExpr: TCallExpr;
   Token: TToken;
+  Signature: TExpr;
+  ParamNames: String = '';
 
-  procedure ParseArg;
+  function ParseArgument: String;
   var
     Expr: TExpr;
     Ident: TIdent = Nil;
   begin
+    Result := '';
     Expr := ParseExpr;
     if CurrentToken.Typ = ttColon then begin
       Ident := TVariable(Expr).Ident; // ExtIdent parsed as Expr
+      Result := '#' + Ident.Text;
       Next; // skip :
       Expr := ParseExpr;
     end;
@@ -418,12 +387,32 @@ begin
   Next;  // skip (
   CallExpr := TCallExpr.Create(Callee, Token);
   if CurrentToken.Typ <> ttCloseParen then begin
-    ParseArg;
+    ParamNames := ParseArgument;
     while CurrentToken.Typ = ttComma do begin
       Next;  // skip ,
-      ParseArg;
+      ParamNames += ParseArgument;
     end;
   end;
+  if ParamNames <> '' then begin
+    if Callee is TVariable then with Callee as TVariable do begin
+      Signature := TVariable.Create(TIdent.Create(Ident.Token.Copy));
+      TVariable(Signature).Ident.Text := Ident.Text + ParamNames;
+    end
+    else if Callee is TGetExpr then with Callee as TGetExpr do begin
+      Signature := TGetExpr.Create(Instance, TVariable.Create(
+        TIdent.Create(TVariable(Member).Ident.Token.Copy)), Token.Copy);
+      TVariable(TGetExpr(Signature).Member).Ident.Text :=
+        TVariable(Member).Ident.Text + ParamNames;
+    end
+    else if Callee is TInheritedExpr then with Callee as TInheritedExpr do begin
+      Signature := TInheritedExpr.Create(Variable, TVariable.Create(
+        TIdent.Create(TVariable(Method).Ident.Token.Copy)));
+      TVariable(TInheritedExpr(Signature).Method).Ident.Text :=
+        TVariable(Method).Ident.Text + ParamNames;
+    end
+  end
+  else Signature := Callee;
+  CallExpr.Signature := Signature;
   Expect(ttCloseParen);
   Result := CallExpr;
 end;
@@ -446,23 +435,26 @@ end;
 function TParser.ParseMatchExpr: TExpr;
 var
   Token: TToken;
-  Values: TExprList;
-  Expr: TExpr;
+  Value, Expr: TExpr;
   MatchExpr: TMatchExpr;
+  Values: TExprList;
 begin
   Token := CurrentToken;
   Next; // skip 'match'
-  Expr := ParseExpr;
-  MatchExpr := TMatchExpr.Create(Expr, Token);
+  MatchExpr := TMatchExpr.Create(ParseExpr, Token);
   Expect(ttIf); // one 'if' is mandatory
   Values := ParseExprList;
   Expect(ttThen);
-  MatchExpr.AddLimb(Values, ParseExpr);
+  Expr := ParseExpr;
+  for Value in Values do
+    MatchExpr.AddLimb(Value, Expr);
   while CurrentToken.Typ = ttIf do begin
     Next;  // skip if
     Values := ParseExprList;
     Expect(ttThen);
-    MatchExpr.AddLimb(Values, ParseExpr);
+    Expr := ParseExpr;
+    for Value in Values do
+      MatchExpr.AddLimb(Value, Expr);
   end;
   Expect(ttElse);  // else is mandatory
   MatchExpr.ElseLimb := ParseExpr;
@@ -484,7 +476,6 @@ begin
   end
   else Result := TVariable.Create(Ident);
 end;
-
 
 function TParser.ParseParenExpr: TExpr;
 var
@@ -515,7 +506,7 @@ begin
         Result := TTupleExpr.Create(ExprList, CurrentToken);
     end
     else begin
-      Result := Expr;
+      Result := Expr;  // it’s a regular parenthesised expression
       Expect(ttCloseParen);
     end;
   end
@@ -543,54 +534,22 @@ end;
 
 function TParser.ParseInheritedExpr: TExpr;
 var
-  Variable: TVariable;
-  Token: TToken;
+  Variable, Method: TVariable;
 begin
   Variable := TVariable.Create(TIdent.Create(CurrentToken));
   Next;  // skip inherited
-  if CurrentToken.Typ = ttIdentifier then
-    Result := TInheritedExpr.Create(Variable, ParseIdent)
-  else if CurrentToken.Typ in [ttInit, ttOpenParen] then begin
-    if CurrentToken.Typ = ttOpenParen then
-      with CurrentToken do
-        Token := TToken.Create(ttIdentifier, 'init', Null, Line, Col, FileIndex)
-    else begin
-      Token := CurrentToken;
-      Next;
-    end;
-    Result := TInheritedExpr.Create(Variable, TIdent.Create(Token));
+  if CurrentToken.Typ in [ttIdentifier, ttInit] then begin
+    Method := TVariable.Create(TIdent.Create(CurrentToken));
+    Next; // skip method name
   end
-  else Error(CurrentToken, ErrIncorrectInherit);
+  else if CurrentToken.Typ = ttOpenParen then with CurrentToken do
+    Method := TVariable.Create(TIdent.Create(TToken.Create(
+      ttIdentifier, 'init', Null, Line, Col, FileIndex)))
+  else
+    Error(CurrentToken, ErrIncorrectInherit);
+  Result := TInheritedExpr.Create(Variable, Method);
 end;
 
-function TParser.ParseBracketExpr: TExpr;
-var
-  Expr: TExpr;
-  ArrayDecl: TArrayDecl;
-  DictDecl: TDictDecl;
-begin
-  Next; // skip [
-  case CurrentToken.Typ of
-    ttCloseBrack: begin    // an empty array
-      ArrayDecl := TArrayDecl.Create(Nil, TDeclList.Create(false), CurrentToken);
-      Result := TArrayDeclExpr.Create(ArrayDecl);
-    end;
-    ttColon: begin        // an empty dictionary
-      DictDecl := TDictDecl.Create(Nil,TDeclList.Create(false), CurrentToken);
-      Result := TDictDeclExpr.Create(DictDecl);
-      Next;  // skip :
-    end
-    else                 // a filled array or dictionary
-      begin
-        Expr := ParseExpr;       // parse the first expr
-        if CurrentToken.Typ = ttColon then    // then check for ‘:’
-          Result := ParseDictDeclExpr(Expr)   // a dictionary; pass the first expr
-        else
-          Result := ParseArrayDeclExpr(Expr); // an array; pass the first expr
-      end;
-  end;
-  Expect(ttCloseBrack);   // final closing bracket
-end;
 
 function TParser.ParseArrayDeclExpr(FirstExpr: TExpr): TExpr;
 var
@@ -610,7 +569,8 @@ var
   DictDecl: TDictDecl;
   Key: TExpr;
 begin
-  DictDecl := TDictDecl.Create(Nil, TDeclList.Create(false), CurrentToken);
+  DictDecl := TDictDecl.Create(Nil, TKeyValueList.Create,
+                TDeclList.Create(false), CurrentToken);
   Expect(ttColon);
   DictDecl.AddElement(KeyExpr, ParseExpr);
   while CurrentToken.Typ = ttComma do begin
@@ -621,6 +581,38 @@ begin
   end;
   Result := TDictDeclExpr.Create(DictDecl);
 end;
+
+function TParser.ParseBracketExpr: TExpr;
+var
+  Expr: TExpr;
+  ArrayDecl: TArrayDecl;
+  DictDecl: TDictDecl;
+begin
+  Next; // skip [
+  case CurrentToken.Typ of
+    ttCloseBrack: begin    // an empty array
+      ArrayDecl := TArrayDecl.Create(Nil, TDeclList.Create(false), CurrentToken);
+      Result := TArrayDeclExpr.Create(ArrayDecl);
+    end;
+    ttColon: begin        // an empty dictionary
+      DictDecl := TDictDecl.Create(Nil, TKeyValueList.Create,
+                    TDeclList.Create(false), CurrentToken);
+      Result := TDictDeclExpr.Create(DictDecl);
+      Next;  // skip :
+    end
+    else                 // a filled array or dictionary
+      begin
+        Expr := ParseExpr;       // parse the first expr
+        if CurrentToken.Typ = ttColon then    // then check for ‘:’
+          Result := ParseDictDeclExpr(Expr)   // a dictionary; pass the first expr
+        else
+          Result := ParseArrayDeclExpr(Expr); // an array; pass the first expr
+      end;
+  end;
+  Expect(ttCloseBrack);   // final closing bracket
+end;
+
+
 
 function TParser.ParseSetBuilderExpr: TExpr;
 var
@@ -679,8 +671,7 @@ begin
   Token := CurrentToken;
   ExprList := TExprList.Create();
   while CurrentToken.Typ = ttInterpolated do begin
-    // Opening string part
-    ExprList.Add(TConstExpr.Create(CurrentToken.Value, CurrentToken));
+    ExprList.Add(TConstExpr.Create(CurrentToken.Value, CurrentToken)); // Opening string
     Next;
     ExprList.Add(ParseExpr);          // Interpolated expression
   end;
@@ -715,17 +706,17 @@ begin
     ttInterpolated: Result := ParseInterpolatedExpr;
     ttOpenParen: Result := ParseParenExpr;
     ttOpenBrace: Result := ParseSetBuilderExpr;
-    ttOpenBrack: Result := ParseBracketExpr;
+    ttOpenBrack: Result := ParseBracketExpr; // [ array or dictionary
     else begin
       Result := TExpr.Create(CurrentToken);
-      Error(CurrentToken, Format(ErrUnexpectedToken, [CurrentToken.toString]));
+      Error(CurrentToken,Format(ErrUnexpectedToken, [CurrentToken.toString]));
     end;
   end;
 end;
 
 const
-  StmtStartSet: TTokenTypSet = [ttIf, ttWhile, ttRepeat, ttFor, ttReturn,
-    ttSwitch, ttEnsure, ttPrint, ttInherited, ttSelf, ttUse, ttBreak,
+  StmtStartSet: TTokenTypSet = [ttIf, ttWhile, ttRepeat, ttFor, ttSwitch,
+    ttReturn, ttEnsure, ttPrint, ttInherited , ttSelf, ttUse, ttBreak,
     ttContinue, ttIdentifier];
 
 function TParser.ParseStmt: TStmt;
@@ -809,8 +800,7 @@ begin
     if Left is TVariable then
       Result := TAssignStmt.Create(Left as TVariable, Op, Right)
     else if Left is TGetExpr then
-      with Left as TGetExpr do
-        Result := TSetStmt.Create(Instance, Ident, Op, Right)
+      Result := TSetStmt.Create(Left as TGetExpr, Op, Right)
     else if Left is TIndexedExpr then
       Result := TIndexedExprStmt.Create(Left as TIndexedExpr, Op, Right)
     else
@@ -829,14 +819,14 @@ var
   Condition: TExpr;
   ThenPart: TBlock;
   ElsePart: TBlock = Nil;
-  ConditionList: TExprList = Nil;
-  ElseIfParts: TBlockList = Nil;
+  ElseIfExprs: TExprList = Nil;
+  ElseIfParts: TBlocks = Nil;
 begin
   Token := CurrentToken;
   Next; // skip if
   if CurrentToken.Typ in [ttVar, ttLet] then begin
     VarToken := CurrentToken;
-    Next;
+    Next; // skip var or let
     VarDecl := ParseVarDecl(VarToken.Typ = ttVar) as TVarDecl;
     Expect(ttWhere);
   end;
@@ -844,21 +834,21 @@ begin
   Expect(ttThen);
   ThenPart := ParseBlock;
   if CurrentToken.Typ = ttElseif then begin
-    ConditionList := TExprList.Create();
-    ElseIfParts := TBlockList.Create();
+    ElseIfExprs := TExprList.Create();
+    ElseIfParts := TBlocks.Create();
     repeat
       Next;  // skip elseif
-      ConditionList.Add(ParseExpr);
+      ElseIfExprs.Add(ParseExpr);
       Expect(ttThen);
       ElseIfParts.Add(ParseBlock);
-    until CurrentToken.Typ <> ttElseif;
+    until CurrentToken.Typ <> ttElseIf;
   end;
   if CurrentToken.Typ = ttElse then begin
     Next; // skip else
     ElsePart := ParseBlock;
   end;
   Expect(ttEnd);
-  Result := TIfStmt.Create(VarDecl, Condition, ConditionList,
+  Result := TIfStmt.Create(VarDecl, Condition, ElseIfExprs,
     ThenPart, ElsePart, ElseIfParts, Token);
 end;
 
@@ -894,17 +884,12 @@ var
   Condition: TExpr;
   Block: TBlock;
 begin
-  try
-    Inc(LoopDepth);
-    Token := CurrentToken;
-    Next; // skip repeat
-    Block := ParseBlock;
-    Expect(ttUntil);
-    Condition := ParseExpr;
-    Result := TRepeatStmt.Create(Condition, Block, Token);
-  finally
-    Dec(LoopDepth);
-  end;
+  Token := CurrentToken;
+  Next; // skip repeat
+  Block := ParseBlock;
+  Expect(ttUntil);
+  Condition := ParseExpr;
+  Result := TRepeatStmt.Create(Condition, Block, Token);
 end;
 
 function TParser.ParseForStmt: TStmt;
@@ -961,29 +946,32 @@ begin
   end;
   Expect(ttDo);
 
-  // create initial iterator vardecl: var iterator := list.iterator
+  // create initial iterator vardecl: var iterator := ListExpr.iterator
   IterDecl := TVarDecl.Create(MakeID('iterator'),
-    TGetExpr.Create(ListExpr, MakeID('iterator')), Nil);
+    TGetExpr.Create(ListExpr, TVariable.Create(MakeID('iterator')), Nil), Nil);
 
   // build condition: iterator.hasNext
   Condition := TGetExpr.Create(
-    TVariable.Create(MakeID('iterator')), MakeID('hasNext'));
+    TVariable.Create(MakeID('iterator')), TVariable.Create(MakeID('hasNext')), Nil);
 
-  // build var loopvar := iterator.next
+  // build var LoopIdent := iterator.next
   VarDecl := TVarDecl.Create(LoopIdent,
-    TGetExpr.Create(TVariable.Create(MakeID('iterator')), MakeID('next')), Nil);
+    TGetExpr.Create(TVariable.Create(MakeID('iterator')), TVariable.Create(MakeID('next')), Nil), Nil);
 
+  // build where-expression into if-statement
   if Assigned(WhereExpr) then begin
     IfStmt := TIfStmt.Create(Nil, WhereExpr, Nil,
-      TBlock.Create(TNodeList.Create(), Nil), Nil, Nil, Nil);
+                TBlock.Create(TNodeList.Create(), Nil), Nil, Nil, Nil);
     IfStmt.ThenPart := ParseBlock;
     Block := TBlock.Create(TNodeList.Create(), Nil);
     Block.Nodes.Add(VarDecl);
     Block.Nodes.Add(IfStmt);
   end else begin
+    // parse the block
     Block := ParseBlock;
     Block.Nodes.Insert(0, VarDecl);   // insert VarDecl at start of block
   end;
+
   Result := TWhileStmt.Create(IterDecl, Condition, Block, Nil);
 end;
 
@@ -1012,32 +1000,28 @@ end;
 function TParser.ParseSwitchStmt: TStmt;
 var
   Token: TToken;
-  Values: TExprList;
+  Value: TExpr;
+  IsObj: Boolean=False;
   SwitchStmt: TSwitchStmt;
-  IsObj: Boolean = False;
+  Values: TExprList;
+  Block: TBlock;
 begin
   Token := CurrentToken;
   Next; // skip 'switch'
   SwitchStmt := TSwitchStmt.Create(ParseExpr, Token);
-  Expect(ttCase); // one 'case' is mandatory
-  if CurrentToken.Typ = ttIs then begin
-    Next; // skip is
-    IsObj := True;
-  end;
-  Values := ParseExprList;
-  Expect(ttColon);
-  SwitchStmt.AddLimb(Values, IsObj, ParseBlock);
-  while CurrentToken.Typ = ttCase do begin
-    Next;  // skip case
-    IsObj := False;
+  repeat
+    Expect(ttCase); // one 'case' is mandatory
     if CurrentToken.Typ = ttIs then begin
       Next; // skip is
       IsObj := True;
     end;
     Values := ParseExprList;
     Expect(ttColon);
-    SwitchStmt.AddLimb(Values, IsObj, ParseBlock);
-  end;
+    Block := ParseBlock;
+    for Value in Values do
+      SwitchStmt.AddLimb(Value, IsObj, Block);
+    IsObj := False;
+  until CurrentToken.Typ <> ttCase;
   Expect(ttElse);  // else is mandatory
   SwitchStmt.ElseLimb := ParseBlock;
   Expect(ttEnd);
@@ -1050,7 +1034,7 @@ var
   Condition: TExpr=Nil;
 begin
   if LoopDepth = 0 then
-    Error(CurrentToken, ErrBreakOutsideLoop);
+    Error(CurrentToken, ErrBreakInLoop);
   Token := CurrentToken;
   Next; // skip Break
   if CurrentToken.Typ = ttOn then begin
@@ -1082,9 +1066,8 @@ const Ext = '.gear';
 var
   Token: TToken;
   Ident: TIdent;
-  Index, i: LongInt;
-  FileName: String;
-  UseFile: String = '';
+  Index: LongInt;
+  FileName, UseFile: String;
   Lexer: TLexer = Nil;
   Reader: TReader = Nil;
 begin
@@ -1098,7 +1081,6 @@ begin
   else if FileExists(GearLibFolder + FileName + Ext) then
     UseFile := GearLibFolder + FileName + Ext
   else Error(Ident.Token, Format(ErrNotExistsUseFile, [FileName]));
-
   if not FileNameArray.Contains(UseFile) then begin
     try
       Reader := TReader.Create(UseFile, itFile);
@@ -1106,18 +1088,19 @@ begin
       Error(Ident.Token, Format(ErrIncorrectUseFile, [FileName]));
     end;
     Lexer := TLexer.Create(Reader);
-    //Insert the new tokens in the main tokens list
+    //Insert the new tokens in the main tokens list, minus the last EOF token
     Index := Current;
-    for i := 0 to Lexer.Tokens.Count-2 do
-      Tokens.Insert(Index+i, Lexer.Tokens[i]);
-  end
+    Lexer.Tokens.Delete(Lexer.Tokens.Count-1);
+    Tokens.InsertRange(Index, Lexer.Tokens);
+  end;
 end;
+
 
 { DECLARATIONS }
 
 const
-  DeclStartSet: TTokenTypSet = [ttArray, ttClass, ttDictionary, ttEnum,
-    ttExtension, ttFunc, ttLet, ttVal, ttVar, ttTrait];
+  DeclStartSet: TTokenTypSet = [ttArray, ttClass, ttDictionary, ttEnum, ttExtension,
+    ttFunc, ttLet, ttVal, ttVar, ttTrait];
 
 function TParser.ParseDecl: TDecl;
 begin
@@ -1128,8 +1111,8 @@ begin
     ttEnum: Result := ParseEnumDecl;
     ttExtension: Result := ParseExtensionDecl;
     ttFunc: Result := ParseFuncDecl(ffFunction);
-    ttLet, ttVar: Result := ParseVarDecls(CurrentToken.Typ = ttVar);
     ttVal: Result := ParseValDecl;
+    ttLet, ttVar: Result := ParseVarDecls(CurrentToken.Typ = ttVar);
     ttTrait: Result := ParseTraitDecl;
   end;
 end;
@@ -1149,13 +1132,11 @@ function TParser.ParseVarDecl(Mutable: Boolean): TDecl;
 var
   Ident: TIdent;
   Token: TToken;
-  Expr: TExpr;
 begin
   Token := CurrentToken;
   Ident := ParseIdent;
   Expect(ttAssign);
-  Expr := ParseExpr;
-  Result := TVarDecl.Create(Ident, Expr, Token, Mutable);
+  Result := TVarDecl.Create(Ident, ParseExpr, Token, Mutable);
 end;
 
 function TParser.ParseVarDecls(Mutable: Boolean): TDecl;
@@ -1177,8 +1158,9 @@ var
   FuncDecl: TFuncDecl;
   Token: TToken;
   Name: TIdent = Nil;
+  Signature: String = '';
 
-  procedure ParseParameters;
+  procedure ParseParameters(var FuncHeader: String);
 
     procedure ParseParam;
     var Ident: TIdent;
@@ -1196,8 +1178,10 @@ var
           else
             FuncDecl.AddParam(Ident, Nil);
         end
-        else Error(CurrentToken, ErrInvalidParameter);
+        else Error(CurrentToken, 'Invalid parameter.');
       end;
+      if FuncDecl.Params.Last.ExtIdent <> Nil then
+        FuncHeader += '#' + FuncDecl.Params.Last.ExtIdent.Text;
     end;
 
   begin
@@ -1213,13 +1197,14 @@ var
 begin
   Token := CurrentToken;
   case FuncForm of
-    ffFunction: begin Next; Name := ParseIdent; end;
+    ffFunction: begin Next; Name := ParseIdent; Signature := Name.Text;  end;
     ffAnonym: Next;
     ffInit: begin Name := TIdent.Create(Token); Next; end;
   end;
   FuncDecl := TFuncDecl.Create(Name, Token);
   Expect(ttOpenParen);
-  ParseParameters;
+  ParseParameters(Signature);
+  if FuncForm = ffFunction then FuncDecl.Ident.Text := Signature;
   Expect(ttCloseParen);
   if CurrentToken.Typ = ttArrow then begin
     FuncDecl.Body := TBlock.Create(TNodeList.Create(), CurrentToken);
@@ -1230,6 +1215,57 @@ begin
     Expect(ttEnd);
   end;
   Result := FuncDecl;
+end;
+
+const
+  ClassStartSet: TTokenTypSet = [ttFunc, ttInit, ttLet, ttVal, ttVar, ttStatic];
+
+function TParser.ParseClassDecl: TDecl;
+var
+  Ident: TIdent;
+  DeclList, StaticList: TDeclList;
+  VarDecls: TVarDecls;
+  Decl: TDecl;
+  Token: TToken;
+  Parent: TVariable = Nil;
+  Traits: TExprList;
+begin
+  Token := CurrentToken;
+  Next;  // skip class
+  Ident := ParseIdent;
+  if CurrentToken.Typ = ttOpenParen then begin
+    Next;  // skip (
+    Parent := TVariable.Create(ParseIdent);
+    Expect(ttCloseParen);
+  end;
+  Traits := TExprList.Create();
+  if CurrentToken.Typ = ttColon then begin
+    Next; // skip :
+    Traits := ParseExprList;
+  end;
+  DeclList := TDeclList.Create(false);
+  StaticList := TDeclList.Create(false);
+  while ClassStartSet.Contains(CurrentToken.Typ) do begin
+    case CurrentToken.Typ of
+      ttFunc: DeclList.Add(ParseFuncDecl(ffFunction));
+      ttInit: DeclList.Add(ParseFuncDecl(ffInit));
+      ttStatic: begin
+        Next; // skip static
+        if CurrentToken.Typ = ttFunc then
+          StaticList.Add(ParseFuncDecl(ffFunction))
+        else
+          Error(CurrentToken, Format(ErrSyntax, ['Func']));
+      end;
+      ttVal: DeclList.Add(ParseValDecl);
+      else begin // ttLet, ttVar
+        VarDecls := ParseVarDecls(CurrentToken.Typ = ttVar) as TVarDecls;
+        for Decl in VarDecls.List do
+          DeclList.Add(Decl);
+      end;
+    end;
+  end;
+  Result := TClassDecl.Create(Ident, Parent, Traits, DeclList, StaticList, Token);
+  Expect(ttEnd);
 end;
 
 function TParser.ParseValDecl: TDecl;
@@ -1253,70 +1289,27 @@ begin
   Result := TValDecl.Create(Ident, FuncDecl, Token);
 end;
 
-{ CLASS DECL }
-
-const
-  ClassStartSet: TTokenTypSet = [ttFunc, ttInit, ttLet, ttVal, ttVar];
-
-function TParser.ParseClassDecl: TDecl;
-var
-  Ident: TIdent;
-  DeclList: TDeclList;
-  Token: TToken;
-  Parent: TVariable = Nil;
-  Traits: TExprList;
-  VarDecls: TVarDecls;
-  Decl: TDecl;
-begin
-  Token := CurrentToken;
-  Next;  // skip class
-  Ident := ParseIdent;
-  if CurrentToken.Typ = ttOpenParen then begin
-    Next;  // skip (
-    Parent := TVariable.Create(ParseIdent);
-    Expect(ttCloseParen);
-  end;
-  Traits := TExprList.Create();
-  if CurrentToken.Typ = ttColon then begin
-    Next; // skip :
-    Traits := ParseExprList;
-  end;
-  DeclList := TDeclList.Create(false);
-  while ClassStartSet.Contains(CurrentToken.Typ) do begin
-    case CurrentToken.Typ of
-      ttFunc: DeclList.Add(ParseFuncDecl(ffFunction));
-      ttInit: DeclList.Add(ParseFuncDecl(ffInit));
-      ttVal: DeclList.Add(ParseValDecl);
-      else begin // ttLet, ttVar
-        VarDecls := ParseVarDecls(CurrentToken.Typ = ttVar) as TVarDecls;
-        for Decl in VarDecls.List do
-          DeclList.Add(Decl);
-      end;
-    end;
-  end;
-  Result := TClassDecl.Create(Ident, Parent, Traits, DeclList, Token);
-  Expect(ttEnd);
-end;
-
 function TParser.ParseExtensionDecl: TDecl;
 var
   Token: TToken;
   Extension: TExtensionDecl;
+  Ident: TIdent;
 begin
   Token := CurrentToken;
   Next;  // skip extension
-  Extension := TExtensionDecl.Create(ParseIdent, TDeclList.Create(false), Token);
-  Extension.DeclList.Assign(ParseDeclList([ttFunc, ttVal], 'extension'));
+  Ident := ParseIdent;
+  Extension :=
+    TExtensionDecl.Create(Ident, ParseDeclList([ttFunc, ttVal], 'extension'), Token);
   Expect(ttEnd);
   Result := Extension;
 end;
+
 
 function TParser.ParseTraitDecl: TDecl;
 var
   Token: TToken;
   Ident: TIdent;
   Traits: TExprList;
-  DeclList: TDeclList;
 begin
   Token := CurrentToken;
   Next; // skip trait
@@ -1324,49 +1317,69 @@ begin
   Traits := TExprList.Create();
   if CurrentToken.Typ = ttColon then begin
     Next; // skip :
-    Traits := ParseExprList;
+    Traits := ParseExprList;  // parse list of traits separated by comma’s
   end;
-  DeclList := TDeclList.Create();
-  DeclList.Assign(ParseDeclList([ttFunc], 'trait'));
+  Result := TTraitDecl.Create(Ident, Traits, ParseDeclList([ttFunc], 'trait'), Token);
   Expect(ttEnd);
-  Result := TTraitDecl.Create(Ident, Traits, DeclList, Token);
 end;
 
 function TParser.ParseArrayDecl: TDecl;
 var
   Token: TToken;
+  Ident: TIdent;
   ArrayDecl: TArrayDecl;
+  ExprList: TExprList;
 begin
   Token := CurrentToken;
   Next;  // skip array
-  ArrayDecl := TArrayDecl.Create(ParseIdent, TDeclList.Create(false), Token);
+  Ident := ParseIdent;
   Expect(ttOpenBrack);
   if CurrentToken.Typ <> ttCloseBrack then
-    ArrayDecl.Elements.Assign(ParseExprList);
+    ExprList := ParseExprList;
   Expect(ttCloseBrack);
-  // other declarations: val and func
-  ArrayDecl.DeclList.Assign(ParseDeclList([ttFunc, ttVal], 'array'));
+  ArrayDecl := TArrayDecl.Create(Ident, ParseDeclList([ttFunc, ttVal], 'array'), Token);
+  ArrayDecl.Elements.AddRange(ExprList);
   Expect(ttEnd);
   Result := ArrayDecl;
+end;
+
+function TParser.ParseKeyValueList: TKeyValueList;
+var
+  Key, Value: TExpr;
+begin
+  Result := TKeyValueList.Create();
+  Key := ParseExpr;
+  Expect(ttColon);
+  Value := ParseExpr;
+  Result.Add(Key, Value);
+  while CurrentToken.Typ = ttComma do begin
+    Next;  // skip ,
+    Key := ParseExpr;
+    Expect(ttColon);
+    Value := ParseExpr;
+    Result.Add(Key, Value);
+  end;
 end;
 
 function TParser.ParseDictDecl: TDecl;
 var
   Token: TToken;
+  Ident: TIdent;
   DictDecl: TDictDecl;
+  KeyValueList: TKeyValueList;
 begin
   Token := CurrentToken;
   Next;  // skip dictionary
-  DictDecl := TDictDecl.Create(ParseIdent, TDeclList.Create(false), Token);
+  Ident := ParseIdent;
   Expect(ttOpenBrack);
   case CurrentToken.Typ of
-    ttColon: Next;
+    ttColon: begin Next; KeyValueList := TKeyValueList.Create(); end;
     ttCloseBrack: Expect(ttColon);
-    else DictDecl.Elements.Assign(ParseKeyValueList);
+    else KeyValueList := ParseKeyValueList;
   end;
   Expect(ttCloseBrack);
-  // other declarations: val and func
-  DictDecl.DeclList.Assign(ParseDeclList([ttFunc, ttVal], 'dictionary'));
+  DictDecl :=
+    TDictDecl.Create(Ident, KeyValueList, ParseDeclList([ttFunc, ttVal], 'dictionary'), Token);
   Expect(ttEnd);
   Result := DictDecl;
 end;
@@ -1383,7 +1396,7 @@ var
     Value: Variant;
   begin
     Name := ParseIdent;
-    if EnumDecl.Elements.Contains(Name.Text) then
+    if EnumDecl.Elements.ContainsKey(Name.Text) then
       Error(Name.Token, Format(ErrDuplicateEnum, [Name.Text]));
     Value := Null;
     if CurrentToken.Typ = ttEQ then begin
@@ -1401,12 +1414,12 @@ var
 begin
   Token := CurrentToken;
   Next;  // skip enum
-  EnumDecl := TEnumDecl.Create(ParseIdent, TDeclList.Create(), Token);
+  EnumDecl := TEnumDecl.Create(ParseIdent, TDeclList.Create(False), Token);
   Expect(ttOpenParen);
   if CurrentToken.Typ <> ttCloseParen then begin
     while CurrentToken.Typ <> ttCloseParen do begin
       if CurrentToken.Typ = ttCase then begin
-        Next; // skip case
+        Next;
         SetName := ParseIdent.Text;
         if EnumDecl.CaseTable.Contains(SetName) then
           Error(CurrentToken, Format(ErrDuplicateSetName, [SetName]))
@@ -1424,7 +1437,7 @@ begin
   else Error(CurrentToken, ErrAtLeastOneEnum);
   Expect(ttCloseParen);
   // other declarations: val and func
-  EnumDecl.DeclList.Assign(ParseDeclList([ttFunc, ttVal], 'enum'));
+  EnumDecl.DeclList.AddRange(ParseDeclList([ttFunc, ttVal], 'enum'));
   Expect(ttEnd);
   Result := EnumDecl;
 end;
@@ -1439,13 +1452,13 @@ begin
     else
       Error(CurrentToken, ErrUnrecognizedDeclOrStmt);
   except
+    Synchronize(DeclStartSet + StmtStartSet + [ttEOF]);
     Result := TNode.Create(CurrentToken);
-    Synchronize(DeclStartSet + StmtStartSet + [ttEnd, ttEOF]);
   end;
 end;
 
 const
-  BlockEndSet: TTokenTypSet = [ttElse, ttElseif, ttUntil, ttCase, ttEnd, ttEOF];
+  BlockEndSet: TTokenTypSet = [ttElse, ttElseif, ttUntil, ttEnd, ttCase, ttEOF];
 
 function TParser.ParseBlock: TBlock;
 begin
@@ -1454,6 +1467,7 @@ begin
     Result.Nodes.Add(ParseNode);
 end;
 
+
 function TParser.ParseProduct: TProduct;
 var
   Token: TToken;
@@ -1461,6 +1475,7 @@ begin
   Token := CurrentToken;
   Result := TProduct.Create(ParseBlock.Nodes, Token);
 end;
+
 
 end.
 
