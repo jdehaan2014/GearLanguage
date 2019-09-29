@@ -1,20 +1,3 @@
-use arrays
-use dictionaries
-use ranges
 
-
-func listBuilder(transform, input, include)
-  var result := []
-  if include <> Null then
-    for each item in input where include(item) do
-      listAdd(result, transform(item))
-    end
-  else
-    for each item in input do
-      listAdd(result, transform(item))
-    end
-  end
-  return result
-end
-
+use collections
 

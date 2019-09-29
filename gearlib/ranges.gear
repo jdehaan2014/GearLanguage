@@ -1,9 +1,8 @@
-// Range type and iterator
 
 class RangeIterator
-  var index := 0
-  var range := Null
-  var stepBy := 1
+  var index := 0,
+      range := Null,
+      stepBy := 1
 
   init(range)
     self.range := range
@@ -21,9 +20,9 @@ class RangeIterator
 end
 
 class Range
-  var from := Null
-  var to := Null
-  var stepBy := 1
+  var from := Null,
+      to := Null,
+      stepBy := 1
 
   init(from, to)
     self.from := from
@@ -31,6 +30,13 @@ class Range
   end
 
   val iterator := RangeIterator(self)
+end
+
+extension Range
+  func step(.by)
+    self.stepBy := by
+    return self
+  end
 end
 
 extension Range
@@ -71,14 +77,12 @@ extension Range
       function(item)
     end
   end
-end
 
-
-extension Range
-  func step(.by)
-    self.stepBy := by
-    return self
+  func contains(.value)
+    if (value >= self.from) & (value <= self.to) then
+      return True
+    end
+    return False
   end
 end
-
 

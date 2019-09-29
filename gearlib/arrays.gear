@@ -1,29 +1,39 @@
-// unit arrays.gear contains standard array functionality
-
 extension Array
   val count := length(self)
   val first := listFirst(self)
   val last := listLast(self)
+
+  func set(.size, .fillChar) => listInit(self, size, fillChar)
   func add(.value) => listAdd(self, value)
+  func add(.list) => listAddList(self, list)
   func insert(at index, .value) => listInsert(self, index, value)
-  func delete(.value) => listDelete(self, value)
+  func delete(.index)
+    listDelete(self, index)
+  end
+  func remove(.value) => listRemove(self, value)
+  func extract(.value) => listExtract(self, value)
   func contains(.value) => listContains(self, value)
   func index(of value) => listIndexOf(self, value)
   func retrieve(.index) => listRetrieve(self, index)
+  func clear()
+    listClear(self)
+  end
 end
 
 class ArrayIterator
   let list := Null
   var index := 0
+  let count := Null
 
   init(list)
     self.list := list
+    self.count := length(list)
   end
 
-  val hasNext := self.index < length(self.list)
+  val hasNext := self.index < self.count
 
   val next
-    var nextItem := self.list[self.index]
+    var nextItem := self.list [self.index]
     self.index +=1
     return nextItem
   end
@@ -32,7 +42,6 @@ end
 extension Array
   val iterator := ArrayIterator(self)
 end
-
 
 extension Array
 
@@ -49,7 +58,7 @@ extension Array
     var result := []
     for var i := 0 where i < length(self), i+=1 do
       if includeElement(self[i]) then
-        listAdd(result, self[i])
+        result.add(value: self[i])
       end
     end
     return result
@@ -58,8 +67,8 @@ extension Array
   func map(transform)
     var result := []
     for var i := 0 where i < length(self), i+=1 do
-      listAdd(result, transform(self[i]))
-     end
+      result.add(value: transform(self[i]))
+    end
     return result
   end
 
@@ -73,14 +82,5 @@ extension Array
     end
   end
 
-end
-
-extension Array
-  func fill(.value)
-    for var i:= 0 where i<length(self), i+=1 do
-      self[i] := value
-    end
-    return self
-  end
 end
 
