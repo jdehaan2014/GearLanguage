@@ -2,9 +2,7 @@ use system
 
 func calculate(.scores)
   class Statistics
-    var min := 0
-    var max := 0
-    var sum := 0
+    var min := 0, max := 0, sum := 0, avg := 0
   end
   var statistics := Statistics()
 
@@ -16,6 +14,7 @@ func calculate(.scores)
     end
     statistics.sum += score
   end
+  statistics.avg := statistics.sum / scores.count
 
   return statistics
 end
@@ -24,4 +23,5 @@ let statistics := calculate(scores: [6, 7, 8, 9, 5, 4, 10, 3])
 print(statistics.min)
 print(statistics.max)
 print(statistics.sum)
+print(statistics.avg)
 

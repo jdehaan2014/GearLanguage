@@ -1,0 +1,9 @@
+
+
+let twice := (f, x) => f(f(x))
+
+let addTwo := x => x + 2
+
+print(twice(addTwo, 2)) // => 6
+
+

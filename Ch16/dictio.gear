@@ -1,0 +1,7 @@
+
+use system
+
+let milesToPoint := ['point1':120.0,'point2':50.0,'point3':70.0]
+let kmToPoint := milesToPoint.values.map(miles => miles * 1.6093 )
+print(kmToPoint)
+

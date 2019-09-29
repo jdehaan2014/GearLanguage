@@ -1,0 +1,26 @@
+// multiline
+
+let StephenHawkingQuote :=
+'When we understand string theory, we will know how the universe began.
+\tIt won''t have much effect on how we live, but it is important to understand
+\tthere we come from and what we can expect to find as we explore.'
+
+print(StephenHawkingQuote)
+
+let apples := 6
+
+print('No of apples: \(apples.')
+
+
+let EdwardWittenQuote :=
+'Technically you need the extra dimensions. At first people didn''t like them too
+much, but they''ve got a big benefit, which is that the ability of string theory
+to describe all the elementary particles and their forces along with gravity
+depends on using the extra dimensions.'
+
+let quotes := 'Edward said: \(EdwardWittenQuote)
+\tthen followed by Stephen''s quote:
+\(StephenHawkingQuote)'
+
+print(quotes)
+

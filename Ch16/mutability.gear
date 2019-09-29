@@ -1,0 +1,36 @@
+// test immutability of fields
+
+class Point
+  let x:=0, y:=0
+  init(.x, .y)
+    self.x:=x
+    self.y:=y
+  end
+  func distance(to point)
+    return sqrt((point.x-self.x)^2 + (point.y-self.y)^2)
+  end
+end
+
+var p0 := Point(), p1 := Point(x:1,y:1), p2 := Point(x:3,y:4)
+
+print(p1.distance(to: p0))
+print(p2.distance(to: p0))
+
+//p0.x := 1 // error x is immutable
+
+extension Point
+  func setXValue(to newValue)
+    self.x := Null
+    self.x := newValue
+  end
+
+  func setYValue(to newValue)
+    self.y := Null
+    self.y := newValue
+  end
+end
+
+p0.setXValue(to:1) // error x is immutable
+p0.setYValue(to:1) // error y is immutable
+
+

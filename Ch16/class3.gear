@@ -17,12 +17,26 @@ class Cylinder (Circle)
   end
 end
 
+class Sphere (Circle)
+  init(.radius)
+    inherited(radius: radius)
+  end
+  val volume := (4/3)*pi()*self.radius^3
+end
+
 var circle := Circle(radius: 1)
 var cylinder := Cylinder(radius: 2, height: 10)
+var sphere1 := Sphere(radius:2)
+var sphere2 := Sphere(radius:3)
 
 print(circle.radius)     // prints 1
 print(circle.area)       // prints 3.14159265358979
 print(cylinder.radius)   // prints 2
 print(cylinder.area)     // prints 12.5663706143592
 print(cylinder.volume)   // prints 125.663706143592
+
+print(sphere1.volume)
+print(sphere1.radius)
+print(sphere2.volume)
+print(sphere2.radius)
 

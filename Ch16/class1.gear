@@ -1,9 +1,7 @@
 // harry and sally
 
 class Date
-  var day := 1
-  var month := 'January'
-  var year := 1980
+  var day := 1, month := 'January', year := 1980
   init(.day, .month, .year)
     self.day := day
     self.month := month

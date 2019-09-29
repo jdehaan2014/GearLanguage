@@ -1,6 +1,6 @@
-use system
+
 func calc(times n, function)
-  for each k in 1..n  do
+  for var k:=1 where k<=n, k+=1  do
     print(function(k), terminator: ' ')
   end
   print()
@@ -10,3 +10,46 @@ calc(times: 5, x=>x^2)  // 1 4 9 16 25
 calc(times: 5, x=>x^3)  // 1 8 27 64 125
 calc(times: 5, x=>x^4)  // 1 16 81 256 625
 
+
+/*
+
+In FPC would be:
+
+program Name;
+
+type
+  TLambda = function(x: Integer): Integer;
+
+function Calc(n: Integer; Lambda: TLambda): Integer;
+var
+  k: Integer;
+begin
+  for k := 1 to n do
+  begin
+    Write(Lambda(k), ' ');
+  end;
+  WriteLn;
+end;
+
+function x2(x: Integer): Integer;
+begin
+  Result := x*x;
+end;
+
+function x3(x: Integer): Integer;
+begin
+  Result := x*x*x;
+end;
+
+function x4(x: Integer): Integer;
+begin
+  Result := x*x*x*x;
+end;
+
+begin
+  Calc(5, @x2);
+  Calc(5, @x3);
+  Calc(5, @x4);
+end.
+
+*/

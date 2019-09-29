@@ -1,0 +1,28 @@
+
+// test class inside class
+
+  class Date
+    var day := 1, month := 1, year := 1
+    init(day, month, year)
+      self.day := day
+      self.month := month
+      self.year := year
+    end
+    func toString() => '\(self.day)-\(self.month)-\(self.year)'
+  end
+
+class Person
+
+  var birthDate := Date()
+  var name := ''
+  init(name, birthDate)
+    self.name := name
+    self.birthDate := birthDate
+  end
+  func toString() => '\(self.name), born: \(self.birthDate.toString())'
+end
+
+var person := Person()
+var Jeroen := Person('Jeroen', Date(18, 01, 1964))
+print(Jeroen.toString())
+

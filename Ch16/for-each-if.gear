@@ -1,7 +1,7 @@
 use system
 
-/*
-let scores := [8.3, 7.7, 9.0, 5.4]
+
+let scores := [8.3, 7.7, 9.0, 5.4, 3, 4, 2]
 var sum := 0
 for each score in scores do
   sum += score
@@ -14,11 +14,11 @@ elseif (average>5.0) & (average<=6.0) then
 else
   print('You failed!')
 end
-*/
+
 //print(average) // Prints 7.6
 
 
-
+/*
 let scores := ['Math': 8.3, 'Science': 7.7, 'English': 9.0, 'Economy': 5.4]
 var sum := 0
 for each score in scores do
@@ -27,5 +27,5 @@ for each score in scores do
 end
 let average := sum / scores.count
 print('The average is \(average).')
-
+*/
 

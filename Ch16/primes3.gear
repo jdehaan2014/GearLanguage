@@ -21,14 +21,10 @@ func sieveOfErasthones(n)
 end
 
 
-func sieve(n)
-  var result := (2..n).
-
-end
 
 let m := milliseconds()
 
-var s := sieveOfErasthones(10000)
+var s := sieveOfErasthones(10010)
 
 
 let ms := milliseconds() - m
@@ -37,4 +33,6 @@ let ms := milliseconds() - m
 print('In \(ms) ms.')
 
 //print(sieveOfErasthones(100))
+
+print(s.last)
 

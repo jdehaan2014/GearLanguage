@@ -1,0 +1,9 @@
+
+func add(a,b) => a+b
+
+print(add(7,9))
+
+func sub(a,b) => a-b
+
+print(sub(9,7))
+

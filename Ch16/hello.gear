@@ -1,0 +1,7 @@
+
+var s := () => 'Hello world!'
+print(s())
+
+val t := 'Hello world!'
+print(t)
+

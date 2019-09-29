@@ -1,0 +1,38 @@
+// stack implementation
+use system
+
+class Stack
+  let items := []
+  func push(item)
+    self.items.add(value: item)
+  end
+  func pop()
+    self.items.remove(value: self.items.last)
+  end
+  val top := self.items.last
+end
+
+var stack := Stack()
+
+stack.push(99)
+stack.push(201)
+stack.push(pi())
+//stack.push('hello')
+stack.push(777)
+
+for each item in stack.items do
+  print(item)
+end
+
+print('last: ', stack.items.last)
+
+
+print(stack.top)
+stack.pop()
+stack.pop()
+print(stack.top)
+
+for each item in stack.items do
+  print(item)
+end
+

@@ -1,0 +1,15 @@
+// test closure in init()
+
+use system
+
+class Function
+  var function := Null
+  init(function)
+    self.function := function
+  end
+end
+
+let fx := Function(x=>x^2+4*x+4)
+
+print(fx.function(2))
+

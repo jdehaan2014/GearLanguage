@@ -1,0 +1,25 @@
+
+use system
+
+func calculate(.scores)
+  var min := 0, max := 0, sum := 0, avg := 0
+
+  for each score in scores do
+    if score > max then
+      max := score
+    elseif score < max then
+      min := score
+    end
+    sum += score
+  end
+  avg := sum / scores.count
+
+  return (min, max, sum, avg)
+end
+
+let statistics := calculate(scores: [6, 7, 8, 9, 5, 4, 10, 3])
+print('min: \(statistics.1)')
+print('max: \(statistics.2)')
+print('sum: \(statistics.3)')
+print('avg: \(statistics.4)')
+

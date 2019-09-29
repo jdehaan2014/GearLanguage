@@ -1,0 +1,39 @@
+
+// overloading functions
+
+func add(a, to b) => a+b
+
+print(add(2, to: 3))
+
+func add(c, plus d) => c+d
+
+print(add(4, plus: 5))
+
+func add(e,f) => e+f
+print(add(6, 5))
+
+print(add)
+
+
+class Class
+  var field := Null
+  init(.field)
+    self.field := field
+  end
+  func toString() => self.field
+  func toString(name)
+    return (self.field, name)
+  end
+end
+
+print(Class)
+
+var c := Class()
+
+print(c.field)
+
+var d := Class(field: 'test1')
+print(d.field)
+print(d.toString())
+
+

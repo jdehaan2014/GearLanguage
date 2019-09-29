@@ -1,0 +1,11 @@
+let Pi := 3.1415926
+var radius := 2
+val area
+  return Pi * radius^2
+end
+
+print(area)  // prints 12.5663704
+radius := 1
+print(area)  // prints 3.1415926
+
+

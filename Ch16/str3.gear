@@ -1,0 +1,4 @@
+var s := ''
+s :=  s + 'it''s' + ' me'
+print(s)
+

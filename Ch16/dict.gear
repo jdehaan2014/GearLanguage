@@ -17,3 +17,7 @@ for each item in dict do
   print(item.key, ': ', item.value)
 end
 
+dict.set(sorted: True)
+print(dict)
+
+

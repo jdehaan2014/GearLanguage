@@ -1,0 +1,253 @@
+
+use system
+
+extension Array
+  val text
+    var result := ''
+    for each item in self do
+      result += '\(item) '
+    end
+    return result
+  end
+end
+
+let randomRange := 101
+
+class Board
+  var rows := 4, cols := 4
+  var cells := (0..<16).toArray()
+
+  init(rows, cols)
+    self.rows := rows
+    self.cols := cols
+    self.cells := (0..<(rows * cols)).toArray()
+  end
+
+  val line
+    var result := ''
+    for var i := 0 where i < self.cols, i+=1 do
+      result += '+----'
+    end
+    result += '+'
+    return result
+  end
+
+  func paint()
+    clrScr()
+    var pos := 0
+    print(self.line)
+    for var i:=0 where i<self.rows, i+=1 do
+      var row := ''
+
+      for var j:=0 where j<self.cols, j+=1 do
+        var tile := self.cells[pos]
+
+        row += match tile
+          if 0 then '|    '
+          if 1,2,3,4,5,6,7,8,9 then '|  \(tile) '
+          else '| \(tile) '
+
+        pos +=1
+      end
+
+      print('\(row)|')
+      print(self.line)
+    end
+  end
+
+end
+
+enum Adjacent
+  (left, top, right, bottom)
+end
+
+class Puzzle
+  let board := Board()
+  let possibleMoves := []
+  var adjacentCells := []
+  var position := 0
+  var solved := False
+  var moveCount := 0
+
+  val cols := self.board.cols
+  val rows := self.board.rows
+  val cells := self.board.cells
+  val cellCount := self.board.cells.count
+
+  func start()
+    clrScr()
+    print('Fifteen puzzle start:')
+    print('  enter a tile number and press <enter> to move' )
+    print('  enter c, q or x and press <enter> to exit' )
+    window(10, 4, 58, 21)
+  end
+
+  func terminate()
+    window(1, 1, 80, 25)
+    clrScr()
+    print('Fifteen puzzle exit.')
+  end
+
+  func move(tile)
+    var pos := -1
+    for each adjacentCell in self.adjacentCells do
+      switch adjacentCell
+        case Adjacent.left:   pos := self.position - 1
+        case Adjacent.top:    pos := self.position - self.cols
+        case Adjacent.right:  pos := self.position + 1
+        case Adjacent.bottom: pos := self.position + self.cols
+        else // never happens
+          print('Position error.')
+      end
+      break on self.cells[pos] = tile
+    end
+    self.board.cells[self.position] := tile
+    self.position := pos
+    self.cells[pos] := 0
+  end
+
+  func checkPossibleMoves()
+    self.possibleMoves.clear()
+    self.adjacentCells.clear()
+
+    let row := trunc(self.position / self.cols)
+    let col := self.position % self.cols
+    let pos := self.position
+
+    if row > 0 then
+      self.possibleMoves.add(value: self.cells[pos - self.cols])
+      self.adjacentCells.add(value: Adjacent.top)
+    end
+    if row < self.rows-1 then
+      self.possibleMoves.add(value: self.cells[pos + self.cols])
+      self.adjacentCells.add(value: Adjacent.bottom)
+    end
+    if col > 0 then
+      self.possibleMoves.add(value: self.cells[pos - 1])
+      self.adjacentCells.add(value: Adjacent.left)
+    end
+    if col < self.cols-1 then
+      self.possibleMoves.add(value: self.cells[pos + 1])
+      self.adjacentCells.add(value: Adjacent.right)
+    end
+  end
+
+  func testSolved()
+    val isSolved
+      for var i:=0 where i <= self.cellCount-3, i+=1 do
+        if self.cells[i] <> self.cells[i+1] - 1 then
+          return False
+        end
+      end
+      return True
+    end
+
+    self.solved := isSolved
+    if !self.solved then
+      self.checkPossibleMoves()
+    end
+  end
+
+  func generateBoard()
+    self.position := self.cellCount-1
+    self.cells[self.position] := 0
+    for var i:=0 where i<=self.cellCount-2, i+=1 do
+      self.cells[i] := i+1
+    end
+    let limit := randomLimit(randomRange)
+    for var i:=0 where i<limit, i+=1 do
+      self.checkPossibleMoves()
+      var selMove := 0
+      for each move in self.possibleMoves do
+        selMove +=1
+      end
+      selMove := randomLimit(selMove)
+      var currMove := 0
+      for each tile in self.possibleMoves do
+        if currMove = selMove then
+          self.move(tile)
+          break
+        end
+        currMove +=1
+      end
+    end
+  end
+
+  func userMoved()
+    var userInput := readln()
+
+    if userInput in ['c', 'C', 'q', 'Q', 'x', 'X'] then
+      return False
+    end
+
+    ensure var tile := toNum(userInput) where tile <> Null else
+      print('Sorry, \(userInput) is invalid input.')
+      return True
+    end
+
+    ensure (1..<self.cellCount).contains(value: tile) else
+      print('Sorry, \(tile) is invalid input.')
+      return True
+    end
+
+    ensure self.possibleMoves.contains(value: tile) else
+      print('Sorry, \(tile) is impossible move.')
+      print('Possible moves: \(self.possibleMoves.text)')
+      return True
+    end
+
+    self.move(tile)
+    self.moveCount +=1
+    self.testSolved()
+
+    self.board.paint()
+    if !self.solved then
+      print('Possible moves: \(self.possibleMoves.text)')
+    end
+    return True
+  end
+
+  func userWantContinue()
+    print('Congratulations! Puzzle solved in \(self.moveCount) moves.')
+    print('Play again(Yes(Y)/<any button>)?')
+    let userInput := readln()
+
+    if userInput in ['y', 'yes', 'Y', 'YES', 'Yes'] then
+      return True
+    end
+    return False
+  end
+
+  func new()
+    self.solved := False
+    self.moveCount := 0
+    self.generateBoard()
+    self.checkPossibleMoves()
+    self.board.paint()
+    if !self.solved then
+      print('Possible moves: \(self.possibleMoves.text)')
+    end
+  end
+
+  func run()
+    randomize()
+    self.start()
+    repeat
+      self.new()
+      while !self.solved do
+        if !self.userMoved() then
+          self.terminate()
+          return 0
+        end
+      end
+      if !self.userWantContinue() then
+        self.terminate()
+        return 0
+      end
+    until False
+  end
+
+end
+
+let result := Puzzle().run()
+

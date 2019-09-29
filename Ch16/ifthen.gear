@@ -1,0 +1,13 @@
+
+func pow(x, n, lim)
+  if let v := x^n where v < lim then
+    return v
+  else
+    print('\(v) >= \(lim)')
+  end
+  return lim  // 'v' can't be used here
+end
+
+print(pow(3,2,10))
+print(pow(3,3,20))
+

@@ -1,0 +1,32 @@
+// steps in ranges
+use system
+
+for var i:=0 where i<10, i+=2 do
+  print(i)
+end
+print()
+
+for each i in 0..<10 where i%2=0 do
+  print(i)
+end
+print()
+
+for each i in (0..<10).step(by:2) do
+  print(i)
+end
+print()
+
+for each i in Range(0,9).step(by:2) do
+  print(i)
+end
+print()
+
+print((0..<10).step(by:2).toArray())
+
+let a := [0,1,2,3,4,5,6,7,8,9,10]
+a.forEach(func(n) print(n) end)
+//[0,1,2,3,4,5,6,7,8,9,10].forEach(func(n) print(n) end)
+
+print()
+let b := 0..<10
+b.step(by:2).forEach(func(n) print(n) end)

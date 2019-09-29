@@ -12,7 +12,7 @@ print(result)
 
 func calc(x,y)
   for each item in table do
-    print(x, item.key, y, ':\t', item.value(x,y))
+    print(x, item.key, y, '\t=\t', item.value(x,y))
   end
 end
 

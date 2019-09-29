@@ -1,0 +1,14 @@
+// test file functions
+
+//let s := 'The quick brown fox jumps over the lazy dog.'
+
+let f := fileOpen('/Users/Jeroen/for.txt', fmOpenRead)
+print(f)
+
+let r := fileRead(f)
+
+print(r)
+
+fileClose(f)
+
+

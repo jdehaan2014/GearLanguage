@@ -1,0 +1,9 @@
+
+print('gimme a number: ')
+if var x := toNum(readln()) where x <> Null then
+  x := x^2
+  print(x)
+else
+  print('That''s not a number')
+end
+

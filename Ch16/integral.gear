@@ -16,5 +16,12 @@ print(integral(x=>x^3, from: 0, to: 1, steps: 10000))
 // Calculate the integral over function 3) f(x) = x^2 + 4*x - 21 in 10000 steps
 print(integral(x=>x^2 + 4*x - 21, from: 0, to: 1, steps: 10000))
 
+// integral of half circle
+// x^2 + y^2 = 1
+// y^2 = 1 - x^2
+// y = sqrt(1-x^2)
+print(integral(x=>sqrt(1-x^2), from: -1, to: 1, steps: 10000)) // pi/2
+
+
 print(pi())
 

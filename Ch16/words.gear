@@ -1,0 +1,12 @@
+
+dictionary Words
+  [:]
+  val count := length(self)
+  func toString() => self
+end
+var words := Words()
+
+words['pair'] := 'couple'
+words['collection'] := 'group'
+print(words.toString())
+

@@ -1,0 +1,18 @@
+/*
+after an example of Coffeescript:
+
+names = ["Ivan", "Joanna", "Nikolay", "Mihaela"]
+linearSearch = (searchName) -> alert(name) for name in names when name is searchName
+
+*/
+
+
+use system
+
+let names := ['Ivan', 'Joanna', 'Nikolay', 'Mihaela']
+
+let linearSearch :=
+  func (searchName) => { name for name in names where name = searchName }
+
+print(linearSearch('Nikolay'))
+

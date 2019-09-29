@@ -6,7 +6,7 @@ let interestingNumbers := [
 ]
 var largest := 0
 for each type in interestingNumbers do
-  for each number in type.value do
+  for each number in type.value do //dict iterator has key, value pairs
     if number > largest then
       largest := number
     end

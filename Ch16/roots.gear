@@ -1,0 +1,19 @@
+
+let ta := [8, 27, 64, 125]
+
+func nthRoot(b,n)
+  return exp((1/n)*ln(b))
+end
+
+for var v:=0 where v<length(ta), v+=1 do
+  var ir := nthRoot(ta[v], 3)
+  print('ta[v] = \(ta[v]), ir = \(ir)')
+end
+
+/*
+ta[v] = 8, ir = 2
+ta[v] = 27, ir = 3
+ta[v] = 64, ir = 4
+ta[v] = 125, ir = 5
+*/
+

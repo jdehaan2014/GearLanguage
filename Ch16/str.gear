@@ -1,0 +1,8 @@
+var s := 'Hello it''s my turn now.\n\tHere!'
+print(s)
+
+var x := ''
+print(x)
+x := 'it''s me'
+print(x)
+

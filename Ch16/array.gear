@@ -20,3 +20,6 @@ print(sum)
 let factorial := numbers.reduce(1, (x,y)=>x*y)
 print(factorial)
 
+let animals := ['lion', 'monkey', 'elephant']
+print(animals)
+

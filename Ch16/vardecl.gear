@@ -1,0 +1,26 @@
+// test var declarations
+
+var x:=1, y:=2, z:=3, s:='Saturn'
+let v:=4, w:=5, p:='Pluto'
+
+print(x,y,z,s,v,w,p)
+
+x:=9
+print(x,y,z)
+
+class Point
+  var x:=0, y:=0
+  init(.x, .y)
+    self.x:=x
+    self.y:=y
+  end
+  func distance(to point)
+    return sqrt((point.x-self.x)^2 + (point.y-self.y)^2)
+  end
+end
+
+var p0 := Point(), p1 := Point(x:1,y:1), p2 := Point(x:3,y:4)
+
+print(p1.distance(to: p0))
+print(p2.distance(to: p0))
+

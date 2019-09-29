@@ -1,0 +1,24 @@
+// based on Dart's example
+// https://en.wikipedia.org/wiki/Dart_(programming_language)
+
+class Point
+  var x := 0, y := 0
+  init(x, y)
+    self.x := x
+    self.y := y
+  end
+
+  val origin := Point()
+
+  func distanceTo(other)
+    let dx := self.x - other.x
+    let dy := self.y - other.y
+    return sqrt(dx*dx + dy*dy)
+  end
+end
+
+var p1 := Point(10,10)
+var p2 := Point().origin
+var distance := p1.distanceTo(p2)
+print(distance)
+

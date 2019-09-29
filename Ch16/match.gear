@@ -1,0 +1,10 @@
+let bar := 2
+
+let x :=
+match bar
+  if 1 then func() print('func 1') end
+  if 2 then func() print('func 2') end
+  else func() print('default func') end
+
+x()
+

@@ -4,4 +4,4 @@ print(time())
 print(now())
 print(today())
 
-print(4 | 2) // 100 or 010 = 110
+print(4 | 2) // binary: 100 or 010 = 110

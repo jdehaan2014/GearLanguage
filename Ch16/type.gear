@@ -1,0 +1,23 @@
+// test new type
+
+type Date
+  var dd := 0,
+      mm := 0,
+      yyyy := 0
+end
+
+func myDate(d,m,y)
+  return Date(d,m,y)
+end
+
+var bornAt := myDate(23, 3, 1987)
+
+
+// tuples
+
+let one := (1, 'one') // one : Number * String
+
+var (a,b) := one  // a=1, b='one'
+
+
+

@@ -1,32 +1,38 @@
-use system
 
-func calculate(.scores)
-  var min := 0
-  var max := 0
-  var sum := 0
+// tuples
 
-  for each score in scores do
-    if score > max then
-      max := score
-    elseif score < max then
-      min := score
-    end
-    sum += score
-  end
+let one := (1, 'one')
+print(one)
 
-  func closure(type) =>
-    match type
-      if 'min' then min
-      if 'max' then max
-      else sum
+let other := one
+print(other)
 
-  return closure
+let a := 6, b := 'ten', c := True
+
+let some := (a,b,c)
+print(some)
+
+var s := some.2
+print(s)
+
+some.2 := 'eleven'
+print(some)
+
+
+func test()
+  return (2, 'two', 'twelve')
 end
 
-var stats := calculate(scores: [6, 7, 8, 9, 5, 4])
+var x := test()
+print(x)
 
-print(stats('min'))
-print(stats('max'))
-print(stats('sum'))
+let p := test()
+print(p)
+p.3 := 'fifteen'
+print(p)
 
+var w := (x=>x^2, x=>x^0.5)
+
+print(w.1(5))    // 25
+print(w.2(16))   // 4
 
