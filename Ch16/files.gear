@@ -1,9 +1,8 @@
 // test file functions
 
-//let s := 'The quick brown fox jumps over the lazy dog.'
 use system
 
-let f := fileOpen('/Users/Jeroen/for.txt', forReading)
+let f := fileOpen('/Users/for.txt', forReading)
 print(f)
 
 let result := fileRead(f) // is an array of byte
