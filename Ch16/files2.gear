@@ -1,7 +1,7 @@
 
 use system
 
-let newFile := fileCreate('/Users/Jeroen/for2.txt')
+let newFile := fileCreate('/Users/for2.txt')
 
 let charArr := Array('this is for real.')
 
@@ -26,7 +26,7 @@ end
 
 fileClose(newFile)
 
-let file := fileOpen('/Users/Jeroen/for2.txt', forReading)
+let file := fileOpen('/Users/for2.txt', forReading)
 let input := fileRead(file) // is an array of byte
 fileClose(file)
 
