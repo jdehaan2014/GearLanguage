@@ -1,0 +1,21 @@
+
+use system
+use token
+
+class Error
+  var line := 0, col := 0
+  var msg := ''
+  init(line, col, msg)
+    self.line := line
+    self.col := col
+    self.msg := msg
+  end
+  func toString() => '@[\(self.line),\(self.col)]: \(self.msg)'
+end
+
+let Errors := []
+
+func error(token, msg)
+  Errors.add(value: Error(token.line, token.col, msg))
+end
+

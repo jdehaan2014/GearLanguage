@@ -1,0 +1,90 @@
+
+use system
+use token
+
+class Ast
+  let token := Null
+  init(token)
+    self.token := token
+  end
+end
+
+class Term(Ast)
+  let factors := Null
+  init(factors, token)
+    inherited(token)
+    self.factors := factors
+  end
+end
+
+class Expression(Ast)
+  let terms := Null
+  init(terms, token)
+    inherited(token)
+    self.terms := terms
+  end
+end
+
+class Factor(Ast)
+end
+
+class Literal(Factor)
+  let value := Null
+  init(value, token)
+    inherited(token)
+    self.value := value
+  end
+end
+
+class Identifier(Factor)
+  let letters := Null
+  init(letters, token)
+    inherited(token)
+    self.letters := letters
+  end
+end
+
+class Repetition(Factor)
+  let expression := Null
+  init(expression, token)
+    inherited(token)
+    self.expression := expression
+  end
+end
+
+class Group(Factor)
+  let expression := Null
+  init(expression, token)
+    inherited(token)
+    self.expression := expression
+  end
+end
+
+class Option(Factor)
+  let expression := Null
+  init(expression, token)
+    inherited(token)
+    self.expression := expression
+  end
+end
+
+class Production(Ast)
+  let left := Null
+  let right := Null
+  init(left, right, token)
+    inherited(token)
+    self.left := left
+    self.right := right
+  end
+end
+
+class Syntax(Ast)
+  let productions := Null
+  init(productions, token)
+    inherited(token)
+    self.productions := productions
+  end
+end
+
+
+

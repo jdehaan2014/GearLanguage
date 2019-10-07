@@ -1,0 +1,52 @@
+
+use system
+use errors
+
+let fileEnding := chr(4)
+
+class Reader
+  var fileName := '', fileIndex := 0
+  var bytes := []
+  var chars := []
+  var index := 1, size := 0
+
+  init(fileName)
+    self.fileName := fileName
+    self.bytes := self.readFile()
+    if self.bytes <> Null then
+      self.size := self.bytes.count
+      self.chars := self.toChars()
+    end
+  end
+
+  func readFile()
+    ensure let file := fileOpen(self.fileName, forReading) where file <> -1 else
+      error(Token(), 'Path/file combination does not exist.')
+      return Null
+    end
+    let input := fileRead(file) // note byte array
+    fileClose(file)
+    return input
+  end
+
+  func toChars()
+    return self.bytes.map(c=>chr(c))
+  end
+
+  func nextChar()
+    if self.index < self.size then
+      let result := self.chars[self.index]
+      self.index +=1   // move to next char
+      return result
+    end
+    return fileEnding
+  end
+
+  val peekChar
+    if self.index <= self.size then
+      return self.chars[self.index]  // read next char, don't move index
+    end
+    return fileEnding
+  end
+
+end

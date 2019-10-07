@@ -1,0 +1,26 @@
+
+use system
+
+enum TokenType
+  (Identifier = 'Identifier', Literal = 'Literal'
+
+   case Symbols:
+     OpenBrack='[', CloseBrack=']', OpenBrace='{', CloseBrace='}',
+     OpenParen='(', CloseParen=')',
+     Definition='=', Alternative='|', Termination='.', Special='?'
+
+   case SpecialHandling:
+     EOF='EOF', Error='Error'
+
+   None
+  )
+
+  val toString := self.value
+end
+
+let factorStartSet := [TokenType.Identifier, TokenType.Literal,
+      TokenType.OpenParen, TokenType.OpenBrack, TokenType.OpenBrace]
+
+let prodSychSet := [TokenType.Definition, TokenType.Identifier,
+      TokenType.Literal, TokenType.EOF]
+

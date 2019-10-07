@@ -1,0 +1,20 @@
+
+use tokentype
+
+class Token
+  var type := TokenType.None
+  var lexeme := '', value := ''
+  var line := 0, col := 0
+
+  init(type, lexeme, value, line, col)
+    self.type := type
+    self.lexeme := lexeme
+    self.value := value
+    self.line := line
+    self.col := col
+  end
+
+  val toString :=
+    '\(self.type.toString); \(self.lexeme); [\(self.line),\(self.col)]'
+end
+

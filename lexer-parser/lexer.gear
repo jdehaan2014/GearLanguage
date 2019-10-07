@@ -1,0 +1,169 @@
+
+use system
+use tokentype
+use token
+use reader
+
+//constants
+  let tab := '\t'
+  let space := ' '
+  let newLine := '\n'
+
+  let quote1 := ''''
+  let quote2 := '"'
+  let quotes := [quote1, quote2]
+
+  let underscore := ['_']
+  let hyphen  := ['-']
+  let digits  := Array('0123456789')
+  let lowCase := Array('abcdefghijklmnopqrstuvwxyz')
+  let upCase  := Array('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+  let letters := lowCase >< upCase >< hyphen
+  let alfaNum := letters >< digits
+  let literal := alfaNum >< underscore
+
+class Lexer
+  var look := chr(0)
+  var lexeme := ''
+  var tokens := []
+  let reader := Null
+  var line := 1, col := 0
+
+  init(reader)
+    self.reader := reader
+    self.look := self.getChar()
+    self.scanTokens()
+  end
+
+  // reads the next character from the input stream
+  func getChar()
+    let result := self.reader.nextChar()
+    self.col +=1
+    if result = newLine then
+      self.line +=1
+      self.col := 0
+    end
+    return result
+  end
+
+  // Process an identifier
+  func identifier()
+    let currLine := self.line, currCol := self.col
+    self.lexeme := self.look
+    self.look := self.getChar()
+    while self.look in letters do
+      self.lexeme += self.look
+      self.look := self.getChar()
+    end
+    return Token(TokenType.Identifier, self.lexeme, '', currLine, currCol)
+  end
+
+  // Process a literal including the quotes
+  // A literal can be any character
+  func literal()
+    let currLine := self.line, currCol := self.col
+    let quote := self.look
+    self.lexeme := self.look
+    var value := ''
+    self.look := self.getChar()
+    while (self.look <> quote) & (self.look <> newLine) do
+      self.lexeme += self.look
+      value += self.look
+      self.look := self.getChar()
+    end
+    if self.look = newLine then // error string exceeds line
+      return self.errorToken('String exceeds line.')
+    end
+    self.lexeme += self.look  // is value incl quotes
+    self.look := self.getChar()
+    return Token(TokenType.Literal, self.lexeme, value, currLine, currCol)
+  end
+
+  //Process a symbol
+  func symbol()
+
+    // nested func to create a token
+    func makeToken(tokenType)
+      let result := Token(tokenType, self.lexeme, '', self.line, self.col)
+      self.look := self.getChar()
+      return result
+    end
+
+    self.lexeme := self.look
+
+    return
+      match self.look
+        if fileEnding then makeToken(TokenType.EOF)
+        if '(' then makeToken(TokenType.OpenParen)
+        if ')' then makeToken(TokenType.CloseParen)
+        if '.' then makeToken(TokenType.Termination)
+        if '|' then makeToken(TokenType.Alternative)
+        if '=' then makeToken(TokenType.Definition)
+        if '?' then makeToken(TokenType.Special)
+        if '[' then makeToken(TokenType.OpenBrack)
+        if ']' then makeToken(TokenType.CloseBrack)
+        if '{' then makeToken(TokenType.OpenBrace)
+        if '}' then makeToken(TokenType.CloseBrace)
+      else self.errorToken('Unexpected character.')
+  end
+
+  // scan a token
+  func scanToken()
+    self.skipWhiteSpace()
+    if self.look in letters then
+      return self.identifier()
+    elseif self.look in quotes then
+      return self.literal()
+    else
+      return self.symbol()
+    end
+  end
+
+  //scan all tokens
+  func scanTokens()
+    var token := self.scanToken()
+    self.tokens.add(value: token)
+    while token.type <> TokenType.EOF do
+      token := self.scanToken()
+      self.tokens.add(value: token)
+    end
+  end
+
+  // create an error token
+  func errorToken(msg)
+    let token := Token(TokenType.Error, self.lexeme, '', self.line, self.col)
+    error(token, msg)
+    return token
+  end
+
+  // skip white spaces tab, newline and space, incl comments
+  func skipWhiteSpace()
+    while True do
+      switch self.look
+        case tab, newLine, space:
+          self.look := self.getChar()
+        case '/':
+          if self.reader.peekChar = '/' then
+            self.singleLineComment()
+          else
+            break
+          end
+        else
+          break
+      end
+    end
+  end
+
+  // process single line comments
+  func singleLineComment()
+    repeat
+      self.look := self.getChar()
+    until self.look = newLine
+    self.look := self.getChar()
+  end
+
+end
+
+
+
+

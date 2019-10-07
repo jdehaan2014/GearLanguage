@@ -1,0 +1,100 @@
+
+use system
+use visitor
+use strings
+
+class Printer(Visitor)
+  let increase := 2
+  var indent := ''
+  let tree := Null
+  init(tree)
+    self.tree := tree
+  end
+
+  func incIndent()
+    self.indent := string(of: ' ', count: length(self.indent) + self.increase)
+  end
+
+  func decIndent()
+    self.indent := string(of: ' ', count: length(self.indent) - self.increase)
+  end
+
+  func write()
+    self.visit(self.tree)
+  end
+
+  func visitAst(Ast)
+    print(self.indent + Ast.className)
+  end
+
+  func visitSyntax(syntax)
+    self.incIndent()
+    self.visitAst(syntax)
+    print(self.indent + 'No. of productions: \(syntax.productions.count)')
+    for each production in syntax.productions do
+      self.visit(production)
+    end
+    self.decIndent()
+  end
+
+  func visitProduction(production)
+    self.incIndent()
+    self.visitAst(production)
+    self.visit(production.left)
+    self.visit(production.right)
+    self.decIndent()
+  end
+
+  func visitExpression(expression)
+    self.incIndent()
+    self.visitAst(expression)
+    for each term in expression.terms do
+      self.visit(term)
+    end
+    self.decIndent()
+  end
+
+  func visitTerm(term)
+    self.incIndent()
+    self.visitAst(term)
+    for each factor in term.factors do
+      self.visit(factor)
+    end
+    self.decIndent()
+  end
+
+  func visitGroup(group)
+    self.incIndent()
+    self.visitAst(group)
+    self.visit(group.expression)
+    self.decIndent()
+  end
+
+  func visitOption(option)
+    self.incIndent()
+    self.visitAst(option)
+    self.visit(option.expression)
+    self.decIndent()
+  end
+
+  func visitRepetition(repetition)
+    self.incIndent()
+    self.visitAst(repetition)
+    self.visit(repetition.expression)
+    self.decIndent()
+  end
+
+  func visitIdentifier(identifier)
+    self.incIndent()
+    print(self.indent + 'Identifier: \(identifier.letters)')
+    self.decIndent()
+  end
+
+  func visitLiteral(literal)
+    self.incIndent()
+    print(self.indent + 'Literal: \(literal.value)')
+    self.decIndent()
+  end
+
+end
+

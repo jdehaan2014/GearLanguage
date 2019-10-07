@@ -1,0 +1,25 @@
+use reader
+use lexer
+use parser
+use ast
+use errors
+use printer
+
+print('Enter file name (incl path): ')
+let file := readln()
+
+let parser := Parser(Lexer(Reader(file)))
+
+let ast := parser.parse()
+
+if Errors.count > 0 then
+  print('*** Errors ***')
+  for each error in Errors do
+    print(error.toString())
+  end
+else
+  Printer(ast).write()
+  print('No errors.')
+end
+
+

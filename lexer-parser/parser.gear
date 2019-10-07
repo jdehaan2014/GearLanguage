@@ -1,0 +1,148 @@
+
+use system
+use errors
+use ast
+
+class Parser
+  let tokens := Null
+  init(lexer)
+    self.tokens := lexer.tokens
+  end
+
+  func parse()
+    return self.parseSyntax()
+  end
+
+  var index := 0
+
+  val current := self.tokens[self.index]
+  val peek := if !self.isLastToken then self.tokens[self.index+1] else Null
+  val isLastToken := self.index = self.tokens.count - 1
+
+  func next()
+    self.index +=1
+  end
+
+  func expect(type, .synchSet)
+    if self.current.type = type then
+      self.next()
+    else
+      error(self.current,
+            'Syntax error, "\(type.toString)" expected.')
+      self.synchronize(synchSet)
+    end
+  end
+
+  func synchronize(synchSet)
+    while !(self.current.type in synchSet) do
+      self.next()
+    end
+  end
+
+  // Syntax = { Production } .
+  // a syntax can have 0 or more productions
+  func parseSyntax()
+    let syntax := Syntax([], self.current)
+    while self.current.type = TokenType.Identifier do
+      syntax.productions.add(value: self.parseProduction())
+    end
+    return syntax
+  end
+
+  // Production  = Identifier "=" Expression "." .
+  func parseProduction()
+    let token := self.current
+    let left := self.parseIdentifier()
+    self.expect(TokenType.Definition, synchSet: prodSychSet)
+    let right := self.parseExpression()
+    self.expect(TokenType.Termination, synchSet: prodSychSet)
+    return Production(left, right, token)
+  end
+
+  // Expression = Term { "|" Term } .
+  func parseExpression()
+    let expression := Expression([], self.current)
+    expression.terms.add(value: self.parseTerm()) // 1 term required
+    while self.current.type = TokenType.Alternative do
+      self.next()
+      expression.terms.add(value: self.parseTerm())
+    end
+    return expression
+  end
+
+  // Term = Factor { Factor } .
+  func parseTerm()
+    let term := Term([], self.current)
+    term.factors.add(value: self.parseFactor())
+    while self.current.type in factorStartSet do
+      term.factors.add(value: self.parseFactor())
+    end
+    return term
+  end
+
+  // Factor = Identifier | Literal | Group | Option | Repetition .
+  func parseFactor()
+    switch self.current.type
+      case TokenType.Identifier: return self.parseIdentifier()
+      case TokenType.Literal:    return self.parseLiteral()
+      case TokenType.OpenParen:  return self.parseGroup()
+      case TokenType.OpenBrack:  return self.parseOption()
+      case TokenType.OpenBrace:  return self.parseRepetition()
+      else
+        error(self.current, 'Expected Identifier, Literal, "(", "[" or "{".')
+        return Factor(self.current)
+    end
+  end
+
+  // Group = "(" Expression ")" .
+  func parseGroup()
+    let token := self.current
+    self.next() // skip (
+    let expression := self.parseExpression()
+    self.expect(TokenType.CloseParen,
+                synchSet: factorStartSet >< [TokenType.Termination])
+    return Group(expression, token)
+  end
+
+  // Option = "[" Expression "]" .
+  func parseOption()
+    let token := self.current
+    self.next() // skip [
+    let expression := self.parseExpression()
+    self.expect(TokenType.CloseBrack,
+                synchSet: factorStartSet >< [TokenType.Termination])
+    return Option(expression, token)
+  end
+
+  // Repetition = "{" Expression "}" .
+  func parseRepetition()
+    let token := self.current
+    self.next() // skip {
+    let expression := self.parseExpression()
+    self.expect(TokenType.CloseBrace,
+                synchSet: factorStartSet >< [TokenType.Termination])
+    return Repetition(expression, token)
+  end
+
+  // Identifier = letter { letter } .
+  // parsing letters is handled in the Lexer
+  func parseIdentifier()
+    let token := self.current
+    self.expect(TokenType.Identifier,
+                synchSet: factorStartSet >< [TokenType.Termination])
+    return Identifier(token.lexeme, token)
+  end
+
+  // Literal = "'" character { character } "'"
+  //         | '"' character { character } '"'.
+  // Literal parsing is handled in the Lexer
+  func parseLiteral()
+    let token := self.current
+    self.expect(TokenType.Literal,
+                synchSet: factorStartSet >< [TokenType.Termination])
+    return Literal(token.value, token)
+  end
+
+
+end
+
