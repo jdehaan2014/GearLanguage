@@ -25,6 +25,7 @@ type
     function isConstant(Ident: TIdent): Boolean;
     function getClassName: String;
     property ClassName: String read getClassName;
+    function getMethod(const Name: String): Variant;
   end;
 
   ITraitable = interface

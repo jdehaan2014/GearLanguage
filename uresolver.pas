@@ -791,6 +791,7 @@ begin
     Enter(TSymbol.Create('toStr', Enabled, False));
     Enter(TSymbol.Create('pred', Enabled, False));
     Enter(TSymbol.Create('succ', Enabled, False));
+    Enter(TSymbol.Create('method', Enabled, False));
 
     Enter(TSymbol.Create('Array', Enabled, False));
     Enter(TSymbol.Create('Dictionary', Enabled, False));
@@ -826,6 +827,20 @@ begin
     Enter(TSymbol.Create('window', Enabled, False));
     Enter(TSymbol.Create('gotoXY', Enabled, False));
     Enter(TSymbol.Create('clrScr', Enabled, False));
+
+    // files
+    Enter(TSymbol.Create('forReading', Enabled, False));
+    Enter(TSymbol.Create('forWriting', Enabled, False));
+    Enter(TSymbol.Create('forReadingAndWriting', Enabled, False));
+    Enter(TSymbol.Create('fromBeginning', Enabled, False));
+    Enter(TSymbol.Create('fromCurrent', Enabled, False));
+    Enter(TSymbol.Create('fromEnd', Enabled, False));
+    Enter(TSymbol.Create('fileOpen', Enabled, False));
+    Enter(TSymbol.Create('fileRead', Enabled, False));
+    Enter(TSymbol.Create('fileClose', Enabled, False));
+    Enter(TSymbol.Create('fileWrite', Enabled, False));
+    Enter(TSymbol.Create('fileSeek', Enabled, False));
+    Enter(TSymbol.Create('fileCreate', Enabled, False));
   end;
 end;
 

@@ -19,7 +19,7 @@
     </General>
     <VersionInfo>
       <AutoIncrementBuild Value="True"/>
-      <BuildNr Value="318"/>
+      <BuildNr Value="325"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
@@ -33,7 +33,7 @@
         <Mode0 Name="default"/>
       </Modes>
     </RunParams>
-    <Units Count="31">
+    <Units Count="32">
       <Unit0>
         <Filename Value="gear.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -187,6 +187,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uStandardCRT"/>
       </Unit30>
+      <Unit31>
+        <Filename Value="ustandardfiles.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uStandardFiles"/>
+      </Unit31>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

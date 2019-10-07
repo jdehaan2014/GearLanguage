@@ -47,6 +47,7 @@ type
       function GetMember(Ident: TIdent): Variant;
       procedure SetField(Ident: TIdent; Value: Variant);
       function isConstant(Ident: TIdent): Boolean;
+      function getMethod(const Name: String): Variant;
   end;
 
   TGearTrait = class(TInterfacedObject, ITraitable)
@@ -220,6 +221,16 @@ end;
 function TGearInstance.isConstant(Ident: TIdent): Boolean;
 begin
   Result := InstanceConsts.ContainsKey(Ident.Text);
+end;
+
+function TGearInstance.getMethod(const Name: String): Variant;
+var
+  Method: ICallable;
+begin
+  Method := GearClass.FindMethod(Self, Name);
+  if Method <> Nil then
+    Exit(Method);
+  Result := Null;
 end;
 
 { TGearTrait }

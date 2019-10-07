@@ -155,10 +155,14 @@ type
     function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
   end;
 
+  TGetMethod = class(TInterfacedObject, ICallable)
+    function Call(Token: TToken; Interpreter: TInterpreter; ArgList: TArgList): Variant;
+  end;
+
 procedure StoreStandardFunctions(GlobalSpace: TMemorySpace);
 
 implementation
-uses uArrayIntf, uDictIntf;
+uses uArrayIntf, uDictIntf, uClassIntf;
 
 { TPi }
 
@@ -485,6 +489,29 @@ begin
   Result := Succ(x);
 end;
 
+{ TGetMethod }
+
+function TGetMethod.Call(Token: TToken; Interpreter: TInterpreter;
+  ArgList: TArgList): Variant;
+var
+  Name: String;
+  Instance: Variant;
+begin
+  TFunc.CheckArity(Token, ArgList.Count, 2);
+  Instance := ArgList[0].Value;
+  Name := ArgList[1].Value;
+  if VarSupports(Instance, IGearInstance) then
+    begin
+      Result := IGearInstance(Instance).getMethod(Name);
+      if Result = Null then
+        Raise ERuntimeError.Create(Token, Format(
+          'Function signature "%s" not found.', [Name]));
+    end
+  else
+    Raise ERuntimeError.Create(Token,
+      'Function method() not possible for this type.');
+end;
+
 
 procedure StoreStandardFunctions(GlobalSpace: TMemorySpace);
 var
@@ -522,6 +549,7 @@ begin
   GlobalSpace.Store('toStr', ICallable(TToStr.Create), Token);
   GlobalSpace.Store('pred', ICallable(TPred.Create), Token);
   GlobalSpace.Store('succ', ICallable(TSucc.Create), Token);
+  GlobalSpace.Store('method', ICallable(TGetMethod.Create), Token);
 end;
 
 end.

@@ -94,7 +94,7 @@ type
   end;
 
 implementation
-uses uCallable, uFunc, uStandard, uStandardList, uStandardCRT, uVariantSupport,
+uses uCallable, uFunc, uStandard, uStandardList, uStandardCRT, uStandardFiles, uVariantSupport,
   uTupleIntf, uTuple, uClassIntf, uClass, uArrayIntf, uArray, uDictIntf, uDict, uEnumIntf, uEnum;
 
 const
@@ -119,6 +119,7 @@ begin
   StoreStandardFunctions(FGlobals);
   StoreStandardListFunctions(FGlobals);
   StoreStandardCRTFunctions(FGlobals);
+  StoreStandardFileFunctions(FGlobals);
 
   // store base Array type
   FGlobals.Store(

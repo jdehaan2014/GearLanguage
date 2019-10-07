@@ -3,11 +3,10 @@
   <ProjectSession>
     <Version Value="12"/>
     <BuildModes Active="Default"/>
-    <Units Count="31">
+    <Units Count="32">
       <Unit0>
         <Filename Value="gear.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <CursorPos X="71" Y="13"/>
         <UsageCount Value="203"/>
         <Loaded Value="True"/>
@@ -46,8 +45,8 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uInterpreter"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="316"/>
-        <CursorPos X="66" Y="361"/>
+        <TopLine Value="102"/>
+        <CursorPos X="27" Y="124"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit4>
@@ -55,7 +54,7 @@
         <Filename Value="ulexer.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uLexer"/>
-        <EditorIndex Value="25"/>
+        <EditorIndex Value="26"/>
         <TopLine Value="19"/>
         <CursorPos X="19" Y="215"/>
         <UsageCount Value="201"/>
@@ -65,9 +64,9 @@
         <Filename Value="uparser.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uParser"/>
-        <EditorIndex Value="26"/>
-        <TopLine Value="28"/>
-        <CursorPos X="6" Y="1446"/>
+        <EditorIndex Value="27"/>
+        <TopLine Value="1000"/>
+        <CursorPos X="3" Y="1009"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit6>
@@ -75,9 +74,9 @@
         <Filename Value="uprinter.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uPrinter"/>
-        <EditorIndex Value="27"/>
-        <TopLine Value="41"/>
-        <CursorPos Y="61"/>
+        <EditorIndex Value="28"/>
+        <TopLine Value="69"/>
+        <CursorPos X="25" Y="33"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit7>
@@ -85,8 +84,8 @@
         <Filename Value="ureader.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uReader"/>
-        <EditorIndex Value="28"/>
-        <TopLine Value="47"/>
+        <EditorIndex Value="29"/>
+        <TopLine Value="31"/>
         <CursorPos X="9" Y="87"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
@@ -95,8 +94,8 @@
         <Filename Value="utoken.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uToken"/>
-        <EditorIndex Value="29"/>
-        <TopLine Value="199"/>
+        <EditorIndex Value="30"/>
+        <TopLine Value="193"/>
         <CursorPos X="7" Y="202"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
@@ -105,9 +104,9 @@
         <Filename Value="uvisitor.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uVisitor"/>
-        <EditorIndex Value="30"/>
+        <EditorIndex Value="31"/>
         <TopLine Value="34"/>
-        <CursorPos X="70" Y="52"/>
+        <CursorPos X="4" Y="45"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit10>
@@ -115,7 +114,7 @@
         <Filename Value="umath.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uMath"/>
-        <EditorIndex Value="24"/>
+        <EditorIndex Value="25"/>
         <TopLine Value="340"/>
         <CursorPos Y="365"/>
         <UsageCount Value="225"/>
@@ -125,7 +124,7 @@
         <Filename Value="umemory.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uMemory"/>
-        <EditorIndex Value="21"/>
+        <EditorIndex Value="22"/>
         <TopLine Value="34"/>
         <CursorPos X="7" Y="48"/>
         <UsageCount Value="201"/>
@@ -135,9 +134,9 @@
         <Filename Value="uresolver.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uResolver"/>
-        <EditorIndex Value="20"/>
-        <TopLine Value="756"/>
-        <CursorPos X="30" Y="763"/>
+        <EditorIndex Value="21"/>
+        <TopLine Value="727"/>
+        <CursorPos X="55" Y="749"/>
         <UsageCount Value="233"/>
         <Loaded Value="True"/>
       </Unit13>
@@ -145,7 +144,7 @@
         <Filename Value="ucallable.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uCallable"/>
-        <EditorIndex Value="22"/>
+        <EditorIndex Value="23"/>
         <CursorPos X="47" Y="21"/>
         <UsageCount Value="213"/>
         <Loaded Value="True"/>
@@ -154,7 +153,7 @@
         <Filename Value="ufunc.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uFunc"/>
-        <EditorIndex Value="23"/>
+        <EditorIndex Value="24"/>
         <CursorPos Y="34"/>
         <UsageCount Value="213"/>
         <Loaded Value="True"/>
@@ -164,8 +163,8 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uStandard"/>
         <EditorIndex Value="17"/>
-        <TopLine Value="478"/>
-        <CursorPos X="54" Y="509"/>
+        <TopLine Value="506"/>
+        <CursorPos X="65" Y="528"/>
         <UsageCount Value="206"/>
         <Loaded Value="True"/>
       </Unit16>
@@ -200,7 +199,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uClassIntf"/>
         <EditorIndex Value="8"/>
-        <CursorPos X="55" Y="24"/>
+        <CursorPos X="2" Y="29"/>
         <UsageCount Value="221"/>
         <Loaded Value="True"/>
       </Unit20>
@@ -208,9 +207,10 @@
         <Filename Value="uclass.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uClass"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="9"/>
-        <TopLine Value="182"/>
-        <CursorPos Y="199"/>
+        <TopLine Value="120"/>
+        <CursorPos X="16" Y="130"/>
         <UsageCount Value="221"/>
         <Loaded Value="True"/>
       </Unit21>
@@ -249,8 +249,8 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uStandardList"/>
         <EditorIndex Value="18"/>
-        <TopLine Value="528"/>
-        <CursorPos Y="578"/>
+        <TopLine Value="192"/>
+        <CursorPos Y="216"/>
         <UsageCount Value="205"/>
         <Loaded Value="True"/>
       </Unit25>
@@ -259,7 +259,6 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uDictIntf"/>
         <EditorIndex Value="12"/>
-        <TopLine Value="94"/>
         <CursorPos X="2" Y="107"/>
         <UsageCount Value="203"/>
         <Loaded Value="True"/>
@@ -298,11 +297,21 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uStandardCRT"/>
         <EditorIndex Value="19"/>
-        <TopLine Value="31"/>
-        <CursorPos X="23" Y="45"/>
-        <UsageCount Value="69"/>
+        <TopLine Value="17"/>
+        <CursorPos X="11" Y="29"/>
+        <UsageCount Value="125"/>
         <Loaded Value="True"/>
       </Unit30>
+      <Unit31>
+        <Filename Value="ustandardfiles.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uStandardFiles"/>
+        <EditorIndex Value="20"/>
+        <TopLine Value="144"/>
+        <CursorPos X="30" Y="164"/>
+        <UsageCount Value="72"/>
+        <Loaded Value="True"/>
+      </Unit31>
     </Units>
     <RunParams>
       <FormatVersion Value="2"/>
