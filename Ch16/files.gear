@@ -1,0 +1,38 @@
+// test file functions
+
+//let s := 'The quick brown fox jumps over the lazy dog.'
+use system
+
+let f := fileOpen('/Users/Jeroen/for.txt', forReading)
+print(f)
+
+let result := fileRead(f) // is an array of byte
+
+fileClose(f)
+
+//print(result)
+
+extension Array
+  func toStr()
+    var result := ''
+    for var i := 0 where i<length(self), i+=1 do
+      result += '\(chr(self[i]))'
+    end
+    return result
+  end
+end
+
+
+val s
+  var res := ''
+  for each r in result do
+    res += chr(r) //'\(chr(r))'
+  end
+  return res
+end
+
+
+print(result.toStr())
+print()
+print(s)
+

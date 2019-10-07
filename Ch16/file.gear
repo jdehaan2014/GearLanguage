@@ -1,0 +1,31 @@
+
+func process(.fileName)
+  let inputFile := fileOpen(fileName, forReading)
+
+  if inputFile = -1 then
+    print('Error opening file "\(fileName)".')
+    return Null
+  end
+
+  let fileSize := fileSeek(inputFile, 0, fromEnd)
+
+  fileSeek(inputFile, 0, fromBeginning)
+
+  let bytesRead := fileRead(inputFile)
+  if length(bytesRead) < fileSize then
+    print('Error reading file "\(fileName)".')
+    return Null
+  end
+
+  fileClose(inputFile)
+
+  return (bytesRead, fileSize)
+end
+
+print('Enter file name: ')
+let file := readln()
+let contents := process(fileName: file)
+print(contents.1)
+
+let size := contents.2
+print('size: \(size)')

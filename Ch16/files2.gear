@@ -1,0 +1,44 @@
+
+use system
+
+let newFile := fileCreate('/Users/Jeroen/for2.txt')
+
+let charArr := Array('this is for real.')
+
+func toBytes(chars)
+  var result := []
+  for var i:=0 where i<length(chars), i+=1 do
+    result.add(value: ord(chars[i]))
+  end
+  return result
+end
+
+print(charArr)
+print()
+print(toBytes(charArr))
+print()
+
+let i := fileWrite(newFile, toBytes(charArr))
+
+if i = -1 then
+  print('error writing to file')
+end
+
+fileClose(newFile)
+
+let file := fileOpen('/Users/Jeroen/for2.txt', forReading)
+let input := fileRead(file) // is an array of byte
+fileClose(file)
+
+val s
+  var res := ''
+  for each r in input do
+    res += chr(r)
+  end
+  return res
+end
+
+
+print()
+print(s)
+
