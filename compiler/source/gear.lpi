@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="12"/>
+    <General>
+      <Flags>
+        <MainUnitHasUsesSectionForAllUnits Value="False"/>
+        <MainUnitHasCreateFormStatements Value="False"/>
+        <MainUnitHasTitleStatement Value="False"/>
+        <MainUnitHasScaledStatement Value="False"/>
+        <CompatibilityMode Value="True"/>
+      </Flags>
+      <SessionStorage Value="InProjectDir"/>
+      <Title Value="gear"/>
+      <UseAppBundle Value="False"/>
+      <ResourceType Value="res"/>
+    </General>
+    <BuildModes Count="3">
+      <Item1 Name="Default" Default="True"/>
+      <Item2 Name="Debug">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="gear"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+              <AllowLabel Value="False"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <VerifyObjMethodCallValidity Value="True"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf3"/>
+              <UseHeaptrc Value="True"/>
+              <TrashVariables Value="True"/>
+              <StripSymbols Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <Verbosity>
+              <ShowHints Value="False"/>
+            </Verbosity>
+          </Other>
+        </CompilerOptions>
+      </Item2>
+      <Item3 Name="Release">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="gear"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <AllowLabel Value="False"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <Optimizations>
+              <OptimizationLevel Value="3"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <Verbosity>
+              <ShowHints Value="False"/>
+            </Verbosity>
+          </Other>
+        </CompilerOptions>
+      </Item3>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+      <UseFileFilters Value="True"/>
+    </PublishOptions>
+    <RunParams>
+      <FormatVersion Value="2"/>
+    </RunParams>
+    <Units Count="27">
+      <Unit0>
+        <Filename Value="gear.lpr"/>
+        <IsPartOfProject Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="ucommon.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCommon"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="umain.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uMain"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="uast.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uAST"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="uerror.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uError"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="ureader.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uReader"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="utoken.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uToken"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="ulexer.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uLexer"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="ubaseparser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uBaseParser"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="uprecedence.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uPrecedence"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="uparser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uParser"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="uexprparser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uExprParser"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="uparselets.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uParselets"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="uvalue.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uValue"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="uprinter.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uPrinter"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="uscopes.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uScopes"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="uresolver.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uResolver"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="uobject.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uObject"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="unative.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uNative"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="utable.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uTable"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="umemory.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uMemory"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="uchunk.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uChunk"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="udebug.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uDebug"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="ucodegen.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCodeGen"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="uvm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uVM"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="uvisitor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uVisitor"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="uDefines.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit26>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <Target>
+      <Filename Value="gear"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)"/>
+      <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <AllowLabel Value="False"/>
+      </SyntaxOptions>
+    </Parsing>
+    <CodeGeneration>
+      <SmartLinkUnit Value="True"/>
+      <Optimizations>
+        <OptimizationLevel Value="2"/>
+      </Optimizations>
+    </CodeGeneration>
+    <Linking>
+      <Debugging>
+        <GenerateDebugInfo Value="False"/>
+        <StripSymbols Value="True"/>
+      </Debugging>
+      <LinkSmart Value="True"/>
+    </Linking>
+    <Other>
+      <Verbosity>
+        <ShowHints Value="False"/>
+      </Verbosity>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="3">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+    </Exceptions>
+  </Debugging>
+</CONFIG>

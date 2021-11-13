@@ -1,0 +1,10 @@
+// this file contains general defines
+
+{$DEFINE NAN_BOXING}
+
+{$DEFINE DEBUG_PRINT_CODE}
+//{$DEFINE DEBUG_TRACE_EXECUTION}
+//{$DEFINE DEBUG_STRESS_GC}
+//{$DEFINE DEBUG_LOG_GC}
+
+
