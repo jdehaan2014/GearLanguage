@@ -1,3 +1,0 @@
-var s := 'it''s' + 'me'
-print(s)
-
