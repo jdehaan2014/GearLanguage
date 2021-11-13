@@ -1,1 +1,1 @@
-This is a Lazarus project
+This is a Lazarus/FreePascal project
