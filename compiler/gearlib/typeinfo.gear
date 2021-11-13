@@ -1,0 +1,56 @@
+// type information
+
+enum Type is
+  Number=0,
+  Boolean=1,
+  String=2,
+  Class=3,
+  Array=4,
+  Dictionary=5,
+  Set=6,
+  Enum=7,
+  Func=8,
+  Nil=9
+end
+
+func type(of value) do
+  switch typeOf(value)
+    case 0: return Type.Number
+    case 1: return Type.Boolean
+    case 2: return Type.String
+    case 3: return Type.Class
+    case 4: return Type.Array
+    case 5: return Type.Dictionary
+    case 6: return Type.Set
+    case 7: return Type.Enum
+    case 8: return Type.Func
+    default: return Type.Nil
+  end
+end
+
+/*
+print(type(of: pi()))
+print(type(of: 'abc'))
+print(type(of: true))
+
+if type(of: 4) = Type.Number then
+  print('Yessss')
+end
+
+if type(of: false) <> Type.Number then
+  print('wrong')
+end
+
+let value := false
+if type(of: value) = Type.Boolean then
+  print('Yes indeed')
+end
+
+let str := 'Hello'
+if type(of: str) = Type.String then
+  print('It sure is')
+end
+*/
+
+//print(type(of: x=>x^2))  // Func
+

@@ -1,0 +1,148 @@
+use ranges
+
+/* module math
+   math functions and constants
+*/
+
+let Pi := pi()
+let E := exp(1)
+
+//print(Pi)
+//print(E)
+
+// calculate the integral over a function over a range in n steps
+
+func integral(f, from a, to b, steps n) do
+  var sum := 0
+  let dt := (b-a)/n
+  for var i := 0 where i<n, i+=1 do
+    sum := sum + f(a + (i + 0.5) * dt)
+  end
+  return sum*dt
+end
+
+// Calculate the integral over function f(x) = x^2 - 2x + 4 in 10000 steps
+//print(integral(/\x=>x^2-2*x+4, from: 0, to: 1, steps: 10000))
+
+// Calculate the integral over function f(x) = x^3 in 10000 steps
+//print(integral(/\x=>x^3, from: 0, to: 1, steps: 10000))
+
+// Calculate the integral over function 3) f(x) = x^2 + 4*x - 21 in 10000 steps
+//print(integral(x=>x^2 + 4*x - 21, from: 0, to: 1, steps: 10000))
+
+// integral of half circle
+// x^2 + y^2 = 1
+// y^2 = 1 - x^2
+// y = sqrt(1-x^2)
+//print(integral(/\x=>sqrt(1-x^2), from: -1, to: 1, steps: 10000)) // pi/2
+
+//Calculate Pi
+//let Pi := 2 * integral(/\x=>sqrt(1-x^2), from: -1, to: 1, steps: 100000)
+
+//print(Pi)
+//print(pi()) // compare
+
+
+// return a random integer number between an interval (a,b)
+
+func random(between a,  b) do
+  randomize()
+  return random(b-a)+a
+end
+
+/*
+print(random(between: 5, 10))
+print(random(between: 10, 20))
+print(random(between: 50, 100))
+*/
+
+
+func random(.interval) do
+  randomize()
+  return random(interval.to - interval.from) + interval.from
+end
+
+//print(random(interval: 0..100))
+
+func hypotenusa(x,y) do
+  ensure y <> 0 else
+    return 0
+  end
+  if let r := y/x where x>y then
+    return x*sqrt(1+r*r)
+  end
+  return y*sqrt(1+(x/y)^2)
+end
+
+// var y := hypotenusa(4,3)
+
+// convert decimal number to hexadecimal string
+func dec2hex(n) do
+  var hex := ''
+  while n<>0 do
+    var temp := 0
+    temp := n%16
+
+    if temp<10 then
+      hex += chr(temp+48)
+    else
+      hex += chr(temp+55)
+    end
+
+    n := trunc(n/16)
+  end
+
+  var result := ''
+  for var i:= length(hex)-1 where i>=0, i-=1 do
+    result += hex[i]
+  end
+
+  result := length(result) = 0 ?
+    true: '00'
+    false: length(result) = 1?
+      true: '0' + result
+      false: result
+
+  return result
+end
+
+// recursive solution
+func toHex(d) do
+  let chars := '0123456789ABCDEF'
+  var r := d % 16
+  if d - r = 0 then
+    return chars[r]
+  end
+  return toHex((d - r) / 16) + chars[r]
+end
+
+// var h := Dec2Hex(28452345)  // 1B225F9
+
+func toBin(n) do
+  var bin := ''
+  do
+    bin := n % 2 = 0 ?
+      true:  '0' + bin
+      false: '1' + bin
+    n := trunc(n / 2)
+  end while n<>0
+  return bin
+end
+
+// faster solution using bitwise 'and' + shift right
+func dec2bin(n) do
+  var bin := ''
+  while n > 0 do
+    bin := n & 1 = 1 ?
+      true:  '1' + bin
+      false: '0' + bin
+    n := n >> 1
+  end
+  return bin
+end
+
+//print(dec2Bin(256))
+//print(0b100000000)
+//print(toBin(7))
+//print(toBin(256))
+

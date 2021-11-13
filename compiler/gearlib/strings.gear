@@ -1,0 +1,57 @@
+//module strings.gear
+// standard string routines
+
+// copies part of a string from start for count characters
+func copy(.string, .start, .count) do
+  var result := ''
+  var len := length(string)
+  if len > start+count then
+    len := start+count
+  end
+  for var i := start where i<len, i+=1 do
+    result += string[i]
+  end
+  return result
+end
+
+// removes the left side spaces
+func trimLeft(string) do
+  var i := 0
+  while string[i] = ' ' do
+    i+=1
+  end
+  return copy(string: string, start: i, count: length(string))
+end
+
+//removes the right side spaces
+func trimRight(string) do
+  var i := length(string)-1
+  while string[i] = ' ' do
+    i-=1
+  end
+  return copy(string: string, start: 0, count: i)
+end
+
+// removes both left and right side spaces
+func trim(string) do
+  return trimRight(trimLeft(string))
+end
+
+// create string of a character
+func string(of char, .count) do
+  var result := ''
+  for var i := 0 where i < count, i+=1 do
+    result += char
+  end
+  return result
+end
+
+func spaces(.count) do
+  var result := ''
+  for var i := 0 where i < count, i+=1 do
+    result += ' '
+  end
+  return result
+end
+
+
