@@ -1,0 +1,26 @@
+// test
+
+var groceries := ['Potatoes', 'Cucumber', 'Tomatoes', 'Olive-oil', 'Peanuts']
+print(groceries[3])     // Olive-oil
+groceries[1] := 'Salad'
+
+print(groceries.first)    // Potatoes
+print(groceries.last)     // Peanuts
+
+groceries := groceries + ['French fries']
+groceries.add(value: 'Mushrooms')
+
+print(groceries)
+
+groceries.add(array: ['Broccoli', 'Cheese', 'Milk'])
+print(groceries)
+
+let moreShopping := ['Oranges', 'Apples', 'Pears', 'Bananas', 'Melon']
+groceries.add(array: moreShopping)
+
+print(groceries)
+
+let newArr := []
+newArr.add(value: 7)
+print(newArr)
+

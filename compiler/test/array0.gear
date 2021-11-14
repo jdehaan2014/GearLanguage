@@ -1,0 +1,27 @@
+
+let a := [1,2,3,4,5,6,7,8,9,10]
+print(a)
+print(a[0])
+
+
+for var i in [1,2,3,4,5,6,7,8,9,10] where i%2=0 do
+  print(i, terminator: '|')
+end
+print()
+
+for var x in a do
+  print(x, terminator: '|')
+end
+print()
+
+var range := -5..<10
+for var i in range do
+  print(i, terminator: '|')
+end
+print()
+range := (0..30).step(3)
+for var i in range do
+  print(i, terminator: '|')
+end
+print()
+

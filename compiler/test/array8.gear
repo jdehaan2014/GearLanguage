@@ -1,0 +1,18 @@
+var list := [1,2,3,4,5,6,7,8,9,10]
+print(list)
+
+
+list.each(/\(n) do
+  print(n^2, terminator: '|')
+end)
+print()
+
+(1..10).each(/\(n) do
+  print(n^3, terminator: '|')
+end)
+print()
+
+print((1..10).reduce(1, /\(x,y)=>x*y))
+print(list[3..9].reduce(0, /\(x,y)=>x+y))
+print(list.reduce(1, /\(x,y)=>x*y))
+

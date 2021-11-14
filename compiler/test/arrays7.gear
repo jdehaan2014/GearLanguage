@@ -1,0 +1,16 @@
+
+
+let set := {1,2,3,4,5,6,7,8,9}
+
+let a := [n for n in set]
+print(a)
+
+var result := [ 2*x for x in {1,2,3,4,5,6,7,8,9,10} where x^2>3 ]
+print(result)
+
+//let y := result
+
+(1..10).each(/\(n) do
+  print(n)
+end)
+

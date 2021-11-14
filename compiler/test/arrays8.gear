@@ -1,0 +1,26 @@
+
+/*
+var a := 1..<9
+print(a)
+print(a.toArray())
+
+let list := (1..<9).toArray()
+*/
+
+var list := [1,2,3,4,5]
+print(list)
+
+list.each(/\(n) do
+  print(n^2, terminator: '|')
+end)
+print()
+
+
+print((1..<9).map(x=>x^3))
+
+(1..<9).each(/\(n) do
+  print(n^2, terminator: '|')
+end)
+print()
+
+

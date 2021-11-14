@@ -1,0 +1,34 @@
+
+var list := [0,1,2,3,4,5,6,7,8,9,10]
+
+for var item in list where item%2=0 do
+  print(item, terminator: '|')
+end
+print(#10, list)
+
+list.each(/\(n) do
+  print(n)
+end)
+print()
+
+print(list.map(x=>x^2))
+print(list.filter(x=>x%2=0))
+print(list.reduce(0, /\(x,y)=>x+y))
+print(list.sum())
+print(list.reversed())
+
+print((3..<10).toArray())
+print((3..<10).toSet())
+var range := 0..<10
+print(5 in range)
+print(10 in range)
+print(9 in range)
+print(12 not in range)
+
+print([ x for x in (0..10).toArray() ])
+print([ x for x in array(of: 'abcdefghik') ])
+for var x in array(of: 'abcdefghik') do
+  print(x, terminator: '|')
+end
+print()
+

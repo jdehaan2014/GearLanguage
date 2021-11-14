@@ -1,0 +1,63 @@
+let m := [[1,2],[3,4],[5,6]]
+print(m[1][1]) //4
+
+
+let a := [1,2,3,4,5]
+for var i:=0 where i < length(a), i:=i+1 do
+  print(a[i])
+end
+
+var numbers := [1,2,3,4,5]
+numbers := numbers + [6,7,8,9]
+print([0] + numbers) // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+//print(numbers + 9)
+
+extension Array is
+
+  // calculate the sum of all elements using
+  // recursive tail calls
+  func summa() =>
+    match @count
+      if 0: 0
+      else @head + @tail.summa()
+
+  //multiply 2 arrays
+  infix *(other) do
+    var result := []
+    for var i in 0..<self.count do
+      result.add(self[i]*other[i])
+    end
+    return result
+  end
+
+  // dot product using ~ tilde operator
+  infix ~(other) do
+    let multiplied := self * other     // using * operator to multiply arrays
+    return multiplied.summa()
+  end
+
+  //negate the elements of the array
+  prefix -() do
+    return [-x for x in self]
+  end
+end
+
+let x := [1,2,3,4,5,6, 7, 8, 9,10]
+let y := [4,5,6,7,8,9,10,11,12,13]
+print(x*y)
+print(x~y)
+print(-x)
+
+/*
+extension Array is
+  // concatenate 2 arrays
+  infix +(other) do
+    print('you are using your own + operator')
+    return [].add(array: self).add(array: other)
+  end
+end
+
+print([1,2,3] + [5,6,7])
+*/
+

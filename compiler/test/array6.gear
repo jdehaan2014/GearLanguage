@@ -1,0 +1,11 @@
+let list := [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+
+print([2*x for x in list where x=>x^2>3])
+print([2*x for x in 0..15 where x=>x^2>3])
+
+var evens := list.flatMap(n => if n%2=0 then [n] else [])
+print(evens)
+
+var evensSquared := list.flatMap(n => if n%2=0 then [n*n] else [])
+print(evensSquared)
+

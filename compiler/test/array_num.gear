@@ -1,0 +1,34 @@
+// array with only numbers
+
+use typeinfo
+
+extension Array is
+  func add(number value) do
+    ensure type(of: value) = Type.Number else
+      error('Only numbers allowed.')
+    end
+    self.add(value)
+  end
+
+  func all(.satisfy) do
+    for var item in self where not satisfy(item) do
+      return false
+    end
+    return true
+  end
+end
+
+var numbers := []
+numbers.add(number: 99)
+numbers.add(number: 100)
+print(numbers) // [99, 100]
+print(numbers.all(satisfy: value=>type(of: value) = Type.Number))
+
+//numbers.add(number: 'hello') // Runtime error: Only numbers allowed.
+
+numbers.add(value: 'hello')
+print(numbers)
+
+print(numbers.all(satisfy: value=>type(of: value) = Type.Number))
+
+
