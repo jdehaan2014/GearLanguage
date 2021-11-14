@@ -1,0 +1,30 @@
+//decimal to hex converter
+
+
+func Dec2Hex(n) do
+  var hex := ''
+  while n<>0 do
+    var temp := 0
+    temp := n%16
+
+    if temp<10 then
+      hex += chr(temp+48)
+    else
+      hex += chr(temp+55)
+    end
+
+    n := trunc(n/16)
+  end
+
+  var result := ''
+  for var i:= length(hex)-1 where i>=0, i-=1 do
+    result += hex[i]
+  end
+
+  return result
+end
+
+let x := 28452345
+
+print('Decimal $(x) = Hex $(Dec2Hex(x)).') // 1B225F9
+

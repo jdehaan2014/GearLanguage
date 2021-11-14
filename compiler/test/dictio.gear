@@ -1,0 +1,25 @@
+
+let interestingNumbers :=
+  ['Prime': [1,2,3,5,7,11,13,17,19,23],
+   'Fibonacci': [1,1,2,3,5,8,13,21,34],
+   'Square': [1,4,9,16,25]
+  ]
+
+for var pair in interestingNumbers do
+  print(pair.key, ': ', pair.value)
+end
+
+print(interestingNumbers)
+
+var largest := 0
+
+for var type in interestingNumbers do
+  for var number in type.value do
+    if number > largest then
+      largest := number
+    end
+  end
+end
+
+print('Largest number is $(largest)')
+

@@ -1,0 +1,13 @@
+
+print([ x for x in (0..10).toArray() ])
+print([ x for x in array(of: 'abcdefghik') ])
+for var x in array(of: 'abcdefghikklmnopqrstuvxyz') do
+  print(x, terminator: '|')
+end
+print()
+let string := '0123456789abcdefghikklmnopqrstuvxyz'
+for var x in array(of: string) do
+  print(x, terminator: '|')
+end
+
+

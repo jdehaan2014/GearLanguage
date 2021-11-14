@@ -1,0 +1,18 @@
+
+let dict := [1:'One', 2:'Two', 3:'Three', 4:'Four']
+
+var x := [ x.value for x in dict where x.key%2=0 ]
+print(x)  // [Two, Four]
+print(dict.keys)
+
+let words := [
+  'pair':'couple',
+  'oma':'grandmother',
+  'man':'male',
+  'woman':'female']
+
+let w := {word.value for word in words where word.key > 'oma' }
+print(w)
+
+// {couple, female}
+

@@ -1,0 +1,36 @@
+// switch with is
+// doesn't work for instance of super class
+
+class Root is
+  var name := 'Root'
+end
+
+class First < Root is
+end
+
+class Second < Root is
+end
+
+class Third < Second is
+end
+
+class Fourth is
+end
+
+var sec := Second()
+//var sec := Fourth()
+
+switch sec
+  case is Root:
+    print('Root')
+  case is First:
+    print('First')
+  case is Second:
+    print('Second')
+    print('is winning')
+  case is Third:
+    print('Third')
+  default:
+    print('None of the above')
+end
+

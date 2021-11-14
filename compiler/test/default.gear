@@ -1,0 +1,19 @@
+// testing the default variable functionality
+
+class Car is
+  default _type := 'car'
+  init(.type) for _type
+end
+
+var car := Car(type: 'Volvo')
+print(car)  // Volvo
+
+car := 'Mercedes'
+print(car)
+
+//car := 12345 //error: Incompatibe types in assignment -> "_type:String:=Number".
+
+var c := 'hello'
+//c := car
+print(c)
+

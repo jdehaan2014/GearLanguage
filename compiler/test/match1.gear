@@ -1,0 +1,41 @@
+// match
+use system
+
+var x := match 10
+  if 1: 'One'
+  if in 2..8: 'More'
+  if 9,10,11: 'Nine or higher'
+  else 'twelve'
+
+print(x)
+
+let value := 10
+let z := match value
+  if < 0: 'below zero'
+  if in 0..<10: 'teenager'
+  if in 10..20: 'in his twenties'
+  if >= 21: 'that''s old'
+  else 'wrong'
+
+print(z)
+
+//func fib(n) => if n<=1 then n else fib(n-1)+fib(n-2)
+
+func fib(n) =>
+  match n
+    if <= 1: n
+    else fib(n-1) + fib(n-2)
+
+print(fib(10))
+
+let age := 35
+print( match age
+  if < 0: 'undefined'
+  if in 0..<10: 'child'
+  if in 10..<20: 'teen'
+  if in 30..<40: 'young adult'
+  if in 40..<65: 'middle aged'
+  else 'pensionado'
+)
+
+

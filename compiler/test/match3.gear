@@ -1,0 +1,23 @@
+// match
+
+use system
+
+var someCharacter := 'u'
+print(someCharacter, match someCharacter
+  if 'a', 'e', 'i', 'o', 'u' : ' is a vowel'
+  if in {'b', 'c', 'd', 'f', 'g', 'h', 'j',
+         'k', 'l', 'm', 'n', 'p', 'q', 'r',
+         's', 't', 'v', 'w', 'x', 'y', 'z'} : ' is a consonant'
+  else ' is not a vowel nor a consonant')
+
+let alphabet := (ord("a")..ord("z")).toSet().map(c=>chr(c))
+let vowels := {"a", "e", "i", "o", "u"}
+//print(alphabet)
+
+let otherCharacter := "="
+print(otherCharacter,  match otherCharacter
+  if in alphabet - vowels: ' is a consonant'
+  if in vowels: ' is a vowel'
+  else ' is not a vowel nor a consonant')
+
+

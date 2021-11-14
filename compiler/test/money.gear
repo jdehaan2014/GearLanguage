@@ -1,0 +1,16 @@
+// money
+
+let ccy := (precision: 10, digits: 3,
+            width: 10,
+            format: fmtCurrency, currency: '€')
+
+print(3.14<~ccy)
+
+let format := (precision: 20, digits: 15, format: fmtFixed)
+
+print(pi()<~format)
+
+let EuroFormat := (precision: 0, digits: 2, format:fmtCurrency, currency: '€')
+let amount := 13.99
+print(amount<~EuroFormat)
+

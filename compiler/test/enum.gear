@@ -1,0 +1,16 @@
+
+enum Color is
+  Red, Blue, Yellow, Green, Orange, Purple
+end
+
+var myColor := Color.Blue
+print(myColor.name)   // prints ‘Blue’
+
+
+enum TokenType is
+  Plus='+', Min='-', Mul='*', Div='/', Rem='%'
+end
+var tokenType := TokenType.Mul
+print(tokenType.name)   // prints ‘Mul’
+print(tokenType.value)  // prints ‘*’
+

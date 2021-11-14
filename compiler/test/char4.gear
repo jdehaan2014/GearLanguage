@@ -1,0 +1,51 @@
+use math
+
+//let e := #233
+//±
+print(#65)
+print(ord('±'[0]),' ',ord('±'[1]))
+//print(chr(0xC2))
+print(0uC2B1)
+print(#194#177)
+//;
+
+print(0xE282AC) // 14844588
+print(0uE282AC) // €
+print(dec2bin(14844588)) // 111000101000001010101100
+
+print('this is a $(#240#159#164#170)')
+print('this too $(chr(240)+chr(159)+chr(164)+chr(170))')
+print('and this as well: $(0uF09FA4AA)')
+print('or this maybe: ', 0uF09FA4AA)
+print('but finally this one: ', 0U+1F92A)
+
+print(dec2hex(4036994218))
+
+print(dec2bin(4036994218))
+
+print(dec2hex(194))
+print(dec2hex(177))
+print(dec2hex(240))
+print(dec2hex(159))
+print(dec2hex(164))
+print(dec2hex(170))
+
+print(0uF0908D88)
+
+// utf codepoints
+print('utf codepoints')
+
+print(0u+20AC)
+print(0u+0024)
+print(0U+1F600)
+print(0U+1F923)
+print(0U+1F4A9)
+print(0U+0065 + 0U+0301)
+print(0U+00E9)
+
+print(length('🔥'))
+print(length("🔥"))
+
+
+
+

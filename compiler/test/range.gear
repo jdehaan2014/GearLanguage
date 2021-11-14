@@ -1,0 +1,27 @@
+
+
+for var item in (0..30).step(by:3) do
+  print(item, terminator: '|')
+end
+print()
+
+for var number in 3..8 do
+  print(number^2, terminator: '|')
+end
+print()
+
+var result := (1..100).filter(x=>x^2>3).map(x=>2*x)
+print(result)
+
+print((1..20).toArray())
+
+
+print((0..<10).toArray())
+var r := (1..10).filter(/\x=>x%2=0).map(/\x=>x^2)
+print(r)
+
+for var number in (1..20).filter(/\x=>x%2=0).map(/\x=>x^2) do
+  print(number)
+end
+
+

@@ -1,0 +1,19 @@
+
+let chars := '0123456789abcdefghijklmnopqrstuvwxyz'
+
+print(array(of: chars))
+
+
+print(array(of: 9823745))
+for var n in array(of: 9823745) do
+  print(n*2, terminator: '|')
+end
+print()
+
+print([x^2 for x in array(of: 9823745)].sum())
+
+for var char in array(of: chars) do
+  print('Char $(char) has ascii code $(ord(char)).')
+end
+
+

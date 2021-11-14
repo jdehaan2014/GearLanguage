@@ -1,0 +1,68 @@
+
+func isPrime(number) do
+  let sqrtNum := sqrt(number)
+  for var i:=3 where i<= sqrtNum, i+=2 do
+    if number%i = 0 then
+      return false
+    end
+  end
+  return true
+end
+
+var m := milliseconds()
+
+let primes := [2] +
+  [n for n in (3..<10000).step(by:2) where isPrime(n)]
+
+
+var ms := milliseconds() - m
+print('In $(ms) ms.')
+
+
+print(primes.count)
+
+m := milliseconds()
+
+var primes2 := [2] + (3..<10000).step(by:2).filter(
+  lambda(number) do
+    let sqrtNum := sqrt(number)
+    for var i:=3 where i<= sqrtNum, i+=2 do
+      if number%i = 0 then
+        return false
+      end
+    end
+    return true
+  end)
+
+ms := milliseconds() - m
+print('In $(ms) ms.')
+
+print(primes2.count)
+
+m := milliseconds()
+
+var primes3 := [2] + (3..<10000).step(by:2).filter(
+  lambda(number) do
+    for var i in (3..sqrt(number)).step(2) do
+      if number%i = 0 then
+        return false
+      end
+    end
+    return true
+  end)
+
+ms := milliseconds() - m
+print('In $(ms) ms.')
+
+print(primes3.count)
+
+/*
+In 16 ms.
+1229
+In 15 ms.
+1229
+In 36 ms.
+1229
+
+for..in is roughly twice as slow
+*/

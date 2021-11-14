@@ -1,0 +1,19 @@
+
+class Abc is
+  var field := 'field'
+  func write() do
+    print(@field)
+  end
+end
+
+class Def<Abc is
+  var property := 'property'
+  func write() do
+    inherited write()
+    print(@property)
+  end
+end
+
+var def := Def()
+def.write()
+

@@ -1,0 +1,38 @@
+// testing overloading functions
+record Point is
+  var x:=0, y:=0
+  init(.x, .y) for self.x, self.y
+
+  func distance(to point) do
+    return sqrt((point.x-self.x)^2 + (point.y-self.y)^2)
+  end
+end
+
+var p0 := Point(x:0,y:0), p1 := Point(x:1,y:1), p2 := Point(x:3,y:4)
+
+print(p1.distance(to: p0))
+print(p2.distance(to: p0))
+
+extension Point is
+  func set(.x) do
+    self.x := x
+  end
+  func set(.y) do
+    self.y := y
+  end
+  func set(.x,.y) do
+    self.x := x
+    self.y := y
+  end
+end
+
+p0.set(x:3)
+p0.set(y:4)
+
+print(p1.distance(to: p0))
+print(p2.distance(to: p0))
+
+p0.set(x:8,y:10)
+print(p1.distance(to: p0))
+print(p2.distance(to: p0))
+

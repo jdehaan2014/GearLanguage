@@ -1,0 +1,14 @@
+
+randomize()
+
+loop
+  var x := 0, y := 0
+do
+  x := random(10)
+  print('$(x) squared', terminator: ': ')
+  exit when x = 0
+  y := x^2
+  print(y)
+  exit when y > 70
+end
+

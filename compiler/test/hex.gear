@@ -1,0 +1,24 @@
+// hexadecimals and characters
+
+let n := 0x9F
+print(n) // 159
+
+print(0x1F89A) // 129178
+//print(0x1aH)
+//print(0xH)
+
+print(0x1B)
+print(0b11011)
+print(0o33)
+
+let c := #65
+print(c) // A
+
+let s := #240#159#166#129
+print(s) // 🦁
+
+let emoji := chr(240)+chr(159)+chr(166)+chr(129)
+print(emoji)
+
+print(chr(650)) // error
+

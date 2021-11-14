@@ -1,0 +1,24 @@
+
+var set := {1,2,3,4,5,6,7,8,9}
+print(set.toArray())
+for var i in set do
+  print(i, terminator:' /')
+end
+print()
+
+print(set.map(x=>x^2))
+
+var list := (1..15).toSet()
+print(list)
+for var i in list do
+  print(i, terminator:' /' )
+end
+print()
+
+var list2 := (1..15).toArray()
+print(list2)
+for var i in list2 do
+  print(i, terminator:' /')
+end
+print()
+

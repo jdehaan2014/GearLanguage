@@ -1,0 +1,31 @@
+
+let milesToPoint := ['point1':120.0,'point2':50.0,'point3':70.0]
+
+let a := [234,346,4567,6789]
+print(a)
+print(length(a))
+print(a.count)
+print(a.map(x=>x*2))
+
+let x := milesToPoint.keys
+print(x)
+print(length(x))
+print(x.count)
+
+let y := milesToPoint.values
+print(y)
+print(length(y))
+print(y.count)
+print(y.map(x=>x*1.6093))
+
+print(5+1.23456)
+
+let z := milesToPoint.values.map(t=>t*1.6)
+print(z)
+
+print('hello')
+let kmToPoint := milesToPoint.values.map(miles=>miles*1.6093 )
+print(kmToPoint)
+
+print(pi())
+

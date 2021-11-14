@@ -1,0 +1,18 @@
+
+func fizzBuzz(n) do
+  if (n%3=0) and (n%5=0) then
+    return 'fizzBuzz'
+  elseif n%3=0 then
+    return 'fizz'
+  elseif n%5=0 then
+    return 'buzz'
+  else
+    return n
+  end
+end
+
+//var fb := [n for n in 1..100].map(fizzBuzz)
+var fb := (1..100).map(fizzBuzz)
+
+print(fb)
+

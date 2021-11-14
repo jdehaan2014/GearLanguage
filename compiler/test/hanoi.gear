@@ -1,0 +1,15 @@
+// towers of Hanoi problem
+
+func tower(diskNumbers, source, auxilary, destination) do
+  if diskNumbers = 1 then
+    print('$(source) \t-> $(destination)')
+  else
+    tower(diskNumbers-1, source, destination, auxilary)
+    print('$(source) \t-> $(destination)')
+    tower(diskNumbers-1, auxilary, source, destination)
+  end
+end
+
+tower(7, 'src ', 'aux ', 'dest')
+
+

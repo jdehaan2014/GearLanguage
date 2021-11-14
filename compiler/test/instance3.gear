@@ -1,0 +1,32 @@
+
+class Number is
+  var code := 0
+  init(code) for self.code
+  func write() do
+    print(self.code)
+  end
+  func toString() => '$(self.code)'
+end
+
+var num1 := Number(10)
+var num2 := Number(20)
+
+print(num1.toString())
+print(num2.toString())
+
+num1.write()
+num2.write()
+
+ensure num1 is Number else
+  print(num1.toString, ' is not a number.')
+end
+
+class Test is
+  var x := 'abc'
+  func toString() => self.x
+end
+
+ensure var t := Test() where t is Number else
+  print('$(t) is not a Number.')
+end
+

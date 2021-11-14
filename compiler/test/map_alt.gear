@@ -1,0 +1,97 @@
+// alternative map, reduce, filter
+// using recursion
+
+extension Array is
+
+  // f is a function in below routines
+
+  func map(f) =>
+    match @count
+      if 0: []
+      else [f(@head)] + @tail.map(f)
+
+  func reduce(value, f) =>
+    match @count
+      if 0: value
+      else @tail.reduce(f(@head, value), f)
+
+  func filter(pred) => // predicate function
+    match @count
+      if 0: []
+      else pred(@head)?
+        true: [@head] + @tail.filter(pred)
+        false: @tail.filter(pred)
+
+  func each(f) do
+    if @count <> 0 then
+      f(@head)
+      @tail.each(f)
+    end
+  end
+
+  func flatMap(f) => @map(f).reduce([],/\(x,y)=>y+x)
+
+  func reversed() =>
+    match @count
+      if 0: []
+      else @tail.reversed() + [@head]
+
+  func sum() =>
+    match @count
+      if 0: 0
+      else @head + @tail.sum()
+
+end
+
+func map(list, f) do
+  if list.count = 0 then
+    return []
+  end
+  return [f(list.head)] + list.tail.map(f)
+end
+
+func reduce(list, f, initial) do
+  if list.count = 0 then
+    return initial
+  end
+  return reduce(list.tail, f, f(list.head, initial))
+end
+
+func filter(list, pred) do
+  if list.count = 0 then
+    return []
+  end
+  if pred(list.head) then
+    return [list.head] + filter(list.tail, pred)
+  end
+  return filter(list.tail, pred)
+end
+
+
+
+
+var list := [1,2,3,4,5,6]
+print(list.map(x=>x^2))
+print(map(list, x=>x^2))
+
+print(list.reduce(0, /\(x,y)=>x+y))
+print(list.reduce(1, /\(x,y)=>x*y))
+print(reduce(list, /\(x,y)=>x+y, 0))
+print(reduce(list, /\(x,y)=>x*y, 1))
+
+print(filter(list, x=>x%2=0))
+print(list.filter(x=>x%2<>0))
+
+list.each(/\(x) do
+  print(x)
+end)
+
+print(list.sum())
+
+let square := x=> [x*x]
+print(square(5))
+print([1,2,3].map(square))
+print([1,2,3].flatMap(square))
+
+print([1,2,3,4,5].reversed())
+

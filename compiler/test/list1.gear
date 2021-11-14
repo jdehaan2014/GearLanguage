@@ -1,0 +1,54 @@
+
+var list := []
+
+list.add('1')
+list.add(2)
+list.add(value: true)
+
+print(list)
+list.insert(1, 'yes')
+print(list)
+list.insert(at:1, value:'right')
+print(list)
+
+print(list.contains(2))
+print(list.contains(value:3))
+//list.insert('a', 'No')  // Error: Index must be a number.
+
+let i := list.indexOf(2)
+print(i)
+print(list.index(of: true))
+print(list.index(of: 'hello')) // -1
+
+let a := list.add(array: ['x','y','z'])
+print(a)
+let b := list.add(value: ['x','y','z'])
+print(b)
+
+list.delete(index:2)
+print(list)
+//list.delete(index:23) // Error: Array index 23 out of range [0,8).
+
+list.remove(value: 'x')
+print(list)
+
+list.clear()
+print(list)
+
+let arr := [0,1,2,3,4,5]
+arr.swap(2,4)
+print(arr)
+//arr.swap(index1:2,index2:7) //Error: At least 1 Array index (2, 7) out of range 0..<6.
+//print(arr)
+
+arr.swap(index1:2,index2:4)
+print(arr)
+
+print('count: ', arr.count)
+
+let a1 := [1,2,3,4]
+let a2 := [1,2,3,4]
+print(a1=a2)
+print(not (a1=a2))
+print(a1+a2)
+

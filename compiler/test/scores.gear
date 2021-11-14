@@ -1,0 +1,42 @@
+
+let scores := [8.3, 7.7, 9.0, 5.4, 1,2]
+var sum := 0
+for var score in scores do
+  sum += score
+end
+
+if let average := sum / scores.count where average > 6.0 then
+  print('You passed!')
+elseif average>5.0 and average<=6.0 then
+  print('You need to work harder!')
+else
+  print('You failed!')
+end
+
+/*
+let scores := [8.3, 7.7, 9.0, 5.4]
+var sum := 0
+for var score in scores do
+  sum += score
+end
+let average := sum / scores.count
+
+if average > 6.0 then
+  print('You passed!')
+elseif (average>5.0) & (average<=6.0) then
+  print('You need to work harder!')
+else
+  print('You failed!')
+end
+*/
+
+/*
+let scores := ['History': 8.3, 'Science': 7.7, 'English': 9.0, 'Economy': 5.4]
+var sum := 0
+for each score in scores do
+  sum += score.value
+  print('Your $(score.key) result was $(score.value)')
+end
+let average := sum / scores.count
+print('The average is $(average)')
+*/

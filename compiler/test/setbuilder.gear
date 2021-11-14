@@ -1,0 +1,23 @@
+//test set builder
+
+var set := {n for n in 1..10}
+print(set)
+
+set := {n for n in 1..10 where n%2=0}
+print(set)
+
+// create set from array
+
+let set2 := {n for n in ['a','b','c','d','e','f','g']}
+print(set2)
+
+let set3 := {c for c in (ord('a')..ord('z')).map(/\n=>chr(n))}
+print(set3)
+
+let list := [c for c in (ord('a')..ord('z')).map(/\n=>chr(n))]
+print(list)
+
+for var item in {n for n in 1..10} do
+  print(item)
+end
+

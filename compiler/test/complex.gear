@@ -1,0 +1,61 @@
+// operator overloading
+
+record Complex is
+  var re := 0, im := 0
+  default _value := ''
+  init(re, im) do
+    @re := re
+    @im := im
+    _value := @toString()
+  end
+  func toString() do
+    let sign := if @im < 0 then '' else '+'
+    return '$(@re)$(sign)$(@im)i'
+  end
+end
+
+extension Complex is
+  func plus(other) =>
+    Complex(@re + other.re, @im + other.im)
+  infix +(other) =>
+    Complex(@re + other.re, @im + other.im)
+  infix >(other) =>
+    sqrt(@re * @im) > sqrt(other.re * other.im)
+  infix <(other) =>
+    sqrt(@re * @im) < sqrt(other.re * other.im)
+  infix =(other) =>
+    @re = other.re and @im = other.im
+  infix <>(other) => not (self = other)
+  prefix -() => Complex(-@re, -@im)
+end
+
+var c := Complex(3,4)
+print(c)
+//print(c.toString())
+
+var d := Complex(5,3)
+print(d)
+//print(d.toString())
+print('====')
+//let e := c+d
+let e := c.plus(d)
+print(e) //.toString())
+print(e)
+print(e.plus(d)) //.toString())
+
+var x := c+d
+print('x=',x)
+print('x=',x.toString())
+
+print(x>d)
+print(c<d)
+print(c=d)
+print(d=d)
+print(Complex(3,4)=Complex(3,4))
+print(c<>d)
+
+let g := -c+d
+print(g) //.toString())
+//print(c<=d)
+
+

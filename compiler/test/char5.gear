@@ -1,0 +1,18 @@
+
+var result := [c for c in (34..124).map(n=>chr(n))]
+print(result)
+
+for var x in array(of: 34..124) do
+  print(chr(x), terminator: ' ')
+end
+
+print()
+print()
+
+print((65..90).map(n=>chr(n)))
+let alfa := (65..90).map(n=>chr(n))
+
+for var c in alfa do
+  print(c, terminator: '|')
+end
+

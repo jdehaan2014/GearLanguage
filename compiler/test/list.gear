@@ -1,0 +1,32 @@
+// linked list
+
+record List is
+  var data := nil, next := nil
+  init(data, next) for self.data, self.next
+
+  func map(function) do
+    var data := function(self.data)
+    var next := nil
+    if self.next<>nil then
+      next := self.next.map(function)
+    end
+    return List(data, next)
+  end
+
+  func display () do
+    var list := self
+    while list<>nil do
+      print(list.data, terminator: "|")
+      list := list.next
+    end
+    print()
+  end
+
+end
+
+var list := List(1, List(2, List(3, List(4, nil))))
+list.display()
+
+list := list.map(n=>n*2)
+list.display()
+

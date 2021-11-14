@@ -1,0 +1,16 @@
+record Date is
+  var _dd:=1, _mm:=1, _yyyy:=1980
+  init(dd,mm,yyyy) for _dd,_mm,_yyyy
+  func toString()=> '$(_dd)-$(_mm)-$(_yyyy)'
+end
+
+class Person is
+  let _birthDate := Date()
+  let _name := ''
+  init(name, birthDate) for _name, _birthDate
+  func toString() => '$(_name): $(_birthDate.toString())'
+end
+
+var JJ := Person('Jerry', Date(18,01,1998))
+print(JJ.toString())
+

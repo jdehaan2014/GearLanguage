@@ -1,0 +1,33 @@
+
+//use system
+
+var a := {3,4,5,6,7,8}
+var b := {6,7,8,9,10,11}
+
+print('a: $(a)')
+print('b: $(b)')
+
+print('union of a and b: ', a.union(with: b))
+print('+ of a and b: ', a+b)
+
+print('intersection of a and b: ', a.intersect(with: b))
+print('* of a and b: ', a*b)
+
+print('a exceptWith b: ', a.except(with: b))
+print('a - b: ', a-b)
+
+print('a symmetricExceptWith b: ', a.symmetricExcept(with: b))
+print('a ~ b: ', a~b)
+
+print(10 in (a~b))
+
+print(a.toArray())
+
+for var i in a do
+  print(i)
+end
+print(b.toArray())
+for var i in b do
+  print(i)
+end
+

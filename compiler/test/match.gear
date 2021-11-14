@@ -1,0 +1,49 @@
+// test match expr
+
+var x := match 4
+    if 1: 'one'
+    if 2: 'two'
+    if 3: 'three'
+    if 4, 5, 6: 'whatever' + ' it takes'
+    else 'none'
+
+print(x)
+
+// using if-expressiom
+func fact(n) => if n<=1 then 1 else n*fact(n-1)
+
+print(fact(10))
+
+func factorial(n) =>
+  match n
+    if 0: 1
+    if 1: 1
+    else n*factorial(n-1)
+
+print(factorial(10))
+
+func fibonacci(n) =>
+  match n
+    if 0: 0
+    if 1: 1
+    if 2: 1
+    else fibonacci(n-1)+fibonacci(n-2)
+
+print(fibonacci(10))
+
+// using if-expressiom
+func fib(n) => if n<=1 then n else fib(n-1)+fib(n-2)
+
+print(fib(10))
+
+func fib2(n) =>
+  if n=0 then 0
+  else if n=1 then 1
+  else if n=2 then 1
+  else fib2(n-1)+fib2(n-2)
+
+print(fib2(10))
+
+func fibo(n) => n<=1? true: n false: fibo(n-1)+fibo(n-2)
+print(fibo(10))
+

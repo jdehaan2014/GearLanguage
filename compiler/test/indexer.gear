@@ -1,0 +1,25 @@
+
+record List is
+  default items := []
+  val count := length(self.items)
+  func add(item) do
+    self.items.add(item)
+  end
+  //subscript[i] for self.items[i] // only getter
+  subscript[i](value) for self.items[i], self.items[i] := value
+  // getter + setter
+end
+
+var list := List()
+list.add(3)
+list.add(5)
+list.add(7)
+list.add(11)
+
+
+let z := list[2]
+print(z)
+list[3] := 9
+print(list.items)
+print(list)
+

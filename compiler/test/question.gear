@@ -1,0 +1,17 @@
+// test on assigned = non nil
+
+var a := 3
+
+if assigned(a) then
+  print('assigned')
+else
+  print('nil')
+end
+
+a := nil
+if ?a then
+  print('nil')
+else
+  print('assigned')
+end
+

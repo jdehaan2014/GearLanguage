@@ -1,0 +1,16 @@
+// test defer
+
+func test() do
+  print('Hello World')
+  defer print('Bye now!')
+  print('Welcome dude!')
+  defer do
+    print('Let''s meet later')
+    print('Or call me')
+  end
+  print('Please, sit down.')
+end
+
+
+test()
+

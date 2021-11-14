@@ -1,0 +1,47 @@
+// getter and setter
+
+class Vehicle is
+  var _type := 'car'
+  init(.type) for _type
+
+  val type := _type  // getter
+
+  func set(.type) do  // setter
+    _type := type
+  end
+
+  func toString() => _type
+end
+
+var vehicle := Vehicle()
+print(vehicle.type)
+vehicle.set(type: 'truck')
+print(vehicle.type)
+
+class Car < Vehicle is
+  var _brand := ''
+  init(.type, .brand) do
+    inherited(type)
+    _brand := brand
+  end
+
+  val brand := _brand //getter
+  func set(.brand) do      //setter
+    _brand := brand
+  end
+
+  func toString() do
+    return inherited toString() + ' ' + _brand
+  end
+end
+
+var car := Car(type: 'station wagon', brand: 'Volvo')
+print(car.type)
+print(car.brand)
+car.set(type: 'truck')
+car.set(brand: 'Scania')
+
+print(car.toString())
+//print(car._type)
+//print(car._brand)
+

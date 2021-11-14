@@ -1,0 +1,36 @@
+func process(.fileName) do
+
+  let inputFile := fileOpen(fileName, forReading)
+  defer do
+    print('closing file...')
+    fileClose(inputFile)
+    print('...file closed')
+  end
+
+  ensure inputFile >= 0 else
+    print('Error opening file "$(fileName)".')
+    return nil
+  end
+
+  let fileSize := fileSeek(inputFile, 0, fromEnd)
+
+  fileSeek(inputFile, 0, fromBeginning)
+
+  let bytesRead := fileRead(inputFile)
+
+  if length(bytesRead) < fileSize then
+    print('Error reading file "$(fileName)".')
+    return nil
+  end
+
+  return (.bytesRead, .fileSize)
+end
+
+print('Enter file name: ')
+let file := readln()
+let contents := process(fileName: file)
+print(contents?.bytesRead)
+
+let size := contents?.fileSize
+print('size: $(size)')
+

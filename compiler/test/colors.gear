@@ -1,0 +1,43 @@
+//colors
+
+use math
+
+record RGB is
+  var red := 0, green := 0, blue := 0
+  init(r,g,b) for self.red, self.green, self.blue
+  func toString() => '$(self.red)-$(self.green)-$(self.blue)'
+  func toHexString() =>
+    dec2hex(@red) + dec2hex(@green) + dec2hex(@blue)
+end
+
+enum Color is
+  Black  = RGB(0,0,0),
+  White  = RGB(255,255,255),
+  Red    = RGB(255,0,0),
+  Green  = RGB(0,255,0),
+  Blue   = RGB(0,0,255),
+  Yellow = RGB(255,255,0),
+  Orange = RGB(255,128,0),
+  Purple = RGB(127,0,255)
+
+  func toString() => '$(self.name)'
+  func valueToString() => @value.toString()
+end
+
+var color := Color.Purple
+print(color)
+print('color name: $(color.name)')
+print('color.value: $(color.value)')
+print('color.value2: $(color.value.toString())')
+
+print('color hex: $(color.value.toHexString())')
+
+switch color
+  case .Black: print('Black')
+  case .White: print('White')
+  case .Red: print('Red')
+  case .Green: print('Green')
+  case .Purple: print('Purple')
+  default: print('no color')
+end
+

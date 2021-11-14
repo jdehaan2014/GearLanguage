@@ -1,0 +1,30 @@
+use typeinfo
+
+record Number is
+  default _value := 0
+  val value := _value
+  init(value) do
+    if type(of: value) = Type.Number then
+      _value := value
+    else
+      error('Number type expected.')
+    end
+  end
+end
+
+extension Number is
+  infix *(other) => self._value * other.value
+end
+
+var n := Number()
+n := 99
+var m := Number(10)
+print(n)
+print(n*m)
+print(n*Number(99))
+//print(n*10)
+
+print('ab'+'cd')
+
+var s := Number('Hello world!')
+

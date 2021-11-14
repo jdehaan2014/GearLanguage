@@ -1,0 +1,24 @@
+// checking for nil
+record Test is
+  var field := 'Field'
+  init(field) for self.field
+end
+
+var test := Test('Hello world')
+
+let a := assigned(test)? true: test false: Test()
+
+print(a.field)
+
+test := nil
+
+let b := test ?? Test()
+print(b.field)
+
+
+let x := 42
+let k := nil
+
+print(k ?? x)
+print(nil ?? x)
+

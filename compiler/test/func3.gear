@@ -1,0 +1,18 @@
+func test(n) do
+  if n = 2 then
+    print('early exit')
+    return
+  end
+  print('tested')
+end
+
+test(1)
+test(2)
+test(3)
+print(test(2))
+
+(1..10).each(/\(x) do
+    print('Number $(x) squared is: $(x^2).')
+  end)
+
+

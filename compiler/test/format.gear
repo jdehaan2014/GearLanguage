@@ -1,0 +1,33 @@
+// testing formatting
+
+/*
+fmtGeneral = 1
+fmtExponent = 2
+fmtFixed = 3
+fmtNumber = 4
+fmtCurrency = 5
+*/
+
+print(510012.98<~(format: fmtCurrency, digits:2))
+
+var number := pi()
+var format := (precision: 12, format: fmtGeneral)
+print(number<~format)
+
+format := (digits:2, format: fmtExponent)
+print(number<~format)
+format := (digits:5, width: 10)
+print(number<~format)
+
+let Euro := (digits:2, format: fmtCurrency, currency: '€')
+print(number<~Euro)
+print(2.12345)
+let amount := 1199075.75
+print('amounts')
+print(amount)
+print(amount<~(format: fmtGeneral, digits:2, precision: 10))
+print(amount<~(format: fmtExponent, digits:2, precision: 10))
+print(amount<~(format: fmtFixed, digits:2, precision: 10))
+print(amount<~(format: fmtNumber, digits:2, precision: 10))
+print(amount<~(format: fmtCurrency, digits:2, precision: 10))
+

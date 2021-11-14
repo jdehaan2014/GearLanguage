@@ -1,0 +1,26 @@
+// testing default variable and indexer with getter + setter
+
+record String is
+  default _value := ''
+  init(value) for _value
+  subscript[i](char) for _value[i], _value[i] := char
+end
+
+var string := String('0123456789abcdefghijklmnopqrstuvwxyz')
+
+print(string)
+
+print(string[10])
+string[10] := "x"
+print(string)
+print(string[10])
+
+string := 'Hello world!'
+print(string)
+string[10] := "x"
+print(string)
+
+var s := String()
+s := 'Even this is possible'
+print(s)
+

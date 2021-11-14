@@ -1,0 +1,9 @@
+let list := [1,2,3,4,5,6,7,8,9,10]
+
+list.add(11)
+
+for var i in list do
+  print(i, terminator: '|')
+end
+print()
+

@@ -1,0 +1,43 @@
+
+use arrays
+
+extension Array is
+
+/* + is predefined
+  infix +(other) do
+    let result := []
+    result.add(array: self)
+    result.add(array: other)
+    return result
+  end
+*/
+  infix *(other) do
+    let result := []
+    for var i:=0 where i<self.count, i+=1 do
+      result.add(self[i]*other[i])
+    end
+    return result
+  end
+
+  infix ~(other) do
+    let multiplied := self * other
+    return multiplied.reduce(0, /\(x,y)=>x+y)
+  end
+
+  prefix -() do
+    let result := []
+    for var i:=0 where i<self.count, i+=1 do
+      result.add(-self[i])
+    end
+    return result
+  end
+
+end
+
+let a := [1,2,3]
+let b := [4,5,6]
+print(a+b)
+print(a*b)
+print(a~b)
+print(-a)
+

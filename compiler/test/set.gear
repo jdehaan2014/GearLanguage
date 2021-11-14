@@ -1,0 +1,44 @@
+// test sets
+
+let aSet := {1,1,2,3,5,5,8,13,21,8}
+print(aSet)
+print(aSet.contains(value: 7))
+print(8 in aSet)
+
+var set := {1,2,3,4,5}
+
+print(set)
+
+let s := {}
+print(s)
+
+/*
+for item in set do
+  print(item)
+end
+*/
+
+var a := {3,4,5,6,7,8}
+var b := {6,7,8,9,10,11}
+
+print('a: $(a)')
+print('b: $(b)')
+
+print('union of a and b: ', a.union(with: b))
+
+print('intersection of a and b: ', a.intersect(with: b))
+
+print('a exceptWith b: ', a.except(with: b))
+
+print('a symmetricExceptWith b: ', a.symmetricExcept(with: b))
+
+
+let x := {'a','b','c','d','e'}
+let y := {'p','q','r','s','t', 'u', 'v'}
+print(x)
+print(y)
+print('union of x and y: ', x.union(with: y))
+
+print('d' in x)
+print('x' in x)
+

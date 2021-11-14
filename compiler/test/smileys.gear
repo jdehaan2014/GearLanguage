@@ -1,0 +1,15 @@
+
+var smileys := ['🤪', 'g', '🐶', '🐔', '🐵', '🦁', '🐯', '🐭', '🐱', '🐮', '🐷', 'ë', 'u']
+
+for var smiley in smileys do
+  print(smiley)
+end
+
+for var smiley in smileys do
+  print(length(smiley))
+  for var i:=0 where i<length(smiley), i+=1 do
+    print(ord(smiley[i]), terminator: ' ')
+  end
+  print()
+end
+

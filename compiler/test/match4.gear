@@ -1,0 +1,27 @@
+class Root is
+  var name := 'Root'
+end
+
+class First < Root is
+end
+
+class Second < Root is
+end
+
+class Third < Second is
+end
+
+class Fourth is
+end
+
+var sec := Second()
+//var sec := Fourth()
+
+print(match sec
+  if is Root:   'Root'
+  if is First:  'First'
+  if is Second: 'Second'
+  if is Third:  'Third'
+  else 'None of the above'
+)
+

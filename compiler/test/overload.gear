@@ -1,0 +1,26 @@
+
+func stringOf(.number) do
+  return '$(number)'
+end
+
+func stringOf(.boolean) do
+  return '$(boolean)'
+end
+
+func stringOf(.char, .length) do
+  var result := ''
+  for var i := 0 where i < length, i+=1 do
+    result += char
+  end
+  return result
+end
+
+var a := stringOf(number: pi())
+print(a)
+
+var c := stringOf(char: '=', length: 10)
+print(c)
+
+var b := stringOf(boolean: not(true or false))
+print(b)
+

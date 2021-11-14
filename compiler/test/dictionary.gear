@@ -1,0 +1,24 @@
+
+var smileys := ['smile': '😀', 'saint': '😇']
+smileys.add(key: 'lol', value: '🤣')
+smileys.add(key: 'cool', value: '😎')
+smileys.add(key: 'cry', value: '😭')
+print(smileys)
+print(smileys.count)
+
+let keyAvailable := smileys.contains(key: 'lol')        // true
+let smileyAvailable := smileys.contains(value: '😭')    // true
+print(smileyAvailable)
+print(keyAvailable)
+
+print(smileys.keys)
+print(smileys.values)
+
+smileys.delete(key: 'lol')
+print(smileys)
+print(smileys.count)
+
+smileys.clear()
+print(smileys)
+print(smileys.count)
+

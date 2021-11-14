@@ -1,0 +1,29 @@
+// test repeating loop
+
+var x := 9
+do
+  print(x, terminator: '|')
+  x-=1
+end while x>=0
+print()
+print('x=',x)
+
+
+var y:=0
+var done := false
+do
+  print(y, terminator: '|')
+  y+=1
+  done := y=10
+end while not done
+
+print()
+
+loop var y:=0, done := false do
+  print(y, terminator: '|')
+  y+=1
+  done := y=10
+  exit when done
+end
+
+

@@ -1,0 +1,13 @@
+
+let words := [
+  'oma': 'grandmother',
+  'moeder': 'mother',
+  'vader': 'father',
+  'zuster': 'sister',
+  'zoon': 'son']
+
+print(words['vader'])
+
+print(words['zoon'] ?? 'key not found')
+print(words['dochter'] ?? 'key not found')
+

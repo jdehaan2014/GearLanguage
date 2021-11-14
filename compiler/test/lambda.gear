@@ -1,0 +1,32 @@
+//use system
+
+func calc(times n, function) do
+  //while var k:=1 where k<=n for k+=1 do
+  for var k in 1..n do
+    print(function(k)<~(width:5), terminator: ' ')
+  end
+  print()
+end
+
+calc(times: 5, x=>x)    // 1 2 3 4 5
+calc(times: 5, x=>x^2)  // 1 4 9 16 25
+calc(times: 5, x=>x^3)  // 1 8 27 64 125
+calc(times: 5, x=>x^4)  // 1 16 81 256 625
+calc(times: 5, x=>x^5)  // 1 32 243 1024 3125
+calc(times: 5, x=>x^6)  // 1 64 729 4096 15625
+print()
+
+// calculate the integral over a function over a range in n steps
+
+func integral(f, from a, to b, steps n) do
+  var sum := 0
+  let dt := (b-a)/n
+  for var i := 0 where i<n, i+=1 do
+    sum := sum + f(a + (i + 0.5) * dt)
+  end
+  return sum*dt
+end
+
+print(integral(x=>sqrt(1-x^2), from: -1, to: 1, steps: 100000))
+print(pi()/2)
+

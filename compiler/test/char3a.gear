@@ -1,0 +1,45 @@
+
+record String is
+  default _value := ''
+  val value := _value
+  func set(value) do
+    _value := value
+  end
+  init(value) for _value
+end
+
+record StringIterator is
+  let _chars := ''
+  var _index := -1
+  let _count := 0
+
+  init(string) do
+    _chars := string.value
+    _count := length(string.value)
+  end
+
+  val moveNext do
+    _index +=1
+    return _index < _count
+  end
+
+  val current := _chars[_index]
+end
+
+extension String is
+  val iterator := StringIterator(self)
+end
+
+// chars
+var chars := String('0123456789abcdefghijklmnopqrstuvwxyz')
+
+for var char in chars do
+  print('Char $(char) has ascii code $(ord(char)).')
+end
+
+chars.set('abcdefghijklmnopqrstuvwxyz')
+print(chars)
+chars := 'abc'
+print(chars)
+
+

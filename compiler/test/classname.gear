@@ -1,0 +1,45 @@
+// test className variable
+// variable className is predefined for each class
+
+record Vehicle is
+  var _brand := 'brand'
+  let type := 'type'
+  init(brand, type) for _brand, @type
+
+  // getter and setter
+  val brand := _brand
+  func set(.brand) do
+    _brand := brand
+  end
+  func set(.type) do
+    @type := type
+  end
+
+  func toString() => '$(_brand), $(@type)'
+end
+
+var vehicle := Vehicle('Volvo', 'V90')
+print(vehicle.brand)
+print(vehicle.type)
+print(vehicle.className)
+//vehicle.brand := 'Mercedes' // error Cannot assign to value property "brand".
+//vehicle.type := 'S class'
+//vehicle.test := 5
+print(vehicle.toString())
+vehicle.set(brand: 'BMW')
+vehicle.set(type: '530i')
+print(vehicle.toString())
+
+use typeinfo
+print(type(of: vehicle))
+print(type(of: Vehicle))
+print(type(of: 5))
+
+if type(of: vehicle) = Type.Class then
+  print(vehicle.className)
+end
+
+var a := [1,2,3]
+print(type(of: a))
+
+

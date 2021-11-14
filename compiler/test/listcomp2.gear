@@ -1,0 +1,39 @@
+
+var list := [1,2,3,4,5,6,7,8,9,10]
+
+for var item in list where item%2=0 do
+  print(item, terminator: '|')
+end
+print()
+
+while var iter := list.iterator where iter.moveNext do
+  var item := iter.current
+  print(item, terminator: '|')
+end
+print()
+
+let a := [x^2 for x in list]
+print(a)
+
+var result := []
+for var x in list do
+  result.add(x^2)
+end
+print(result)
+
+let transform := x=>x^2
+let include := x=>x%2=0
+//let include := nil
+let builder := []
+while var iter := list.iterator where iter.moveNext do
+  var item := iter.current
+  if ?include then
+    builder.add(transform(item))
+  elseif include(item) then
+    builder.add(transform(item))
+  end
+end
+
+print(builder)
+
+

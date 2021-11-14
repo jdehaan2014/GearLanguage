@@ -1,0 +1,9 @@
+
+var smileys := ['smile': '😀', 'saint': '😇']
+
+smileys.add(key: 'lol', value: '🤣')
+smileys.add(key: 'cool', value: '😎')
+smileys.add(key: 'cry', value: '😭')
+
+print(smileys)
+

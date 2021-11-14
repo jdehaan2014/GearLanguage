@@ -1,0 +1,10 @@
+
+var factorial := /\n => (1..n).reduce(1, /\(x,y)=>x*y)  // test
+print(factorial(69))
+
+(1..10).each(/\(n) do
+  print(n)
+end)
+
+print((1..10).map(x=>x^2))
+

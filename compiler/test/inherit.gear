@@ -1,0 +1,66 @@
+// inherit
+
+class Circle is
+  var radius := 0
+  val area := pi() * self.radius^2
+  init(.radius) do
+    self.radius := radius
+  end
+  func set(.radius) do
+    self.radius := radius
+    //radius := radius
+  end
+  func set(.newRadius) do
+    self.radius := newRadius
+  end
+end
+
+class Cylinder < Circle is
+  var height := 0
+  val volume := self.area * self.height
+  init(.radius, .height) do
+    inherited (radius)
+    self.height := height
+  end
+  func set(.height) do
+    self.height := height
+    //height := height
+  end
+end
+
+var circle := Circle(radius:1)
+var cylinder := Cylinder(radius:2, height:10)
+
+
+print('area = $(circle.area<~(format: fmtGeneral, precision:4, digits:2)) m2')
+
+let format1 := (format: fmtFixed, precision:4, digits:2, width:8)
+let format2 := (format: fmtGeneral, precision:0, digits:0, width:5)
+
+circle.set(radius:2)
+print(circle.area<~format1)
+print(cylinder.area<~format1)
+print(cylinder.height<~format2)
+print(cylinder.volume<~format1)
+print(cylinder.radius<~format2)
+cylinder.set(radius:3)
+cylinder.set(height:8)
+print(cylinder.volume<~format1)
+print(3e10<~format2)
+
+let format3 := (format: fmtCurrency,
+  currency: '€', precision:0, digits:2, width:10
+)
+
+print(10.25<~format3)
+
+circle.set(newRadius: 10)
+print('radius = $(circle.radius)')
+/*
+//cylinder.set(1)
+cylinder.set(5)
+print(cylinder.volume)
+*/
+
+//circle.area := 3 // error immutable
+

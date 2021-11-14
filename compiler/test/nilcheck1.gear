@@ -1,0 +1,35 @@
+record Window is
+  var caption := nil
+  init(caption) for self.caption
+end
+
+var newWindow := Window('Hello world')
+print( newWindow?.caption ?? 'Default caption' )
+
+//newWindow.caption := nil
+newWindow := Window()
+print( newWindow.caption ?? 'Default caption' )
+
+if newWindow <> nil then
+  print('NONNIL')
+end
+
+newWindow := nil
+print(newWindow?.caption)
+
+print( newWindow?.caption ?? 'Default caption' )
+
+if newWindow = nil then
+  print('NIL')
+end
+
+//print(newWindow.caption)
+
+func test() do
+  var w := nil
+  //w := Window()
+  print(w.caption) // generates runtime error
+end
+
+test()
+

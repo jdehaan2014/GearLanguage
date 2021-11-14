@@ -1,0 +1,12 @@
+// test if statement
+
+//var a := 8
+
+if var a := 8 where a=10 then
+  print(a)
+elseif a>10 then
+  print('smth big')
+else
+  print('smaller')
+end
+

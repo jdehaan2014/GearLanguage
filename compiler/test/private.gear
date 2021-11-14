@@ -1,0 +1,39 @@
+// private
+
+record Test is
+  default _field := 0
+
+  let data := 42
+  var nonsense := -999999
+
+  val field := _field
+  func set(.field) do
+    _field := field
+    self.nonsense := field*2
+  end
+
+  func _help() do
+    return '$(self.data)'
+  end
+
+  func toString() => self._help()
+end
+
+var test := Test()
+test.set(field: 99)
+
+print(test)
+print(test.field)
+//print(test._field) // error cannot access private field
+
+//test._field := 100 // error cannot access private field
+
+print(test.data)
+//test.data := 43 // error cannot assign value to constant
+
+print(test.nonsense)
+test.nonsense += -1
+print(test.nonsense)
+print(test.toString())
+//print(test._help())
+

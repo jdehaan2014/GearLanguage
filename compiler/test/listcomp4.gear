@@ -1,0 +1,5 @@
+let matrix := [[1, 2], [3,4], [5,6], [7,8]]
+print(matrix)
+let transpose := [[row[i] for row in matrix] for i in 0..1]
+print (transpose)
+

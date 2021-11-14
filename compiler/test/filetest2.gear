@@ -1,0 +1,23 @@
+// testing file handling
+
+var fileName := '/Users/Jeroen/Documents/Programming/ProjectCompilerTests/anon1.txt'
+
+// combining open, read and close in 1 funxtions
+let content := readFile(fileName)
+let str := string(of: content)
+print(str)
+// standard printing as string
+
+// writing the string to a file
+// get the handle
+
+let newFile := fileCreate('/Users/Jeroen/Documents/Programming/ProjectCompilerTests/filewrite.txt')
+let buffer := bytes(of: str)
+
+let i := fileWrite(newFile, buffer)
+if i = -1 then
+  print('error writing to file')
+end
+
+fileClose(newFile)
+

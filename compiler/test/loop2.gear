@@ -1,0 +1,13 @@
+
+func factorial(n) do
+  var result := 1
+  loop var counter := n do
+    result *= counter
+    counter -=1
+    exit when counter=0
+  end
+  return result
+end
+
+print(factorial(70))
+

@@ -1,0 +1,38 @@
+// test numbers and formatting
+
+let x := 1.2345
+let y := pi()
+
+print(x+y<~(precision: 15, digits: 5)) // digits ignored
+
+//print(pi()<~3) // tuple expected
+
+
+let format := (precision: 10, digits: 3)
+print(pi()<~format) // returns a string
+
+format.digits := 2
+print((3.12345E3)<~format)
+
+format.precision := 3
+
+print((123456)<~format)
+
+print((pi())<~(precision: 0, digits: 5, width:10))
+
+print((1762354)<~(precision: 10, digits: 3, format:fmtExponent))
+print((1762354)<~(precision: 10, digits: 3, format:fmtFixed))
+print((1762354)<~(precision: 10, digits: 3, format:fmtGeneral))
+print((1762354)<~(precision: 10, digits: 3, format:fmtNumber))
+print((1762354)<~(precision: 10, digits: 3, format:fmtCurrency))
+
+//print(7<~2) // tuple expected
+
+/*
+The argument is converted to a string using ffExponent or ffFixed
+format, depending on which one gives the shortest string.
+There will be no trailing zeroes. If Value is less than 0.00001
+or if the number of decimals left of the decimal point is larger
+than Precision then scientific notation is used, and Digits is
+the minimum number of digits in the exponent. Otherwise Digits is ignored.
+*/

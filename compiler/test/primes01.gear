@@ -1,0 +1,19 @@
+
+let m1 := milliseconds()
+
+func isPrime(number) do
+  let sqrtNum := sqrt(number)
+  for var i in (3..sqrtNum).step(by:2) where number%i = 0 do
+    return false
+  end
+  return true
+end
+
+//var primes := (3..<10000).step(by:2).filter(n=>isPrime(n))
+let primes := [n for n in (3..<10000).step(by:2) where isPrime(n)]
+
+print(milliseconds()-m1)
+
+print(primes.count)
+
+

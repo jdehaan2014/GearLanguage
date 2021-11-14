@@ -1,0 +1,16 @@
+// overload with default parameter
+
+func counter(start, .step) do
+  return start + step
+end
+
+func counter(start) do
+  return counter(start, step: 1)
+end
+
+var begin := 4
+
+print(counter(begin))
+print(counter(begin, step: 5))
+print(counter(begin))
+

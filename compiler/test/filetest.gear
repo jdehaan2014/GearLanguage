@@ -1,0 +1,29 @@
+// testing file handling
+
+var fileName := '/Users/Jeroen/Documents/Programming/ProjectCompilerTests/anon1.txt'
+
+let handle := fileOpen(fileName, forReading)
+let content := fileRead(handle)
+fileClose(handle)
+print(content)
+
+// to get an array of bytes from the file content
+let bytes := array(of: content)
+print(bytes)
+
+// to get a string from the file input
+let string := string(of: content)
+print(string)
+
+/*
+print('File name: ', terminator: '')
+fileName := readln()
+*/
+// combining open, read and close in 1 funxtions
+print('in one go')
+let content2 := readFile(fileName)
+let str := string(of: content2)
+print(str)
+// standard printing as string
+
+

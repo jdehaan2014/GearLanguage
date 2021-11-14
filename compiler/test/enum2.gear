@@ -1,0 +1,43 @@
+enum Math is
+  Add = '+', Min = '-', Mul = '*', Div = '/'
+  val asStr := self.value
+end
+
+var calc := Math.Div
+print(calc.asStr)
+
+// type is derived from calc: Math
+switch calc
+  case .Add:
+    print('added')
+  case .Min:
+    print('subtracted')
+  case .Mul:
+    print('multiplied')
+  case .Div:
+    print('divided') // !
+  default:
+    print('no math')
+end
+
+calc := Math.Mul
+
+switch calc
+  case Math.Add:
+    print('added')
+  case Math.Min:
+    print('subtracted')
+  case Math.Mul:
+    print('multiplied') // !
+  case Math.Div:
+    print('divided')
+  default:
+    print('no math')
+end
+
+switch calc
+  case 'a': print('a')
+  case 'b': print('b')
+  default: print('c')  // !
+end  // c
+

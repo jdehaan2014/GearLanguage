@@ -1,0 +1,46 @@
+
+// regular solution
+let len := 10
+for var i:=1 where i<=len, i+=1 do
+  print(i^2, terminator: '|')
+end
+print()
+
+(1..len).each(/\(i) do
+  print(i^2, terminator: '|')
+end)
+print()
+
+// using map on a range
+let numbers := (1..len).map(x=>x^2)
+numbers.each(/\(i) do
+  print(i, terminator: '|')
+end)
+
+print()
+
+let numbers2 := 1..len
+numbers2.each(/\(i) do
+  print(i^2, terminator: '|')
+end)
+
+print()
+
+// in one line
+(1..10).each(/\(i) do
+  print(i^2, terminator: '|')
+end)
+
+print()
+
+// or
+(1..len).each(/\(i) do
+  print(i^2, terminator: '|')
+end)
+print()
+
+(1..len).map(x=>x^2).each(/\(i) do
+  print(i, terminator: '|')
+end)
+print()
+

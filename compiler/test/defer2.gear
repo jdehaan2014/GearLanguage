@@ -1,0 +1,21 @@
+func myFunc() do
+  print('Step 2')
+  defer do
+    print('Step 3')
+  end
+  print('Step 4')
+end
+
+func test() do
+  print('Step 1')
+  defer do
+    print('step a')
+    myFunc()
+    print('step b')
+  end
+  print('Step 5')
+end
+
+
+test()
+

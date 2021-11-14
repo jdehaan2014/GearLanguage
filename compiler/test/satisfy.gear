@@ -1,0 +1,16 @@
+
+
+extension Array is
+  func allSatisfy(predicate) do
+    for var item in self where not predicate(item) do
+      return false
+    end
+    return true
+  end
+end
+
+let numbers := [1,0,0,3,6, -9]
+let allPositives := numbers.allSatisfy(x=>x>=0)
+
+print(allPositives)
+

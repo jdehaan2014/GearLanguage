@@ -1,0 +1,27 @@
+let max := 100
+randomize()
+var number := random(max) + 1
+
+while true do
+  print('Guess a number (1 to $(max)): ', terminator: '')
+
+  ensure let guess := numberOf(readln()) where guess <> nil else
+    print('That''s not a number!')
+    continue
+  end
+
+  ensure (guess > 0) and (guess <= max) else
+    print('That number is not in range 1 to ', max)
+    continue
+  end
+
+  if guess < number then
+    print('Too low.')
+  elseif guess = number then
+    print('You win!')
+    break
+  else
+    print('Too high.')
+  end
+end
+

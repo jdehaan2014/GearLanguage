@@ -1,0 +1,17 @@
+//test defer
+
+func test() do
+  var a := 1
+  print('1')
+  if a = 1 then
+    print('a')
+    defer print('c')
+    print('b')
+  end
+  print('2')
+  defer print('3')
+  print('4')
+end
+
+test()
+

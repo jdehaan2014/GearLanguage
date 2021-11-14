@@ -1,0 +1,9 @@
+class Simple is
+  var field := 'field'
+  init(field) for field
+  func toString() => '(field)'
+end
+
+var simple := Simple('another field')
+print(simple.toString(), terminator: '...')
+

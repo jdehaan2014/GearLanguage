@@ -1,0 +1,6 @@
+
+let milesToPoint := ['Point1':120.0 ,'Point2':50, 'Point3':70]
+
+var km := [ miles.value*1.6093 for miles in milesToPoint ]
+print('km to points: ', km)
+

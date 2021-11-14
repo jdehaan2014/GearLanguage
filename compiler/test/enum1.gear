@@ -1,0 +1,70 @@
+// enumeration
+
+/*
+enum Math is
+  Add = '+', Min = '-', Mul = '*', Div = '/'
+end
+
+var add := Math.Add
+print(add)
+print(add.name)
+print(add.value)
+*/
+use math
+
+record RGB is
+  var red := 0, green := 0, blue := 0
+  init(r,g,b) for self.red, self.green, self.blue
+  func toString() => '$(self.red)-$(self.green)-$(self.blue)'
+  val asHex do
+    return dec2hex(self.red) + dec2hex(self.green) + dec2hex(self.blue)
+  end
+end
+
+enum Color is
+  Black  = RGB(0,0,0),
+  White  = RGB(255,255,255),
+  Red    = RGB(255,0,0),
+  Green  = RGB(0,255,0),
+  Blue   = RGB(0,0,255),
+  Yellow = RGB(255,255,0),
+  Orange = RGB(255,128,0),
+  Purple = RGB(127,0,255)
+
+  func toString() => '$(self.name)'
+  func valueToString() => self.value.toString()
+end
+
+var color := Color.Orange
+//var color := Color.Exit // expected Enum value
+print(color)
+print('color name: $(color.name)')
+print('color.value: $(color.value)')
+print('color.value as hex: $(color.value.asHex)')
+
+switch color
+  case .Exit: print('exit')
+  case .Black: print('Black: $(color.value.asHex)')
+  case .White: print('White: $(color.value.asHex)')
+  case .Red: print('Red: $(color.value.asHex)')
+  case .Green: print('Green: $(color.value.asHex)')
+  case .Blue: print('Blue: $(color.value.asHex)')
+  case .Yellow: print('Yellow: $(color.value.asHex)')
+  case .Orange: print('Orange: $(color.value.asHex)')
+  case .Purple: print('Purple: $(color.value.asHex)')
+  default: print('no color')
+end
+
+
+
+//add := color // error incompatible types
+
+class Class is
+  var field := 0
+  init(field) for self.field
+end
+
+var instance := Class(42)
+
+//var new := Class.field // error undefined static func
+

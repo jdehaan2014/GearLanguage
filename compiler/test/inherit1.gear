@@ -1,0 +1,16 @@
+class Bar is
+  var f := 0
+  init(.f) for f
+end
+
+class Baz<Bar is
+  var g:=0
+  init(.f,.g) do
+    inherited init(f)
+    self.g := g
+  end
+end
+
+var x := Baz(f:1, g:2)
+var y := Baz(f:3, g:x.g)
+

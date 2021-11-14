@@ -1,0 +1,13 @@
+
+record TimesTable is
+  var multiplier := 1
+  init(.multiplier) for self.multiplier
+  subscript[i] for i * self.multiplier
+end
+
+let table := TimesTable(multiplier: 7)
+print('Table of $(table.multiplier):')
+for var index in 1..10 do
+  print(index, ' * ', table.multiplier, ' = ',table[index])
+end
+

@@ -1,0 +1,15 @@
+
+func toHex(d) do
+  let chars := '0123456789ABCDEF'
+  var r := d % 16
+  if d - r = 0 then
+    return chars[r]
+  end
+  return toHex((d - r) / 16) + chars[r]
+end
+
+let x := 123455543
+print(toHex(x))
+
+print(0x75BC837) // 123455543
+

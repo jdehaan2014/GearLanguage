@@ -1,0 +1,52 @@
+// a Fibonacci generator
+
+/*
+  The idea is to create a generator for Fibonacci numbers, such
+  that you can write:
+
+  for i in Fibonacci(15) do
+    print(n, terminator: ' | ')
+  end
+
+1 | 1 | 2 | 3 | 5 | 8 | 13 | 21 | 34 | 55 | 89 | 144 | 233 | 377 | 610 |
+
+*/
+
+record Fibonacci is
+  var max := 0
+  init(max) for max
+end
+
+record FibonacciIterator is
+  var _numbers := []
+  var _index := -1
+
+  init(max) do
+    if max >= 1 then
+      _numbers.add(1)
+    end
+    if max >= 2 then
+      _numbers.add(1)
+    end
+    for var i in 2..<max do
+      _numbers.add(_numbers[i-1] + _numbers[i-2])
+    end
+  end
+
+  val moveNext do
+    _index +=1
+    return _index < _numbers.count
+  end
+
+  val current := _numbers[_index]
+end
+
+extension Fibonacci is
+  val iterator := FibonacciIterator(self.max)
+end
+
+for var n in Fibonacci(15) do
+  print(n, terminator: ' | ')
+end
+print()
+

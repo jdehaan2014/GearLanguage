@@ -1,0 +1,50 @@
+// new loop idea
+
+randomize()
+
+loop var x := 0 do
+  x := random(10)
+exit when x = 0
+  let y := x^2
+  print(y)
+end
+
+print()
+
+/*randomize()
+
+loop do
+  var z := random(10)
+exit when z = 0 else // 'z' unknown
+  let y := z^2  // 'z' unknown
+  print(y)
+end
+*/
+
+func factorial(n) do
+  var result := 1
+  loop var counter := n do
+    result *= counter
+    counter -=1
+  exit when counter=0
+    print(result)
+  end
+  return result
+end
+
+print(factorial(10))
+
+func fac(n) do
+  var result := 1
+  loop var counter := 1 do
+    result *= counter
+    counter +=1
+    exit when counter>n
+    print(result)
+  end
+  return result
+end
+
+print(fac(10))
+
+

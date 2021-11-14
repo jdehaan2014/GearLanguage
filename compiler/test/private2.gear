@@ -1,0 +1,21 @@
+// private fields and using a getter and setter
+// private fields don't require 'self' in front of it
+// so, either 'self._type' or '_type' are ok to use
+// this is only for private fields
+
+class Building is
+  var _type := 'Flat'
+
+  val type := _type     // getter
+  func set(.type) do    // setter
+    _type := type
+  end
+
+  init(.type) for _type
+end
+
+var building := Building(type: 'Appartment')
+print(building.type)
+building.set(type: 'Office')
+print(building.type)
+

@@ -1,0 +1,15 @@
+
+let list := [1,2,3,4,5,6]
+var r := [x^2 for x in list where x%2=0]
+
+print(r)
+
+print({x^3 for x in 1..10 where x%2=1})
+
+let s := {1,2,3,4,5,6,7,8}
+print(s)
+print(s.first)
+print(s.head)
+print(s.last)
+print(s.tail)
+
