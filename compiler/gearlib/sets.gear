@@ -1,0 +1,46 @@
+// set extensions
+
+extension Set is
+
+  val isEmpty := self.count = 0
+
+  func each(function) do
+    for var element in self do
+      function(element)
+    end
+  end
+
+  func reduce(initialValue, nextValue) do
+    var result := initialValue
+    for var element in self do
+      result := nextValue(result, element)
+    end
+    return result
+  end
+
+  func filter(includeElement) do
+    var result := {}
+
+    for var item in self where includeElement(item) do
+      result.add(item)
+    end
+
+    return result
+  end
+
+  func map(transform) do
+    var result := {}
+
+    for var item in self do
+      result.add(transform(item))
+    end
+
+    return result
+  end
+
+  func flatMap(transform) do
+    return self.map(transform).reduce([],/\(x,y)=>x+y)
+  end
+
+end
+

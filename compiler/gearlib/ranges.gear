@@ -1,0 +1,45 @@
+
+/*
+Defines Range extensions.
+*/
+
+extension Range is
+
+  func each(function) do
+    for var item in self do
+      function(item)
+    end
+  end
+
+  func reduce(initialValue, nextValue) do
+    var result := initialValue
+    for var item in self do
+      result := nextValue(result, item)
+    end
+    return result
+  end
+
+  func filter(includeElement) do
+    var result := []
+    for var item in self where includeElement(item) do
+      result.add(item)
+    end
+    return result
+  end
+
+  func map(transform) do
+    var result := []
+    for var item in self do
+      result.add(transform(item))
+    end
+    return result
+  end
+
+  func contains(.value) do
+    return value in self
+  end
+
+end
+
+
+

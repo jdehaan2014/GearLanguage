@@ -1,0 +1,66 @@
+
+extension Array is
+
+  val isEmpty := self.count = 0
+
+  func each(function) do
+    for var element in self do
+      function(element)
+    end
+  end
+
+  func reduce(initialValue, nextValue) do
+    var result := initialValue
+    for var element in self do
+      result := nextValue(result, element)
+    end
+    return result
+  end
+
+  func filter(include) do
+    var result := []
+    for var element in self where include(element) do
+      result.add(element)
+    end
+    return result
+  end
+
+  func map(transform) do
+    var result := []
+    for var element in self do
+      result.add(transform(element))
+    end
+    return result
+  end
+
+  func flatMap(transform) do
+    return self.map(transform).reduce([],/\(x,y)=>x+y)
+  end
+
+  func reversed() do
+    var result := []
+    let count := self.count
+    for var i in 0..<count do
+      result.insert(at: 0, value: self[i])
+    end
+    return result
+  end
+
+  func sum() do
+    var result := 0
+    let count := self.count
+    for var i in 0..<count do
+      result += self[i]
+    end
+    return result
+  end
+
+end
+
+
+extension Array is
+  // = operator predefined
+  infix <>(other) => not (self = other)
+
+end
+
