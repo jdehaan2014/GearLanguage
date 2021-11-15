@@ -41,4 +41,5 @@ Gear runs on GearVM, which (currently) is built into the compiler, so compile an
 run a Gear program as follows:
 > gear -c -f filename.gear
 
-Use the accomanied MacOs binary 'gear' or compile for any other platform with Lazarus & Free Pascal.
+Use the accomanied MacOs binary 'gear' or compile for any other platform with Lazarus & Free Pascal. Also, add the complete gearlib/ folder as a separate folder into the same folder as the gear binary.
+
